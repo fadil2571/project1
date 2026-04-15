@@ -55,6 +55,11 @@ urlpatterns = [
     # Products
     path("products/", product_views.ProductManageView.as_view(), name="product_manage"),
     path(
+        "products/<int:pk>/",
+        product_views.ProductDetailView.as_view(),
+        name="product_detail",
+    ),
+    path(
         "products/import-api/preview/",
         product_views.ProductImportApiPreviewView.as_view(),
         name="product_import_api_preview",

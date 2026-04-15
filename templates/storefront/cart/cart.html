@@ -31,48 +31,85 @@
   <div class="cart-layout">
     <div style="display:flex;flex-direction:column;gap:12px">
       {% if items %}
-        {% for item in items %}
-          <div class="card citem" data-cart-item-id="{{ item.id }}" data-update-url="{% url 'landing_app:update_cart' item.id %}">
-            <div class="ci-img" style="width:86px;height:86px;border-radius:8px;overflow:hidden;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              {% if 'Mukenah' in item.product.name %}
-                <img src="{% static 'store/album/mukena.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
-              {% elif 'Jamu' in item.product.name %}
-                <img src="{% static 'album/jamu_botol.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
-              {% elif 'Tas Bambu' in item.product.name %}
-                <img src="{% static 'album/tas_bambu.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
-              {% elif 'Yogurt' in item.product.name %}
-                <img src="{% static 'album/yogurt.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
-              {% elif 'Abon Salmon' in item.product.name or 'Abon Rendang' in item.product.name %}
-                <img src="{% static 'album/abon_salmon.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
-              {% elif 'Sabun Cuci Piring' in item.product.name %}
-                <img src="{% static 'album/sabun_cuci_piring.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
-              {% elif 'Daster' in item.product.name %}
-                <img src="{% static 'album/daster_motif.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
-              {% elif 'iPhone' in item.product.name %}
-                <img src="{% static 'album/produk1.png' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
-              {% elif item.product.image %}
-                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
-              {% else %}
-                <img
-                  src="{% static 'album/produk1.png' %}"
-                  alt="{{ item.product.name }}"
-                  style="width:100%;height:100%;object-fit:cover;"
-                >
-              {% endif %}
+        <!-- Store Selection Info -->
+        {% if stores|length > 1 %}
+          <div class="card" style="padding:16px;background:#fff7ed;border:1px solid #fed7aa;margin-bottom:8px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4M12 8h.01"/>
+              </svg>
+              <div>
+                <strong style="color:#9a3412;font-size:14px">Pilih Satu Toko untuk Checkout</strong>
+                <p style="margin:4px 0 0;color:#c2410c;font-size:13px">Anda memiliki produk dari {{ stores|length }} toko berbeda. Silakan pilih satu toko untuk melanjutkan checkout.</p>
+              </div>
             </div>
-            <div class="ci-info">
-              <div class="ci-name">{{ item.product.name }}</div>
-              <div class="ci-var">{{ item.variant|default:"Varian standar" }}</div>
-              <div class="ci-pr">Rp {{ item.product.price|rupiah }}</div>
+          </div>
+        {% endif %}
+
+        <!-- Products grouped by store -->
+        {% for store_name, store_data in stores.items %}
+          <div class="store-section" data-store-name="{{ store_name }}" style="margin-bottom:16px">
+            <!-- Store Header with Checkbox -->
+            <div class="card" style="padding:14px;background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+                <input type="checkbox" class="store-checkbox" data-store-name="{{ store_name }}" style="width:18px;height:18px;cursor:pointer">
+                <div style="flex:1">
+                  <strong style="color:#0f172a;font-size:15px">{{ store_name }}</strong>
+                  <span style="color:#64748b;font-size:13px;margin-left:8px">{{ store_data.items|length }} produk</span>
+                </div>
+                <div style="text-align:right">
+                  <div style="color:#64748b;font-size:12px">Subtotal</div>
+                  <strong style="color:#2563eb;font-size:15px">Rp {{ store_data.subtotal|rupiah }}</strong>
+                </div>
+              </label>
             </div>
-            <div class="ci-qctrl">
-              <button class="cqbtn js-qty-btn" type="button" data-delta="-1" data-input-id="cq{{ item.id }}">−</button>
-              <input class="cqval" id="cq{{ item.id }}" value="{{ item.quantity }}" readonly>
-              <button class="cqbtn js-qty-btn" type="button" data-delta="1" data-input-id="cq{{ item.id }}">+</button>
-            </div>
-            <div style="font-size:14px;color:var(--muted);min-width:150px;text-align:right">
-              Subtotal: <strong class="js-item-subtotal" style="color:var(--blue)">Rp {{ item.subtotal|rupiah }}</strong>
-            </div>
+
+            <!-- Store Items -->
+            {% for item in store_data.items %}
+              <div class="card citem store-item" data-cart-item-id="{{ item.id }}" data-update-url="{% url 'landing_app:update_cart' item.id %}" data-store-name="{{ store_name }}" style="opacity:0.6;pointer-events:none">
+                <div class="ci-img" style="width:86px;height:86px;border-radius:8px;overflow:hidden;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  {% if 'Mukenah' in item.product.name %}
+                    <img src="{% static 'store/album/mukena.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% elif 'Jamu' in item.product.name %}
+                    <img src="{% static 'album/jamu_botol.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% elif 'Tas Bambu' in item.product.name %}
+                    <img src="{% static 'album/tas_bambu.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% elif 'Yogurt' in item.product.name %}
+                    <img src="{% static 'album/yogurt.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% elif 'Abon Salmon' in item.product.name or 'Abon Rendang' in item.product.name %}
+                    <img src="{% static 'album/abon_salmon.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% elif 'Sabun Cuci Piring' in item.product.name %}
+                    <img src="{% static 'album/sabun_cuci_piring.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% elif 'Daster' in item.product.name %}
+                    <img src="{% static 'album/daster_motif.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% elif 'iPhone' in item.product.name %}
+                    <img src="{% static 'album/produk1.png' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% elif item.product.image %}
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% else %}
+                    <img
+                      src="{% static 'album/produk1.png' %}"
+                      alt="{{ item.product.name }}"
+                      style="width:100%;height:100%;object-fit:cover;"
+                    >
+                  {% endif %}
+                </div>
+                <div class="ci-info">
+                  <div class="ci-name">{{ item.product.name }}</div>
+                  <div class="ci-var">{{ item.variant|default:"Varian standar" }}</div>
+                  <div class="ci-pr">Rp {{ item.product.price|rupiah }}</div>
+                </div>
+                <div class="ci-qctrl">
+                  <button class="cqbtn js-qty-btn" type="button" data-delta="-1" data-input-id="cq{{ item.id }}" disabled>−</button>
+                  <input class="cqval" id="cq{{ item.id }}" value="{{ item.quantity }}" readonly disabled>
+                  <button class="cqbtn js-qty-btn" type="button" data-delta="1" data-input-id="cq{{ item.id }}" disabled>+</button>
+                </div>
+                <div style="font-size:14px;color:var(--muted);min-width:150px;text-align:right">
+                  Subtotal: <strong class="js-item-subtotal" style="color:var(--blue)">Rp {{ item.subtotal|rupiah }}</strong>
+                </div>
+              </div>
+            {% endfor %}
           </div>
         {% endfor %}
       {% else %}
@@ -82,10 +119,10 @@
     
     <div class="card sum-card">
       <h3>Ringkasan Pesanan</h3>
-      <div class="sr"><span>Total Item ({{ total_items }})</span><span id="cartSummarySubtotal">Rp {{ total_price|rupiah }}</span></div>
-      <div class="sr"><span>Estimasi Ongkir</span><span>Rp 20.000</span></div>
-      <div class="sr tot"><span>Total</span><span class="amt" id="cartGrandTotal">Rp {{ total_price|add:20000|rupiah }}</span></div>
-      <a class="btn bp" href="{% url 'landing_app:checkout' %}" style="width:100%;padding:13px;font-size:16px;margin-top:14px;justify-content:center">Checkout Sekarang</a>
+      <div class="sr"><span>Total Item Terpilih</span><span id="selectedItemsCount">0</span></div>
+      <div class="sr"><span>Subtotal Toko</span><span id="selectedStoreName" style="color:#64748b;font-size:13px">-</span></div>
+      <div class="sr tot"><span>Total yang Harus Dibayar</span><span class="amt" id="cartGrandTotal">Rp 0</span></div>
+      <a class="btn bp" id="checkoutBtn" href="#" style="width:100%;padding:13px;font-size:16px;margin-top:14px;justify-content:center;opacity:0.5;pointer-events:none">Checkout Sekarang</a>
       <a class="btn bg" href="{% url 'landing_app:product_list' %}" style="width:100%;padding:13px;font-size:16px;margin-top:10px;justify-content:center">Lanjut Belanja</a>
     </div>
   </div>
@@ -199,7 +236,8 @@
 {% block extra_js %}
 <script>
   (function () {
-    const shippingCost = 20000;
+    let selectedStore = null;
+    let storeData = {};
 
     function getCookie(name) {
       const cookies = document.cookie ? document.cookie.split('; ') : [];
@@ -218,14 +256,96 @@
       return 'Rp ' + amount.toLocaleString('id-ID');
     }
 
-    function updateSummary(cartTotal) {
-      const headerSubtotal = document.getElementById('cartHeaderSubtotal');
-      const summarySubtotal = document.getElementById('cartSummarySubtotal');
+    function updateSummary() {
+      const selectedItemsCount = document.getElementById('selectedItemsCount');
+      const selectedStoreName = document.getElementById('selectedStoreName');
       const grandTotal = document.getElementById('cartGrandTotal');
-      if (headerSubtotal) headerSubtotal.textContent = formatRupiah(cartTotal);
-      if (summarySubtotal) summarySubtotal.textContent = formatRupiah(cartTotal);
-      if (grandTotal) grandTotal.textContent = formatRupiah(cartTotal + shippingCost);
+      const checkoutBtn = document.getElementById('checkoutBtn');
+
+      if (!selectedStore) {
+        if (selectedItemsCount) selectedItemsCount.textContent = '0';
+        if (selectedStoreName) selectedStoreName.textContent = '-';
+        if (grandTotal) grandTotal.textContent = 'Rp 0';
+        if (checkoutBtn) {
+          checkoutBtn.style.opacity = '0.5';
+          checkoutBtn.style.pointerEvents = 'none';
+          checkoutBtn.href = '#';
+        }
+        return;
+      }
+
+      const data = storeData[selectedStore];
+      if (!data) return;
+
+      if (selectedItemsCount) selectedItemsCount.textContent = data.totalItems;
+      if (selectedStoreName) selectedStoreName.textContent = selectedStore;
+      if (grandTotal) grandTotal.textContent = formatRupiah(data.subtotal);
+      if (checkoutBtn) {
+        checkoutBtn.style.opacity = '1';
+        checkoutBtn.style.pointerEvents = 'auto';
+        // Build checkout URL with store filter
+        const baseUrl = "{% url 'landing_app:checkout' %}";
+        checkoutBtn.href = baseUrl + '?store=' + encodeURIComponent(selectedStore);
+      }
     }
+
+    // Handle store checkbox selection
+    document.querySelectorAll('.store-checkbox').forEach((checkbox) => {
+      checkbox.addEventListener('change', function () {
+        const storeName = this.dataset.storeName;
+        const section = document.querySelector(`.store-section[data-store-name="${storeName}"]`);
+        const items = section.querySelectorAll('.store-item');
+        const buttons = section.querySelectorAll('.cqbtn');
+        const inputs = section.querySelectorAll('.cqval input, .cqval');
+
+        if (this.checked) {
+          // Uncheck all other stores
+          document.querySelectorAll('.store-checkbox').forEach((cb) => {
+            if (cb !== this) {
+              cb.checked = false;
+              const otherSection = document.querySelector(`.store-section[data-store-name="${cb.dataset.storeName}"]`);
+              otherSection.querySelectorAll('.store-item').forEach((item) => {
+                item.style.opacity = '0.6';
+                item.style.pointerEvents = 'none';
+              });
+              otherSection.querySelectorAll('.cqbtn').forEach((btn) => btn.disabled = true);
+              otherSection.querySelectorAll('.cqval').forEach((input) => input.disabled = true);
+            }
+          });
+
+          // Enable this store's items
+          selectedStore = storeName;
+          items.forEach((item) => {
+            item.style.opacity = '1';
+            item.style.pointerEvents = 'auto';
+          });
+          buttons.forEach((btn) => btn.disabled = false);
+          inputs.forEach((input) => input.disabled = false);
+        } else {
+          // Disable this store's items
+          selectedStore = null;
+          items.forEach((item) => {
+            item.style.opacity = '0.6';
+            item.style.pointerEvents = 'none';
+          });
+          buttons.forEach((btn) => btn.disabled = true);
+          inputs.forEach((input) => input.disabled = true);
+        }
+
+        updateSummary();
+      });
+    });
+
+    // Initialize store data from backend
+    {% for store_name, store_data in stores.items %}
+      storeData['{{ store_name }}'] = {
+        subtotal: {{ store_data.subtotal }},
+        totalItems: {{ store_data.items|length }}
+      };
+    {% endfor %}
+
+    // Initial summary update
+    updateSummary();
 
     async function syncCartItem(row, nextQty) {
       const cartItemId = row.dataset.cartItemId;
@@ -250,7 +370,17 @@
 
       const subtotalEl = row.querySelector('.js-item-subtotal');
       if (subtotalEl) subtotalEl.textContent = formatRupiah(data.item_total);
-      updateSummary(data.cart_total);
+      
+      // Update store data if needed
+      if (selectedStore) {
+        const storeName = row.dataset.storeName;
+        if (storeData[storeName]) {
+          storeData[storeName].subtotal = data.cart_total;
+          if (storeName === selectedStore) {
+            updateSummary();
+          }
+        }
+      }
     }
 
     document.querySelectorAll('.js-qty-btn').forEach((btn) => {

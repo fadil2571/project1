@@ -11,3 +11,13 @@ def rupiah(value):
     except (TypeError, ValueError):
         return value
     return f"{amount:,}".replace(',', '.')
+
+
+@register.filter(name='numberformat')
+def numberformat(value):
+    """Format angka dengan pemisah ribuan titik (alias untuk rupiah tanpa 'Rp')."""
+    try:
+        amount = int(value)
+    except (TypeError, ValueError):
+        return value
+    return f"{amount:,}".replace(',', '.')

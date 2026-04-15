@@ -50,13 +50,18 @@ class ProductDetailView(DetailView):
         # Wishlist is temporarily removed.
         context['in_wishlist'] = False
 
+        # Calculate display price
         lowest_optional_price = product.variations.exclude(price__isnull=True).aggregate(
             min_price=Min('price')
         )['min_price']
         context['lowest_optional_price'] = lowest_optional_price
+        
+        # Set display_price (used in template) and display_price_from (for variations)
         if lowest_optional_price is not None:
             context['display_price_from'] = int(product.final_price) + int(lowest_optional_price)
+            context['display_price'] = f"Rp {int(product.final_price):,}".replace(',', '.')
         else:
             context['display_price_from'] = product.final_price
+            context['display_price'] = f"Rp {int(product.final_price):,}".replace(',', '.')
         
         return context

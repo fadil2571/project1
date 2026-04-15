@@ -1,0 +1,139 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% load currency %}
+{% block title %}{{ product.name }} - Detail Produk{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <div class="flex items-center justify-between">
+    <h2 class="font-bold text-xl">{{ page_title }}</h2>
+    {% if is_admin %}
+    <span class="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-600">Admin View</span>
+    {% endif %}
+  </div>
+
+  <!-- Product Main Info -->
+  <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+    <!-- Product Images -->
+    <div class="flex flex-col gap-3">
+      {% if product_images %}
+      <div class="overflow-hidden rounded-lg">
+        <img src="{{ product_images.0.image.url }}" alt="{{ product.name }}" class="h-64 w-full object-cover">
+      </div>
+      {% if product_images|length > 1 %}
+      <div class="flex gap-2 overflow-x-auto">
+        {% for image in product_images|slice:"1:" %}
+        <img src="{{ image.image.url }}" alt="{{ product.name }}" class="h-20 w-20 flex-shrink-0 cursor-pointer rounded-md object-cover hover:ring-2 hover:ring-custom-blue">
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% else %}
+      <div class="flex h-64 items-center justify-center rounded-lg bg-gray-100">
+        <svg class="h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Product Details -->
+    <div class="flex flex-col gap-4">
+      <div>
+        <h3 class="font-bold text-2xl text-custom-blue">{{ product.name }}</h3>
+        <p class="text-sm text-custom-grey">{{ product.category.name|default:"Tanpa Kategori" }}</p>
+      </div>
+
+      <div class="rounded-lg bg-gray-50 p-4">
+        <p class="font-semibold text-custom-grey">Harga</p>
+        <p class="font-bold text-2xl text-custom-blue">Rp {{ product.price|numberformat }}</p>
+      </div>
+
+      <div class="rounded-lg bg-gray-50 p-4">
+        <p class="font-semibold text-custom-grey">Berat</p>
+        <p class="font-bold text-lg">{{ product.weight }} gram</p>
+      </div>
+
+      <div class="rounded-lg bg-gray-50 p-4">
+        <p class="font-semibold text-custom-grey">Status</p>
+        <span class="inline-block rounded-full px-3 py-1 text-sm font-semibold {% if product.status == 'active' %}bg-green-100 text-green-600{% elif product.status == 'draft' %}bg-yellow-100 text-yellow-600{% else %}bg-red-100 text-red-600{% endif %}">
+          {{ product.get_status_display }}
+        </span>
+      </div>
+
+      <div>
+        <p class="font-semibold text-custom-grey mb-2">Deskripsi</p>
+        <p class="text-gray-700 whitespace-pre-line">{{ product.description|default:"Tidak ada deskripsi" }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Variations -->
+  {% if variations %}
+  <div class="rounded-lg border border-gray-200 p-4">
+    <h4 class="mb-3 font-bold text-lg">Varian Produk</h4>
+    <div class="overflow-x-auto">
+      <table class="min-w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-2 text-left font-semibold text-gray-600">Nama Varian</th>
+            <th class="px-4 py-2 text-left font-semibold text-gray-600">Harga Tambahan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for variation in variations %}
+          <tr class="border-t">
+            <td class="px-4 py-2">{{ variation.variant_name }}</td>
+            <td class="px-4 py-2">
+              {% if variation.price %}
+              <span class="font-semibold text-custom-blue">+Rp {{ variation.price|numberformat }}</span>
+              {% else %}
+              <span class="text-gray-400">-</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Action Buttons -->
+  <div class="flex gap-3 pt-4">
+    <a
+      href="{% url 'panel_admin:product_update' product.pk %}"
+      class="flex h-12 items-center rounded-full bg-custom-blue px-6 font-semibold text-white hover:ring-2 ring-custom-blue transition-300"
+    >
+      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+      </svg>
+      Edit Produk
+    </a>
+    <form
+      method="post"
+      action="{% url 'panel_admin:product_delete' product.pk %}"
+    >
+      {% csrf_token %}
+      <button
+        type="submit"
+        class="flex h-12 items-center rounded-full border-2 border-red-500 px-6 font-semibold text-red-500 hover:bg-red-50 transition-300"
+        onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?');"
+      >
+        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+        Hapus
+      </button>
+    </form>
+    <a
+      href="{% url 'panel_admin:product_manage' %}"
+      class="flex h-12 items-center rounded-full border-2 border-gray-300 px-6 font-semibold text-gray-600 hover:bg-gray-50 transition-300"
+    >
+      <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Kembali
+    </a>
+  </div>
+</div>
+{% endblock %}
+
