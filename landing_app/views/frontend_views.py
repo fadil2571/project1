@@ -34,7 +34,9 @@ def resolve_buyer_order(user, order_ref):
 
 
 class FrontendKategoriView(TemplateView):
-    template_name = "storefront/kategori.html"
+    """MEMBERIKAN NILAI RANDOM UNTUK SLUG KALO DUPLIKAT"""
+    # Updated template path: kategori.html -> product/category.html (konsolidasi template)
+    template_name = "storefront/product/category.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -98,7 +100,9 @@ class FrontendKategoriView(TemplateView):
 
 
 class FrontendProductDetailView(TemplateView):
-    template_name = "storefront/produk.html"
+    """MEMBERIKAN NILAI RANDOM UNTUK SLUG KALO DUPLIKAT"""
+    # Updated template path: produk.html -> product/detail.html (konsolidasi template)
+    template_name = "storefront/product/detail.html"
 
     def get_product(self):
         queryset = Product.objects.filter(status="active").select_related(
@@ -143,7 +147,9 @@ class FrontendProductDetailView(TemplateView):
 
 
 class FrontendOrderHistoryView(LoginRequiredMixin, TemplateView):
-    template_name = "storefront/orders.html"
+    """MEMBERIKAN NILAI RANDOM UNTUK SLUG KALO DUPLIKAT"""
+    # Updated template path: orders.html -> order/history.html (konsolidasi template duplikat)
+    template_name = "storefront/order/history.html"
     login_url = "/auth/login/"
 
     def get_context_data(self, **kwargs):
@@ -321,11 +327,13 @@ class PaymentLandingRedirectView(LoginRequiredMixin, View):
             return redirect("payment", order_number=order.order_number)
 
         messages.info(request, "Belum ada pesanan untuk dibayar.")
-        return redirect("orders")
+        return redirect("landing_app:order_history")
 
 
 class FrontendCheckoutAddressView(LoginRequiredMixin, View):
-    template_name = "storefront/profile.html"
+    """MEMBERIKAN NILAI RANDOM UNTUK SLUG KALO DUPLIKAT"""
+    # Updated template path: profile.html -> auth/address.html (konsolidasi template duplikat)
+    template_name = "storefront/auth/address.html"
     login_url = "/auth/login/"
 
     def get(self, request, *args, **kwargs):
