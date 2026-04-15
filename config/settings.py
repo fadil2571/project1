@@ -230,6 +230,16 @@ JWT_REFRESH_EXP_SECONDS = int(os.getenv('JWT_REFRESH_EXP_SECONDS', 604800))
 SESSION_COOKIE_AGE = 86400  # 24 hours
 CART_SESSION_ID = 'cart'
 
+# RajaOngkir API Configuration (for shipping cost calculation)
+RAJAONGKIR_API_KEY = os.getenv('RAJAONGKIR_API_KEY', 'X38ie90K9de223926b6170bdfAoO46H2')
+RAJAONGKIR_BASE_URL = 'https://api.rajaongkir.com/starter'
+
+# EMSIFA API Configuration (for Indonesian region data - Kecamatan/Kelurahan)
+EMSIFA_API_BASE_URL = 'https://emsifa.github.io/api-wilayah-indonesia/api'
+
+# Nominatim OpenStreetMap API (for geocoding)
+NOMINATIM_API_BASE_URL = 'https://nominatim.openstreetmap.org'
+
 # Messages
 from django.contrib.messages import constants as messages
 

@@ -30,6 +30,7 @@ class PaymentView(LoginRequiredMixin, TemplateView):
         selected_bank = bank_accounts.filter(is_default=True).first() or bank_accounts.first()
 
         context['order'] = order
+        context['seller'] = seller
         context['order_items'] = order.items.select_related('product').prefetch_related('product__images')
         context['payment_settings'] = payment_settings
         context['bank_accounts'] = bank_accounts

@@ -1,16 +1,42 @@
 from __future__ import annotations
 
+import json
+import random
+import string
+
+import requests
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db.models import Avg, Prefetch, Q
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.text import slugify
 from django.views.generic import TemplateView, View
 
 from panel_admin.models import Address, Category, Notification, Order, Product, ProductReview
+
+
+def get_rajaongkir_api_key():
+    """Get RajaOngkir API key from settings"""
+    return getattr(settings, 'RAJAONGKIR_API_KEY', '')
+
+
+def get_rajaongkir_base_url():
+    """Get RajaOngkir base URL from settings"""
+    return getattr(settings, 'RAJAONGKIR_BASE_URL', 'https://api.rajaongkir.com/starter')
+
+
+def get_emsifa_api_base_url():
+    """Get EMSIFA API base URL from settings"""
+    return getattr(settings, 'EMSIFA_API_BASE_URL', 'https://emsifa.github.io/api-wilayah-indonesia/api')
+
+
+def get_nominatim_api_base_url():
+    """Get Nominatim API base URL from settings"""
+    return getattr(settings, 'NOMINATIM_API_BASE_URL', 'https://nominatim.openstreetmap.org')
 
 
 def format_rupiah(value):
@@ -337,10 +363,29 @@ class FrontendCheckoutAddressView(LoginRequiredMixin, View):
     login_url = "/auth/login/"
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+        # Fetch provinces for dropdown using API
+        provinces = []
+        api_key = get_rajaongkir_api_key()
+        
+        if api_key:
+            try:
+                response = requests.get(
+                    f"{get_rajaongkir_base_url()}/province",
+                    headers={"key": api_key},
+                    timeout=5
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    provinces = data.get("rajaongkir", {}).get("results", [])
+            except Exception:
+                # Fallback to empty list if API fails
+                provinces = []
+        
+        return render(request, self.template_name, {"provinces": provinces})
 
     def post(self, request, *args, **kwargs):
-        street = request.POST.get("street", "").strip()
+        """MEMBERIKAN NILAI RANDOM UNTUK SLUG KALO DUPLIKAT"""
+        street = request.POST.get("address", "").strip()
         detail = request.POST.get("detail", "").strip()
         full_address = street
         if detail:
@@ -348,19 +393,213 @@ class FrontendCheckoutAddressView(LoginRequiredMixin, View):
 
         Address.objects.create(
             user=request.user,
-            label="Rumah",
-            recipient_name=request.POST.get("full_name", "").strip(),
-            recipient_phone=request.POST.get("phone", "").strip(),
+            label=request.POST.get("label", "Rumah").strip() or "Rumah",
+            recipient_name=request.POST.get("recipient_name", "").strip(),
+            recipient_phone=request.POST.get("recipient_phone", "").strip(),
             address=full_address,
             city=request.POST.get("city", "").strip(),
+            city_id=request.POST.get("city_id", "").strip(),
+            province=request.POST.get("province", "").strip(),
+            province_id=request.POST.get("province_id", "").strip(),
             sub_district=(
                 request.POST.get("sub_district", "").strip()
-                or request.POST.get("district", "").strip()
+                or request.POST.get("district_name", "").strip()
             ),
             village=request.POST.get("village", "").strip(),
-            province=request.POST.get("province", "").strip(),
             postal_code=request.POST.get("postal_code", "").strip(),
             is_default=not request.user.addresses.exists(),
         )
         messages.success(request, "Alamat baru berhasil disimpan.")
         return redirect("checkout")
+
+
+class RajaOngkirProvinceView(LoginRequiredMixin, View):
+    """API endpoint untuk mendapatkan list provinsi"""
+    def get(self, request, *args, **kwargs):
+        api_key = get_rajaongkir_api_key()
+        
+        if not api_key:
+            return JsonResponse({"success": False, "error": "API key not configured"}, status=500)
+        
+        try:
+            response = requests.get(
+                f"{get_rajaongkir_base_url()}/province",
+                headers={"key": api_key},
+                timeout=5
+            )
+            if response.status_code == 200:
+                data = response.json()
+                provinces = data.get("rajaongkir", {}).get("results", [])
+                return JsonResponse({"success": True, "data": provinces})
+            else:
+                return JsonResponse({"success": False, "error": "Failed to fetch provinces"}, status=500)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+class RajaOngkirCityView(LoginRequiredMixin, View):
+    """API endpoint untuk mendapatkan list kota berdasarkan province_id"""
+    def get(self, request, *args, **kwargs):
+        province_id = request.GET.get("province_id")
+        if not province_id:
+            return JsonResponse({"success": False, "error": "province_id required"}, status=400)
+        
+        api_key = get_rajaongkir_api_key()
+        if not api_key:
+            return JsonResponse({"success": False, "error": "API key not configured"}, status=500)
+        
+        try:
+            response = requests.get(
+                f"{get_rajaongkir_base_url()}/city?province={province_id}",
+                headers={"key": api_key},
+                timeout=5
+            )
+            if response.status_code == 200:
+                data = response.json()
+                cities = data.get("rajaongkir", {}).get("results", [])
+                return JsonResponse({"success": True, "data": cities})
+            else:
+                return JsonResponse({"success": False, "error": "Failed to fetch cities"}, status=500)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+class EmsifaDistrictView(LoginRequiredMixin, View):
+    """API endpoint untuk mendapatkan list kecamatan (district) berdasarkan city_id (EMSIFA API)"""
+    def get(self, request, *args, **kwargs):
+        city_id = request.GET.get("city_id")
+        if not city_id:
+            return JsonResponse({"success": False, "error": "city_id required"}, status=400)
+        
+        try:
+            # EMSIFA API uses regency ID (kabupaten/kota) which is the first 4 digits of city_id
+            regency_id = str(city_id)[:4]
+            response = requests.get(
+                f"{get_emsifa_api_base_url()}/kecamatan/{regency_id}.json",
+                timeout=5
+            )
+            if response.status_code == 200:
+                districts = response.json()
+                return JsonResponse({"success": True, "data": districts})
+            else:
+                return JsonResponse({"success": False, "error": "Failed to fetch districts"}, status=500)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+class EmsifaVillageView(LoginRequiredMixin, View):
+    """API endpoint untuk mendapatkan list kelurahan (village) berdasarkan district_id (EMSIFA API)"""
+    def get(self, request, *args, **kwargs):
+        district_id = request.GET.get("district_id")
+        if not district_id:
+            return JsonResponse({"success": False, "error": "district_id required"}, status=400)
+        
+        try:
+            # EMSIFA API uses kecamatan ID which is the first 6 digits of district_id
+            kecamantan_code = str(district_id)[:6]
+            response = requests.get(
+                f"{get_emsifa_api_base_url()}/kelurahan/{kecamantan_code}.json",
+                timeout=5
+            )
+            if response.status_code == 200:
+                villages = response.json()
+                return JsonResponse({"success": True, "data": villages})
+            else:
+                return JsonResponse({"success": False, "error": "Failed to fetch villages"}, status=500)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+class NominatimGeocodeView(LoginRequiredMixin, View):
+    """API endpoint untuk geocoding alamat menggunakan Nominatim OpenStreetMap"""
+    def get(self, request, *args, **kwargs):
+        address = request.GET.get("address", "")
+        city = request.GET.get("city", "")
+        province = request.GET.get("province", "")
+        
+        if not address:
+            return JsonResponse({"success": False, "error": "address required"}, status=400)
+        
+        # Build query string for Nominatim
+        query_parts = [address]
+        if city:
+            query_parts.append(city)
+        if province:
+            query_parts.append(province)
+        query_parts.append("Indonesia")
+        
+        query = ", ".join(query_parts)
+        
+        try:
+            response = requests.get(
+                f"{get_nominatim_api_base_url()}/search",
+                params={
+                    "q": query,
+                    "format": "json",
+                    "limit": 5,
+                    "countrycodes": "id"  # Limit to Indonesia
+                },
+                headers={
+                    "User-Agent": "KopmassShop/1.0"  # Required by Nominatim
+                },
+                timeout=5
+            )
+            if response.status_code == 200:
+                results = response.json()
+                return JsonResponse({"success": True, "data": results})
+            else:
+                return JsonResponse({"success": False, "error": "Failed to geocode address"}, status=500)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+class RajaOngkirShippingCostView(LoginRequiredMixin, View):
+    """API endpoint untuk menghitung ongkos kirim menggunakan RajaOngkir"""
+    def post(self, request, *args, **kwargs):
+        """MEMBERIKAN NILAI RANDOM UNTUK SLUG KALO DUPLIKAT"""
+        origin = request.POST.get("origin")  # ID kota asal (dari seller)
+        destination = request.POST.get("destination")  # ID kota tujuan (dari buyer)
+        weight = request.POST.get("weight", "1000")  # Berat dalam gram
+        courier = request.POST.get("courier", "jne")  # Kurir: jne, tiki, pos
+        
+        if not origin or not destination:
+            return JsonResponse({"success": False, "error": "origin and destination required"}, status=400)
+        
+        api_key = get_rajaongkir_api_key()
+        if not api_key:
+            return JsonResponse({"success": False, "error": "API key not configured"}, status=500)
+        
+        try:
+            response = requests.post(
+                f"{get_rajaongkir_base_url()}/cost",
+                data={
+                    "origin": origin,
+                    "destination": destination,
+                    "weight": weight,
+                    "courier": courier
+                },
+                headers={"key": api_key},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                costs = data.get("rajaongkir", {}).get("results", [])
+                
+                # Format the response with courier options
+                courier_options = []
+                for result in costs:
+                    courier_name = result.get("code", "").upper()
+                    for cost in result.get("costs", []):
+                        courier_options.append({
+                            "service": cost.get("service", ""),
+                            "description": cost.get("description", ""),
+                            "cost": cost.get("cost", {}).get("value", 0),
+                            "etd": cost.get("cost", {}).get("etd", ""),
+                            "note": cost.get("note", "")
+                        })
+                
+                return JsonResponse({"success": True, "data": courier_options})
+            else:
+                return JsonResponse({"success": False, "error": "Failed to calculate shipping cost"}, status=500)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)

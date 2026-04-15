@@ -427,7 +427,7 @@
     <div class="main-stack">
       <section class="panel">
         <h4 class="payment-panel-title">Metode Pembayaran Terpilih</h4>
-        <p class="payment-method-sub">{% if active_payment_method == 'qris' %}QRIS{% else %}Transfer Bank (BCA){% endif %}</p>
+        <p class="payment-method-sub">{% if active_payment_method == 'qris' %}QRIS{% else %}Transfer Bank{% endif %}</p>
         <div class="payment-inner">
           {% if active_payment_method == 'qris' %}
             <p class="payment-label">Scan kode QR di bawah menggunakan aplikasi e-wallet atau mobile banking.</p>
@@ -435,11 +435,20 @@
               <img src="{% static 'album/qris.svg' %}" alt="QRIS Payment Code">
             </div>
           {% else %}
-            <p class="payment-label">Transfer ke Virtual Account</p>
-            <p class="payment-bank">Bank: BCA</p>
-            <p class="payment-label">Nomor VA:</p>
-            <p class="payment-va" data-va-number>{{ va_number|default:'8808123456789012' }}</p>
-            <button class="copy-btn" type="button" data-copy-va>Salin Nomor VA</button>
+            {% if selected_bank %}
+              <p class="payment-label">Transfer ke rekening berikut:</p>
+              <p class="payment-bank">Bank: {{ selected_bank.bank_name|default:'BCA' }}</p>
+              <p class="payment-label">Atas Nama: {{ selected_bank.account_holder_name|default:seller.name }}</p>
+              <p class="payment-label">Nomor Rekening:</p>
+              <p class="payment-va" data-va-number>{{ selected_bank.account_number|default:'8808123456789012' }}</p>
+              <button class="copy-btn" type="button" data-copy-va>Salin Nomor Rekening</button>
+            {% else %}
+              <p class="payment-label">Transfer ke Virtual Account</p>
+              <p class="payment-bank">Bank: BCA</p>
+              <p class="payment-label">Nomor VA:</p>
+              <p class="payment-va" data-va-number>{{ va_number|default:'8808123456789012' }}</p>
+              <button class="copy-btn" type="button" data-copy-va>Salin Nomor VA</button>
+            {% endif %}
           {% endif %}
         </div>
       </section>
