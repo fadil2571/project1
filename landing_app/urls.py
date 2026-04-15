@@ -10,6 +10,7 @@ from .views import (
     cart_views,
     category_views,
     checkout_views,
+    frontend_views,
     home_views,
     order_create_views,
     order_detail_views,
@@ -65,4 +66,13 @@ urlpatterns = [
     # Profile
     path('profile/', profile_views.ProfileView.as_view(), name='profile'),
     path('addresses/', address_views.AddressView.as_view(), name='addresses'),
+    
+    # Checkout Address with API
+    path('checkout/address/new/', frontend_views.FrontendCheckoutAddressView.as_view(), name='checkout_address_new'),
+    path('api/provinces/', frontend_views.RajaOngkirProvinceView.as_view(), name='api_provinces'),
+    path('api/cities/', frontend_views.RajaOngkirCityView.as_view(), name='api_cities'),
+    path('api/districts/', frontend_views.EmsifaDistrictView.as_view(), name='api_districts'),
+    path('api/villages/', frontend_views.EmsifaVillageView.as_view(), name='api_villages'),
+    path('api/geocode/', frontend_views.NominatimGeocodeView.as_view(), name='api_geocode'),
+    path('api/shipping-cost/', frontend_views.RajaOngkirShippingCostView.as_view(), name='api_shipping_cost'),
 ]
