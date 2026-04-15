@@ -61,7 +61,7 @@ class PaymentView(LoginRequiredMixin, TemplateView):
         else:
             messages.info(request, 'Pembayaran untuk pesanan ini sudah terkonfirmasi.')
 
-        return redirect('orders')
+        return redirect('landing_app:order_history')
 
 
 __all__ = ['PaymentView']

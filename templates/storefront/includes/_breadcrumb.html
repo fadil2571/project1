@@ -1,0 +1,28 @@
+<!-- Breadcrumb Component -->
+{% load static %}
+
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'landing_app:home' %}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Beranda
+            </a>
+        </li>
+        
+        {% for crumb in breadcrumbs %}
+            {% if forloop.last %}
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if crumb.icon %}<i class="{{ crumb.icon }}"></i>{% endif %}
+                    {{ crumb.label }}
+                </li>
+            {% else %}
+                <li class="breadcrumb-item">
+                    <a href="{{ crumb.url|default:'#' }}" class="text-decoration-none">
+                        {% if crumb.icon %}<i class="{{ crumb.icon }}"></i>{% endif %}
+                        {{ crumb.label }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+</nav>

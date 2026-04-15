@@ -1,53 +1,111 @@
 {% extends 'layouts/base/base.html' %}
 {% load humanize %}
 
-{% block title %}Hasil Pencarian: {{ query }} - Kopmas Shop{% endblock %}
+{% block title %}Hasil Pencarian: {{ query|default:"Cari Produk" }} - Kopmas Shop{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    <!-- Search Header -->
+    <!-- Breadcrumb -->
+    {% include 'storefront/includes/_breadcrumb.html' with breadcrumbs='[{"label": "Pencarian", "icon": "bi bi-search"}]' %}
+    
+    <!-- Search Header dengan Prominent UI -->
     <div class="row mb-4">
         <div class="col-12">
-            <h2>Hasil Pencarian</h2>
-            <p class="text-muted">
-                {% if query %}
-                Menampilkan {{ total_results }} hasil untuk "<strong>{{ query }}</strong>"
-                {% else %}
-                Masukkan kata kunci untuk mencari produk
-                {% endif %}
-            </p>
+            <div class="card border-0 shadow-lg bg-primary text-white">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h2 class="mb-2">
+                                <i class="bi bi-search"></i> Hasil Pencarian
+                            </h2>
+                            {% if query %}
+                                <p class="mb-0 opacity-75">
+                                    Menampilkan <strong>{{ total_results }}</strong> hasil untuk 
+                                    "<mark class="bg-warning text-dark px-2 rounded">{{ query }}</mark>"
+                                </p>
+                            {% else %}
+                                <p class="mb-0 opacity-75">Masukkan kata kunci untuk mencari produk UMKM lokal</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-lg-4 mt-3 mt-lg-0">
+                            <form action="{% url 'landing_app:search' %}" method="get" class="d-flex gap-2">
+                                <input type="text" name="q" class="form-control form-control-lg" 
+                                       value="{{ query }}" placeholder="Cari produk..." autofocus>
+                                <button type="submit" class="btn btn-light btn-lg">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
     {% if query %}
-    <!-- Filters -->
+    <!-- Filters & Sort Toolbar -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
-                <div class="card-body">
+                <div class="card-body p-3">
                     <form method="get" class="row g-3 align-items-end">
                         <input type="hidden" name="q" value="{{ query }}">
-                        <div class="col-md-4">
-                            <label class="form-label">Kategori</label>
+                        
+                        <!-- Kategori Filter -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small text-muted mb-1">
+                                <i class="bi bi-collection"></i> Kategori
+                            </label>
                             <select name="category" class="form-select">
                                 <option value="">Semua Kategori</option>
                                 {% for cat in categories %}
-                                <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                                <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Urutkan</label>
+                        
+                        <!-- Price Range -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small text-muted mb-1">
+                                <i class="bi bi-currency-dollar"></i> Harga Max
+                            </label>
+                            <select name="max_price" class="form-select">
+                                <option value="">Semua Harga</option>
+                                <option value="50000" {% if request.GET.max_price == "50000" %}selected{% endif %}>≤ Rp 50.000</option>
+                                <option value="100000" {% if request.GET.max_price == "100000" %}selected{% endif %}>≤ Rp 100.000</option>
+                                <option value="250000" {% if request.GET.max_price == "250000" %}selected{% endif %}>≤ Rp 250.000</option>
+                                <option value="500000" {% if request.GET.max_price == "500000" %}selected{% endif %}>≤ Rp 500.000</option>
+                                <option value="1000000" {% if request.GET.max_price == "1000000" %}selected{% endif %}>≤ Rp 1.000.000</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Sort -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small text-muted mb-1">
+                                <i class="bi bi-sort-down"></i> Urutkan
+                            </label>
                             <select name="sort" class="form-select">
                                 <option value="relevance" {% if current_sort == 'relevance' %}selected{% endif %}>Relevansi</option>
                                 <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Terbaru</option>
-                                <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Harga: Rendah ke Tinggi</option>
-                                <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Harga: Tinggi ke Rendah</option>
+                                <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Harga Terendah</option>
+                                <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Harga Tertinggi</option>
                                 <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Populer</option>
+                                <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>Rating Terbaik</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <button type="submit" class="btn btn-primary">Terapkan</button>
+                        
+                        <!-- Action Buttons -->
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2 d-md-flex">
+                                <button type="submit" class="btn btn-primary flex-fill">
+                                    <i class="bi bi-check-lg"></i> Terapkan
+                                </button>
+                                <a href="?q={{ query }}" class="btn btn-outline-secondary" title="Reset filter">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </a>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -55,75 +113,126 @@
         </div>
     </div>
     
-    <!-- Results -->
-    <div class="row g-4">
+    <!-- Results Info Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <p class="mb-0 text-muted">
+            <i class="bi bi-info-circle"></i> 
+            Menampilkan {{ products.start_index }} - {{ products.end_index }} dari {{ total_results }} produk
+        </p>
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-secondary btn-sm active" id="gridViewBtn">
+                <i class="bi bi-grid-3x3-gap"></i> Grid
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="listViewBtn">
+                <i class="bi bi-list-ul"></i> List
+            </button>
+        </div>
+    </div>
+    
+    <!-- Product Grid -->
+    <div class="row g-4" id="productGrid">
         {% for product in products %}
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="product-card card h-100 border-0 shadow-sm">
-                <a href="{% url 'landing_app:product_detail' slug=product.slug %}" class="text-decoration-none">
-                    <div class="position-relative">
-                        {% if product.main_image %}
-                        <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="card-img-top" style="height: 200px; object-fit: cover;">
-                        {% else %}
-                        <img src="https://via.placeholder.com/300x200?text=No+Image" alt="{{ product.name }}" class="card-img-top" style="height: 200px; object-fit: cover;">
-                        {% endif %}
-                        {% if product.discount_percentage > 0 %}
-                        <span class="badge bg-danger position-absolute top-0 start-0 m-2">-{{ product.discount_percentage }}%</span>
-                        {% endif %}
-                    </div>
-                    <div class="card-body">
-                        <h6 class="card-title text-dark text-truncate">{{ product.name }}</h6>
-                        <p class="text-muted small mb-2">{{ product.category.name }}</p>
-                        <div>
-                            <span class="text-primary fw-bold">Rp {{ product.final_price|intcomma }}</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
+            {% include 'storefront/includes/_product_card.html' with product=product show_seller=True show_rating=True show_add_to_cart=True show_stock=True %}
         </div>
         {% empty %}
-        <div class="col-12 text-center py-5">
-            <i class="bi bi-search display-1 text-muted"></i>
-            <h5 class="mt-3">Tidak Ada Hasil</h5>
-            <p class="text-muted">Coba kata kunci lain atau periksa ejaan Anda</p>
-            <a href="{% url 'landing_app:product_list' %}" class="btn btn-primary mt-3">Lihat Semua Produk</a>
+        <div class="col-12">
+            {% include 'storefront/includes/_empty_state.html' with icon="bi bi-x-circle" title="Tidak Ada Hasil Pencarian" message="Maaf, tidak ditemukan produk yang cocok dengan pencarian Anda." action_url="/produk/" action_text="Lihat Semua Produk" show_suggestions=True %}
         </div>
         {% endfor %}
     </div>
     
     <!-- Pagination -->
-    {% if is_paginated %}
-    <nav class="mt-5">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}&sort={{ current_sort }}&category={{ current_category }}">Previous</a>
-            </li>
-            {% endif %}
-            {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-            <li class="page-item"><a class="page-link" href="?q={{ query }}&page={{ num }}&sort={{ current_sort }}&category={{ current_category }}">{{ num }}</a></li>
-            {% endif %}
-            {% endfor %}
-            {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}&sort={{ current_sort }}&category={{ current_category }}">Next</a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
+    {% if is_paginated and products %}
+    {% include 'storefront/includes/_pagination.html' with query_params=request.GET.urlencode %}
     {% endif %}
+    
     {% else %}
-    <!-- Empty Search -->
+    <!-- Empty Search State -->
     <div class="row">
-        <div class="col-12 text-center py-5">
-            <i class="bi bi-search display-1 text-muted"></i>
-            <h5 class="mt-3">Cari Produk</h5>
-            <p class="text-muted">Masukkan kata kunci di kolom pencarian</p>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm text-center py-5">
+                <div class="card-body">
+                    <i class="bi bi-search display-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">Cari Produk UMKM Lokal</h4>
+                    <p class="text-muted mb-4">Temukan berbagai produk berkualitas dari pelaku UMKM di seluruh Indonesia</p>
+                    
+                    <div class="row g-3 justify-content-center">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="fw-bold"><i class="bi bi-lightbulb text-warning"></i> Tips Pencarian:</h6>
+                                <ul class="text-start small text-muted mb-0">
+                                    <li>Gunakan kata kunci spesifik (contoh: "batik", "kerajinan tangan")</li>
+                                    <li>Coba nama kategori produk (contoh: "makanan", "fashion")</li>
+                                    <li>Periksa ejaan dan tata bahasa</li>
+                                    <li>Gunakan sinonim atau kata kunci alternatif</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="fw-bold"><i class="bi bi-fire text-danger"></i> Populer Saat Ini:</h6>
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <a href="?q=batik" class="badge bg-primary text-decoration-none">Batik</a>
+                                    <a href="?q=kerajinan" class="badge bg-success text-decoration-none">Kerajinan</a>
+                                    <a href="?q=makanan" class="badge bg-warning text-dark text-decoration-none">Makanan</a>
+                                    <a href="?q=fashion" class="badge bg-info text-dark text-decoration-none">Fashion</a>
+                                    <a href="?q=aksesoris" class="badge bg-purple text-decoration-none" style="background-color: #6f42c1;">Aksesoris</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'landing_app:product_list' %}" class="btn btn-primary btn-lg mt-4">
+                        <i class="bi bi-box-seam"></i> Lihat Semua Produk
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}
 </div>
+
+<style>
+.product-card {
+    transition: all 0.3s ease;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.15) !important;
+}
+mark {
+    padding: 0.2em 0.5em;
+    border-radius: 0.25rem;
+}
+</style>
+
+<script>
+// View toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const gridViewBtn = document.getElementById('gridViewBtn');
+    const listViewBtn = document.getElementById('listViewBtn');
+    const productGrid = document.getElementById('productGrid');
+    
+    if (gridViewBtn && listViewBtn && productGrid) {
+        gridViewBtn.addEventListener('click', function() {
+            productGrid.className = 'row g-4';
+            document.querySelectorAll('#productGrid > div').forEach(col => {
+                col.className = 'col-6 col-md-4 col-lg-3';
+            });
+            gridViewBtn.classList.add('active');
+            listViewBtn.classList.remove('active');
+        });
+        
+        listViewBtn.addEventListener('click', function() {
+            productGrid.className = 'row g-3';
+            document.querySelectorAll('#productGrid > div').forEach(col => {
+                col.className = 'col-12';
+            });
+            listViewBtn.classList.add('active');
+            gridViewBtn.classList.remove('active');
+        });
+    }
+});
+</script>
 {% endblock %}
