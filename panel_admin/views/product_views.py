@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 import requests
 
 from panel_admin.models import Category, Product, ProductImage
@@ -659,6 +659,36 @@ class ProductUpdateView(SellerProductAccessRequiredMixin, SellerOwnerMixin, Upda
                 if row["price"] is not None
             }
 
+        return context
+
+
+class ProductDetailView(SellerProductAccessRequiredMixin, SellerRequiredMixin, DetailView):
+    model = Product
+    template_name = "dashboard/admin/product-detail-dashboard.html"
+    context_object_name = "product"
+
+    def test_func(self):
+        user = self.request.user
+        if not (user.is_authenticated and user.is_seller_user):
+            return False
+        obj = self.get_object()
+        # Seller hanya bisa lihat produk sendiri, Admin bisa lihat semua
+        return bool(obj and (obj.seller_id == user.id or user.is_admin))
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        # Seller hanya bisa lihat produk sendiri, Admin bisa lihat semua
+        if obj.seller == self.request.user or self.request.user.is_admin:
+            return obj
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Detail Produk"
+        context["product_images"] = self.object.images.all()[:4]
+        context["variations"] = self.object.variations.all()
+        context["is_seller"] = bool(self.request.user.is_seller_user)
+        context["is_admin"] = bool(self.request.user.is_admin)
         return context
 
 

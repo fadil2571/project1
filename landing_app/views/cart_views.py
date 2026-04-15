@@ -2,6 +2,7 @@ from django.views.generic import View
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from panel_admin.models import Cart, CartItem
+from django.db.models import Count
 
 
 class CartView(View):
@@ -10,14 +11,31 @@ class CartView(View):
     def get(self, request, *args, **kwargs):
         cart = self.get_cart(request)
         cart_items = (
-            cart.items.select_related('product', 'product__seller').prefetch_related('product__images')
+            cart.items.select_related('product', 'product__seller', 'product__seller__store').prefetch_related('product__images')
             if cart else []
         )
+        
+        # Group items by seller/store for single-store checkout feature
+        stores_dict = {}
+        for item in cart_items:
+            seller = item.product.seller
+            store_name = seller.store.store_name if hasattr(seller, 'store') and seller.store else str(seller)
+            
+            if store_name not in stores_dict:
+                stores_dict[store_name] = {
+                    'seller': seller,
+                    'items': [],
+                    'subtotal': 0
+                }
+            
+            stores_dict[store_name]['items'].append(item)
+            stores_dict[store_name]['subtotal'] += item.subtotal
         
         context = {
             'cart': cart,
             'cart_items': cart_items,
             'items': cart_items,
+            'stores': stores_dict,
             'total_items': cart.total_items if cart else 0,
             'total_price': cart.subtotal if cart else 0,
         }
