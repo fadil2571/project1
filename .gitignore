@@ -9,26 +9,18 @@ env/
 venv/
 .venv/
 .ENV
-.ENV.local
-
-# Logs
+.venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
 *.log
-
-# IDE
-.vscode/
-.idea/
-
-# OS
+.git/modules/
 .DS_Store
 Thumbs.db
-
-# Coverage
-.coverage
-htmlcov/
-coverage/
-
-# Build
-build/
-dist/
-*.egg-info/
 ```

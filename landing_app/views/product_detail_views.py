@@ -6,7 +6,7 @@ from panel_admin.models import Product
 
 class ProductDetailView(DetailView):
     model = Product
-    template_name = 'storefront/produk-detail.html'
+    template_name = 'storefront/product/detail.html'
     context_object_name = 'product'
     slug_url_kwarg = 'slug'
     

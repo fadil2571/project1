@@ -107,7 +107,7 @@
                     {% if search_query or current_category %}
                         <p class="text-muted mb-0 small">
                             {% if search_query %}Mencari: "<strong>{{ search_query }}</strong>"{% endif %}
-                            {% if current_category %}{% if search_query %} • {% endif %}Kategori: <strong>{{ categories|first_where:"id"|default:"Semua" }}</strong>{% endif %}
+                            {% if current_category %}{% if search_query %} • {% endif %}Kategori: <strong>{{ category_name|default:"Semua" }}</strong>{% endif %}
                         </p>
                     {% endif %}
                 </div>

@@ -14,6 +14,14 @@ class ProductListView(ListView):
             'category', 'seller'
         ).prefetch_related('images', 'product_reviews')
         
+        # Search functionality
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) | 
+                Q(description__icontains=search_query)
+            )
+        
         # Filter by category
         category_slug = self.request.GET.get('category')
         if category_slug:
@@ -48,9 +56,22 @@ class ProductListView(ListView):
         context['total_products'] = self.get_queryset().count()
         
         # Get current filters
-        context['current_category'] = self.request.GET.get('category', '')
+        category_slug = self.request.GET.get('category', '')
+        context['current_category'] = category_slug
+        
+        # Get category name for display
+        if category_slug:
+            try:
+                category = Category.objects.get(slug=category_slug)
+                context['category_name'] = category.name
+            except Category.DoesNotExist:
+                context['category_name'] = 'Semua'
+        else:
+            context['category_name'] = 'Semua'
+        
         context['current_sort'] = self.request.GET.get('sort', 'newest')
         context['min_price'] = self.request.GET.get('min_price', '')
         context['max_price'] = self.request.GET.get('max_price', '')
+        context['search_query'] = self.request.GET.get('search', '')
         
         return context
