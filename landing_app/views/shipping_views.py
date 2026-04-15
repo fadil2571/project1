@@ -25,7 +25,7 @@ class SearchDestinationView(LoginRequiredMixin, View):
         result = RajaOngkirService.search_destination(keyword, limit=15)
         if result['success']:
             return JsonResponse(result)
-        return JsonResponse(result, status=502)
+        return JsonResponse(result, status=result.get('status', 502))
 
 
 class CalculateCostView(LoginRequiredMixin, View):

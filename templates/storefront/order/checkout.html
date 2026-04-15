@@ -772,7 +772,9 @@
         <div class="address-list">
           {% for address in addresses %}
             <label class="address-option {% if address.is_primary or forloop.first %}is-selected{% endif %}"
-                   data-city="{{ address.city }}">
+                   data-city="{{ address.city }}"
+                   data-district="{{ address.sub_district }}"
+                   data-zip="{{ address.postal_code }}">
               <input type="radio" name="address_id" value="{{ address.id }}" {% if address.is_primary or forloop.first %}checked{% endif %}>
               <div style="flex:1;min-width:0">
                 <strong>{{ address.label }}{% if address.is_primary %}<span class="primary-chip">UTAMA</span>{% endif %}</strong>
@@ -1004,21 +1006,29 @@
       <button class="ongkir-modal-close" id="ongkirClose">&times;</button>
     </div>
     <div class="ongkir-modal-body">
-      <!-- Destination search -->
-      <div class="ongkir-field" style="position:relative">
-        <label>Kota / Kecamatan Tujuan</label>
-        <input type="text" id="destSearch" placeholder="Ketik nama kota tujuan..."
-               autocomplete="off">
-        <div class="dest-dropdown" id="destDropdown"></div>
-        <input type="hidden" id="destId" value="">
+      <!-- Destination summary (Automatic) -->
+      <div class="ongkir-field">
+        <label>Lokasi Tujuan</label>
+        <div id="destStatusText" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b;">
+          ⏳ Menyiapkan lokasi...
+        </div>
       </div>
+
+      <!-- Manual search (hidden by default, shown if auto fails) -->
+      <div id="destSearchWrapper" style="display:none; margin-top: -8px; margin-bottom: 16px;">
+        <div class="ongkir-field" style="position:relative; margin-bottom:0">
+          <input type="text" id="destSearch" placeholder="Cari lokasi manual..." autocomplete="off" style="font-size: 13px; height: 38px;">
+          <div class="dest-dropdown" id="destDropdown"></div>
+        </div>
+      </div>
+      <input type="hidden" id="destId" value="">
 
       <!-- Courier selection -->
       <div class="ongkir-field">
         <label>Pilih Kurir</label>
         <select id="courierSelect">
           <option value="">-- Pilih Kurir --</option>
-          <option value="jne">JNE</option>
+          <option value="jne" selected>JNE (Otomatis)</option>
           <option value="tiki">TIKI</option>
           <option value="pos">POS Indonesia</option>
           <option value="jnt">J&T Express</option>
@@ -1054,6 +1064,28 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  /* ── DOM Elements ── */
+  var overlay = document.getElementById('ongkirOverlay');
+  var btnOpen = document.getElementById('btnOpenOngkir');
+  var btnChange = document.getElementById('btnChangeOngkir');
+  var btnClose = document.getElementById('ongkirClose');
+  var destSearch = document.getElementById('destSearch');
+  var destDropdown = document.getElementById('destDropdown');
+  var destId = document.getElementById('destId');
+  var courierSelect = document.getElementById('courierSelect');
+  var btnCalc = document.getElementById('btnCalcOngkir');
+  var ongkirError = document.getElementById('ongkirError');
+  var ongkirLoading = document.getElementById('ongkirLoading');
+  var ongkirResults = document.getElementById('ongkirResults');
+  var ongkirServiceList = document.getElementById('ongkirServiceList');
+  var btnApply = document.getElementById('btnApplyOngkir');
+  var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  
+  var STORE_ORIGIN = '{{ store_info.city_id }}';
+  var TOTAL_WEIGHT = {{ total_weight }};
+  var searchTimer = null;
+  var selectedService = null;
+
   /* ── Payment method toggle ── */
   var payOptions = Array.prototype.slice.call(document.querySelectorAll('[data-pay-choice]'));
   var methodLabel = document.getElementById('paymentMethodLabel');
@@ -1085,33 +1117,149 @@ document.addEventListener('DOMContentLoaded', function () {
     opt.addEventListener('click', function() {
       addressOptions.forEach(function(o) { o.classList.remove('is-selected'); });
       opt.classList.add('is-selected');
-      // Reset shipping when address changes
       resetShipping();
     });
   });
 
-  /* ── Ongkir modal ── */
-  var overlay = document.getElementById('ongkirOverlay');
-  var btnOpen = document.getElementById('btnOpenOngkir');
-  var btnChange = document.getElementById('btnChangeOngkir');
-  var btnClose = document.getElementById('ongkirClose');
+  /* ── Shipping Modal Logic ── */
+  function openModal() {
+    overlay.classList.add('is-open');
+    var selected = document.querySelector('.address-option.is-selected');
+    if (selected) {
+      var cityName = selected.getAttribute('data-city') || '';
+      var districtName = selected.getAttribute('data-district') || '';
+      var zip = selected.getAttribute('data-zip') || '';
+      
+      if (cityName && !destId.value) {
+        autoLookupDestination(cityName, districtName, zip);
+      } else if (destId.value && courierSelect.value) {
+        btnCalc.click();
+      }
+    }
+  }
 
-  function openModal() { overlay.classList.add('is-open'); }
   function closeModal() { overlay.classList.remove('is-open'); }
+
+  function resetShipping() {
+    document.getElementById('shippingRowDefault').style.display = 'flex';
+    document.getElementById('shippingRowSelected').style.display = 'none';
+    document.getElementById('hiddenShippingCost').value = '0';
+    document.getElementById('hiddenCourierName').value = '';
+    document.getElementById('hiddenCourierService').value = '';
+    document.getElementById('summaryOngkir').textContent = 'Rp 0';
+    destId.value = '';
+    destSearch.value = '';
+    destSearch.placeholder = "Mencari lokasi...";
+    
+    document.getElementById('destStatusText').innerHTML = '⏳ Menyiapkan lokasi...';
+    document.getElementById('destSearchWrapper').style.display = 'none';
+    
+    ongkirResults.style.display = 'none';
+    btnApply.disabled = true;
+    checkCalcReady();
+    var subtotal = {{ total_price }};
+    document.getElementById('summaryGrandTotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+    selectedService = null;
+  }
+
+  function checkCalcReady() {
+    btnCalc.disabled = !(destId.value && courierSelect.value);
+  }
+
+    var destCache = {}; // Simple cache to prevent rate limits
+
+  function autoLookupDestination(city, district, zip) {
+    function clean(str) {
+      if (!str) return '';
+      return str.split(',')[0]
+                .replace(/kabupaten|kota|kab\.?|kec\.?|kecamatan/gi, '')
+                .replace(/\d+/g, '')
+                .trim();
+    }
+
+    var q_district = clean(district);
+    var q_city = clean(city);
+    var q = q_district || q_city;
+    var cacheKey = q.toLowerCase();
+
+    var statusEl = document.getElementById('destStatusText');
+
+    if (destCache[cacheKey]) {
+      var best = destCache[cacheKey];
+      destId.value = best.id;
+      destSearch.value = best.label;
+      statusEl.innerHTML = '📍 <strong>' + best.label + '</strong>';
+      checkCalcReady();
+      if (destId.value && courierSelect.value) setTimeout(() => { btnCalc.click(); }, 300);
+      return;
+    }
+
+    statusEl.innerHTML = '⏳ Mencari lokasi...';
+    
+    fetch('/api/shipping/search-destination/?search=' + encodeURIComponent(q))
+      .then(r => {
+        if (r.status === 429) throw new Error('LIMIT');
+        return r.json();
+      })
+      .then(data => {
+        var items = [];
+        if (data.success && data.data) {
+          if (Array.isArray(data.data)) items = data.data;
+          else if (data.data.rajaongkir && data.data.rajaongkir.results) items = data.data.rajaongkir.results;
+        }
+        
+        if (items.length > 0) {
+          var match = null;
+          var q_dist = q_district.toLowerCase();
+          var q_cty = q_city.toLowerCase();
+          if (q_dist) {
+            match = items.find(it => (it.subdistrict_name || it.city_name || '').toLowerCase().includes(q_dist));
+          }
+          if (!match && q_cty) {
+            match = items.find(it => (it.city_name || it.city || it.name || '').toLowerCase().includes(q_cty));
+          }
+          var bestItem = match || items[0];
+          var id = bestItem.id || bestItem.city_id || bestItem.subdistrict_id || '';
+          var label = bestItem.subdistrict_name ? (bestItem.subdistrict_name + ', ' + (bestItem.city_name || bestItem.city || '')) : (bestItem.city_name || bestItem.name || '');
+          
+          destId.value = id;
+          destSearch.value = label;
+          statusEl.innerHTML = '📍 <strong>' + label + '</strong>';
+          
+          // Save to cache
+          destCache[cacheKey] = { id: id, label: label };
+          
+          checkCalcReady();
+          if (destId.value && courierSelect.value) {
+            setTimeout(() => { btnCalc.click(); }, 300);
+          }
+        } 
+        else if (q === q_district && q_city && q_district !== q_city) {
+          autoLookupDestination(city, '', zip);
+        } else {
+          statusEl.innerHTML = '<span style="color:red">⚠️ Lokasi tidak ditemukan.</span>';
+          document.getElementById('destSearchWrapper').style.display = 'block';
+        }
+      })
+      .catch(err => {
+        if (err.message === 'LIMIT') {
+          statusEl.innerHTML = '<span style="color:orange">⚠️ Limit tercapai. Silakan ketik manual.</span>';
+        } else {
+          statusEl.innerHTML = '<span style="color:red">⚠️ Gagal memuat data.</span>';
+        }
+        document.getElementById('destSearchWrapper').style.display = 'block';
+      });
+  }
+
+  courierSelect.addEventListener('change', function() {
+    checkCalcReady();
+    if (destId.value && courierSelect.value) btnCalc.click();
+  });
 
   btnOpen.addEventListener('click', openModal);
   if (btnChange) btnChange.addEventListener('click', openModal);
   btnClose.addEventListener('click', closeModal);
-  overlay.addEventListener('click', function(e) {
-    if (e.target === overlay) closeModal();
-  });
-
-  /* ── Destination search ── */
-  var destSearch = document.getElementById('destSearch');
-  var destDropdown = document.getElementById('destDropdown');
-  var destId = document.getElementById('destId');
-  var searchTimer = null;
-  var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 
   destSearch.addEventListener('input', function() {
     var q = destSearch.value.trim();
@@ -1119,89 +1267,43 @@ document.addEventListener('DOMContentLoaded', function () {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(function() {
       fetch('/api/shipping/search-destination/?search=' + encodeURIComponent(q))
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
+        .then(r => r.json())
+        .then(data => {
           destDropdown.innerHTML = '';
-          if (!data.success || !data.data) {
-            destDropdown.innerHTML = '<div class="dest-item"><span>Tidak ditemukan</span></div>';
-            destDropdown.classList.add('is-open');
-            return;
-          }
-          // Parse the API response - handle different response structures
           var items = [];
-          if (Array.isArray(data.data)) {
-            items = data.data;
-          } else if (data.data.rajaongkir && data.data.rajaongkir.results) {
-            items = data.data.rajaongkir.results;
-          } else if (data.data.data) {
-            items = Array.isArray(data.data.data) ? data.data.data : [];
+          if (data.success && data.data) {
+            if (Array.isArray(data.data)) items = data.data;
+            else if (data.data.rajaongkir && data.data.rajaongkir.results) items = data.data.rajaongkir.results;
           }
-
           if (!items.length) {
             destDropdown.innerHTML = '<div class="dest-item"><span>Tidak ditemukan</span></div>';
-            destDropdown.classList.add('is-open');
-            return;
-          }
-
-          items.forEach(function(loc) {
-            var div = document.createElement('div');
-            div.className = 'dest-item';
-            var id = loc.id || loc.city_id || loc.subdistrict_id || '';
-            var label = '';
-            if (loc.subdistrict_name) {
-              label = loc.subdistrict_name + ', ' + (loc.city_name || loc.city || '') + ', ' + (loc.province || '');
-            } else if (loc.city_name) {
-              label = (loc.type || '') + ' ' + loc.city_name + ', ' + (loc.province || '');
-            } else if (loc.name) {
-              label = loc.name;
-            } else {
-              label = JSON.stringify(loc).substring(0, 80);
-            }
-            div.innerHTML = '<strong>' + label + '</strong>';
-            div.setAttribute('data-id', id);
-            div.setAttribute('data-label', label);
-            div.addEventListener('click', function() {
-              destId.value = id;
-              destSearch.value = label;
-              destDropdown.classList.remove('is-open');
-              checkCalcReady();
+          } else {
+            items.forEach(function(loc) {
+              var div = document.createElement('div');
+              div.className = 'dest-item';
+              var id = loc.id || loc.city_id || loc.subdistrict_id || '';
+              var label = loc.subdistrict_name ? (loc.subdistrict_name + ', ' + (loc.city_name || loc.city || '') + ', ' + (loc.province || ''))
+                                               : (loc.city_name ? ((loc.type || '') + ' ' + loc.city_name + ', ' + (loc.province || '')) : (loc.name || ''));
+              div.innerHTML = '<strong>' + label + '</strong>';
+              div.addEventListener('click', function() {
+                destId.value = id;
+                destSearch.value = label;
+                document.getElementById('destStatusText').innerHTML = '📍 <strong>' + label + '</strong>';
+                destDropdown.classList.remove('is-open');
+                checkCalcReady();
+                btnCalc.click();
+              });
+              destDropdown.appendChild(div);
             });
-            destDropdown.appendChild(div);
-          });
-          destDropdown.classList.add('is-open');
-        })
-        .catch(function() {
-          destDropdown.innerHTML = '<div class="dest-item"><span>Error pencarian</span></div>';
+          }
           destDropdown.classList.add('is-open');
         });
     }, 350);
   });
-
-  // Close dropdown on click outside
-  document.addEventListener('click', function(e) {
-    if (!destSearch.contains(e.target) && !destDropdown.contains(e.target)) {
-      destDropdown.classList.remove('is-open');
-    }
+  
+  document.addEventListener('click', e => {
+    if (!destSearch.contains(e.target) && !destDropdown.contains(e.target)) destDropdown.classList.remove('is-open');
   });
-
-  /* ── Calculate readiness ── */
-  var courierSelect = document.getElementById('courierSelect');
-  var btnCalc = document.getElementById('btnCalcOngkir');
-
-  function checkCalcReady() {
-    btnCalc.disabled = !(destId.value && courierSelect.value);
-  }
-  courierSelect.addEventListener('change', checkCalcReady);
-
-  /* ── Calculate cost ── */
-  var ongkirError = document.getElementById('ongkirError');
-  var ongkirLoading = document.getElementById('ongkirLoading');
-  var ongkirResults = document.getElementById('ongkirResults');
-  var ongkirServiceList = document.getElementById('ongkirServiceList');
-  var btnApply = document.getElementById('btnApplyOngkir');
-  var STORE_ORIGIN = '{{ store_info.city_id }}';
-  var TOTAL_WEIGHT = {{ total_weight }};
-  var selectedService = null;
 
   btnCalc.addEventListener('click', function() {
     ongkirError.classList.remove('is-visible');
@@ -1209,7 +1311,6 @@ document.addEventListener('DOMContentLoaded', function () {
     ongkirResults.style.display = 'none';
     ongkirServiceList.innerHTML = '';
     btnApply.disabled = true;
-    selectedService = null;
 
     var formData = new URLSearchParams();
     formData.append('origin', STORE_ORIGIN);
@@ -1219,142 +1320,72 @@ document.addEventListener('DOMContentLoaded', function () {
 
     fetch('/api/shipping/calculate-cost/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-CSRFToken': csrfToken
-      },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfToken },
       body: formData.toString()
     })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
+    .then(r => r.json())
+    .then(data => {
       ongkirLoading.classList.remove('is-visible');
-
       if (!data.success) {
         ongkirError.textContent = data.error || 'Gagal menghitung ongkir.';
         ongkirError.classList.add('is-visible');
         return;
       }
-
-      // Parse results - handle different response structures
       var services = [];
       var raw = data.data;
       if (raw && raw.rajaongkir && raw.rajaongkir.results) {
-        raw.rajaongkir.results.forEach(function(courier) {
+        raw.rajaongkir.results.forEach(courier => {
           if (courier.costs) {
-            courier.costs.forEach(function(svc) {
-              var costInfo = svc.cost && svc.cost[0] ? svc.cost[0] : {};
-              services.push({
-                courier: courier.code || courierSelect.value,
-                courier_name: courier.name || courierSelect.options[courierSelect.selectedIndex].text,
-                service: svc.service || '',
-                description: svc.description || '',
-                cost: costInfo.value || 0,
-                etd: costInfo.etd || '-'
-              });
+            courier.costs.forEach(svc => {
+              var c = svc.cost && svc.cost[0] ? svc.cost[0] : {};
+              var v = c.value || 0;
+              if (v > 0) {
+                services.push({
+                  courier_name: courier.name || courierSelect.options[courierSelect.selectedIndex].text,
+                  service: svc.service, description: svc.description, cost: v, etd: c.etd || '-'
+                });
+              }
             });
           }
         });
-      } else if (raw && raw.data) {
-        // Komerce API format
-        var results = Array.isArray(raw.data) ? raw.data : [raw.data];
-        results.forEach(function(courier) {
-          var costs = courier.costs || courier.cost || [];
-          if (!Array.isArray(costs)) costs = [costs];
-          costs.forEach(function(svc) {
-            var costArr = svc.cost || [];
-            if (!Array.isArray(costArr)) costArr = [costArr];
-            var costInfo = costArr[0] || svc;
-            services.push({
-              courier: courier.code || courierSelect.value,
-              courier_name: courier.name || courierSelect.options[courierSelect.selectedIndex].text,
-              service: svc.service || '',
-              description: svc.description || '',
-              cost: costInfo.value || costInfo.cost || 0,
-              etd: costInfo.etd || '-'
-            });
-          });
-        });
       }
-
       if (!services.length) {
-        ongkirError.textContent = 'Tidak ada layanan pengiriman tersedia untuk rute ini.';
+        ongkirError.textContent = 'Layanan tidak tersedia.';
         ongkirError.classList.add('is-visible');
-        return;
-      }
-
-      // Render services
-      services.forEach(function(svc, idx) {
-        var div = document.createElement('div');
-        div.className = 'ongkir-service-item';
-        div.innerHTML =
-          '<input type="radio" name="ongkir_service" value="' + idx + '">' +
-          '<div class="svc-info">' +
-            '<div class="svc-name">' + svc.courier_name.toUpperCase() + ' — ' + svc.service + '</div>' +
-            '<div class="svc-desc">' + svc.description + '</div>' +
-            '<div class="svc-etd">Estimasi: ' + svc.etd + ' hari</div>' +
-          '</div>' +
-          '<div class="svc-cost">Rp ' + Number(svc.cost).toLocaleString('id-ID') + '</div>';
-
-        div.addEventListener('click', function() {
-          var radio = div.querySelector('input[type="radio"]');
-          radio.checked = true;
-          // Remove selection from all
-          ongkirServiceList.querySelectorAll('.ongkir-service-item').forEach(function(el) {
-            el.classList.remove('is-selected');
+      } else {
+        services.forEach((svc, idx) => {
+          var div = document.createElement('div');
+          div.className = 'ongkir-service-item';
+          div.innerHTML = '<input type="radio" name="ongkir_service" value="' + idx + '"><div class="svc-info"><div class="svc-name">' + svc.courier_name.toUpperCase() + ' — ' + svc.service + '</div><div class="svc-desc">' + svc.description + '</div><div class="svc-etd">Estimasi: ' + svc.etd + ' hari</div></div><div class="svc-cost">Rp ' + Number(svc.cost).toLocaleString('id-ID') + '</div>';
+          div.addEventListener('click', () => {
+            div.querySelector('input').checked = true;
+            ongkirServiceList.querySelectorAll('.ongkir-service-item').forEach(el => el.classList.remove('is-selected'));
+            div.classList.add('is-selected');
+            selectedService = svc;
+            btnApply.disabled = false;
           });
-          div.classList.add('is-selected');
-          selectedService = svc;
-          btnApply.disabled = false;
+          ongkirServiceList.appendChild(div);
         });
-        ongkirServiceList.appendChild(div);
-      });
-      ongkirResults.style.display = 'block';
-    })
-    .catch(function(err) {
-      ongkirLoading.classList.remove('is-visible');
-      ongkirError.textContent = 'Gagal menghubungi server. Coba lagi.';
-      ongkirError.classList.add('is-visible');
+        ongkirResults.style.display = 'block';
+      }
     });
   });
 
-  /* ── Apply selected service ── */
   btnApply.addEventListener('click', function() {
     if (!selectedService) return;
-
-    // Update hidden form fields
     document.getElementById('hiddenShippingCost').value = selectedService.cost;
     document.getElementById('hiddenCourierName').value = selectedService.courier_name;
     document.getElementById('hiddenCourierService').value = selectedService.service;
-
-    // Update shipping display
     document.getElementById('shippingRowDefault').style.display = 'none';
-    var selRow = document.getElementById('shippingRowSelected');
-    selRow.style.display = 'flex';
+    document.getElementById('shippingRowSelected').style.display = 'flex';
     document.getElementById('selectedCourierLabel').textContent = selectedService.courier_name.toUpperCase() + ' — ' + selectedService.service;
     document.getElementById('selectedCourierEtd').textContent = 'Estimasi: ' + selectedService.etd + ' hari';
     document.getElementById('selectedCourierCost').textContent = 'Rp ' + Number(selectedService.cost).toLocaleString('id-ID');
-
-    // Update summary
     document.getElementById('summaryOngkir').textContent = 'Rp ' + Number(selectedService.cost).toLocaleString('id-ID');
     var subtotal = {{ total_price }};
-    var grandTotal = subtotal + Number(selectedService.cost);
-    document.getElementById('summaryGrandTotal').textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
-
+    document.getElementById('summaryGrandTotal').textContent = 'Rp ' + (subtotal + Number(selectedService.cost)).toLocaleString('id-ID');
     closeModal();
   });
-
-  /* ── Reset shipping ── */
-  function resetShipping() {
-    document.getElementById('shippingRowDefault').style.display = 'flex';
-    document.getElementById('shippingRowSelected').style.display = 'none';
-    document.getElementById('hiddenShippingCost').value = '0';
-    document.getElementById('hiddenCourierName').value = '';
-    document.getElementById('hiddenCourierService').value = '';
-    document.getElementById('summaryOngkir').textContent = 'Rp 0';
-    var subtotal = {{ total_price }};
-    document.getElementById('summaryGrandTotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
-    selectedService = null;
-  }
 });
 </script>
 {% endblock %}

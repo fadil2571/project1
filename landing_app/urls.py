@@ -75,5 +75,7 @@ urlpatterns = [
     path('api/districts/', frontend_views.EmsifaDistrictView.as_view(), name='api_districts'),
     path('api/villages/', frontend_views.EmsifaVillageView.as_view(), name='api_villages'),
     path('api/geocode/', frontend_views.NominatimGeocodeView.as_view(), name='api_geocode'),
+    path('api/shipping/search-destination/', shipping_views.SearchDestinationView.as_view(), name='api_shipping_search_destination'),
+    path('api/shipping/calculate-cost/', shipping_views.CalculateCostView.as_view(), name='api_shipping_calculate_cost'),
     path('api/shipping-cost/', frontend_views.RajaOngkirShippingCostView.as_view(), name='api_shipping_cost'),
 ]

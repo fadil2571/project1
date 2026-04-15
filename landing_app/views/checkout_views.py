@@ -50,6 +50,12 @@ class CheckoutView(LoginRequiredMixin, View):
             total_weight = max(sum(item.quantity for item in cart_items) * 200, 200)
 
         # Store / Toko info for display and as shipping origin
+        # Get seller from first item to determine origin
+        seller = None
+        if cart_items.exists():
+            seller = cart_items.first().product.seller
+        
+        # Default store info (as fallback)
         store_info = {
             'city_id': os.getenv('STORE_CITY_ID', '501'),
             'city_name': os.getenv('STORE_CITY_NAME', 'Kabupaten Sleman'),
@@ -58,6 +64,20 @@ class CheckoutView(LoginRequiredMixin, View):
             'postal_code': os.getenv('STORE_POSTAL_CODE', '55584'),
             'phone': os.getenv('STORE_PHONE', '081234567890'),
         }
+
+        if seller:
+            store_addr = Address.objects.filter(user=seller, label='Alamat Toko').first()
+            if store_addr:
+                store_info.update({
+                    'city_name': store_addr.city,
+                    'province': store_addr.province,
+                    'address': store_addr.address,
+                    'postal_code': store_addr.postal_code,
+                    'phone': seller.phone or store_addr.recipient_phone or store_info['phone'],
+                })
+                # Note: city_id still needs mapping for RajaOngkir calculate cost
+                # For now, we continue using the provided city_id or fallback
+                # but the DISPLAY will be correct from DB.
         
         context = {
             'cart': cart,

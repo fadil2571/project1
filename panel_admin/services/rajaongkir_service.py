@@ -45,18 +45,20 @@ class RajaOngkirService:
         }
         try:
             resp = requests.get(url, params=params, headers={'key': RAJAONGKIR_API_KEY}, timeout=10)
+            if resp.status_code == 429:
+                return {'success': False, 'error': 'Limit permintaan RajaOngkir tercapai.', 'status': 429}
             resp.raise_for_status()
             data = resp.json()
             return {'success': True, 'data': data}
         except requests.exceptions.Timeout:
             logger.error('RajaOngkir search_destination timeout')
-            return {'success': False, 'error': 'Koneksi ke RajaOngkir timeout. Coba lagi.'}
-        except requests.exceptions.RequestException as e:
-            logger.error(f'RajaOngkir search_destination error: {e}')
-            return {'success': False, 'error': f'Gagal menghubungi RajaOngkir: {str(e)}'}
+            return {'success': False, 'error': 'Koneksi ke RajaOngkir timeout. Coba lagi.', 'status': 504}
+        except requests.exceptions.HTTPError as e:
+            st = e.response.status_code if e.response else 502
+            return {'success': False, 'error': f'RajaOngkir error: {str(e)}', 'status': st}
         except Exception as e:
-            logger.error(f'RajaOngkir search_destination unexpected error: {e}')
-            return {'success': False, 'error': 'Terjadi kesalahan.'}
+            logger.error(f'RajaOngkir search_destination error: {e}')
+            return {'success': False, 'error': 'Terjadi kesalahan.', 'status': 500}
 
     @staticmethod
     def calculate_cost(origin, destination, weight, courier):
