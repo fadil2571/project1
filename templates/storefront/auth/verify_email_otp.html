@@ -1,0 +1,63 @@
+{% extends 'layouts/base/base.html' %}
+{% load static %}
+
+{% block title %}Verifikasi Email - Kopmas Shop{% endblock %}
+
+{% block content %}
+<div style="display:flex; width:100%; min-height:100vh; padding:30px; align-items:center; justify-content:center; overflow-y:auto;">
+    <div style="display:flex; flex-direction:column; width:100%; max-width:480px; border-radius:24px; gap:24px; padding:24px; background:#fff; box-shadow:0 2px 16px rgba(0,0,0,0.08);">
+        <a href="{% url 'landing_app:home' %}" style="display:block; text-align:center;">
+            <img src="{% static 'storefront/img/logokopmas.png' %}" style="height:37px; margin:0 auto;" alt="logo">
+        </a>
+
+        <div style="text-align:center;">
+            <p style="font-weight:700; font-size:1.5rem; margin:0;">Verifikasi Email</p>
+            <p style="color:#6A7686; margin-top:8px;">Masukkan OTP 6 digit yang dikirim ke email Anda</p>
+        </div>
+
+        {% if messages %}
+        <div>
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="margin-bottom:8px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" style="display:flex; flex-direction:column; gap:16px;">
+            {% csrf_token %}
+            <input type="hidden" name="email" value="{{ email|default:'' }}">
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="font-weight:600; color:#6A7686;">Email</label>
+                <input type="email" value="{{ email|default:'' }}" readonly
+                    style="height:48px; padding:0 16px; border:1.5px solid #E0E0E0; border-radius:12px; font-size:0.95rem; width:100%; box-sizing:border-box; background:#F8F9FA;">
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="font-weight:600; color:#6A7686;">Kode OTP</label>
+                <input type="text" name="otp" maxlength="6" minlength="6" pattern="[0-9]{6}" placeholder="Masukkan 6 digit OTP" required
+                    style="height:48px; padding:0 16px; border:1.5px solid #E0E0E0; border-radius:12px; font-size:1rem; width:100%; box-sizing:border-box; letter-spacing:0.3em;">
+            </div>
+
+            <button type="submit"
+                style="display:flex; align-items:center; justify-content:center; height:56px; border-radius:9999px; padding:16px 24px; background:#4F46E5; font-weight:600; color:#fff; border:none; cursor:pointer; font-size:1rem;">
+                Verifikasi Email
+            </button>
+        </form>
+
+        <form method="post" style="display:flex; justify-content:center;">
+            {% csrf_token %}
+            <input type="hidden" name="email" value="{{ email|default:'' }}">
+            <input type="hidden" name="action" value="resend">
+            <button type="submit" style="background:none; border:none; color:#4F46E5; font-weight:600; cursor:pointer;">Kirim ulang OTP</button>
+        </form>
+
+        <p style="text-align:center; color:#6A7686; margin:0;">
+            Kembali ke <a href="{% url 'landing_app:login' %}" style="font-weight:600; color:#4F46E5; text-decoration:none;">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}Withdrawal Detail - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <h2 class="font-bold text-xl">Withdrawal Detail</h2>
+  <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Amount</p>
+      <p class="font-bold text-2xl text-custom-blue">
+        Rp {{ withdrawal.amount }}
+      </p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Status</p>
+      <p class="font-bold text-lg">{{ withdrawal.get_status_display }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Date</p>
+      <p class="font-bold text-lg">
+        {{ withdrawal.created_at|date:"d M Y, H:i" }}
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,49 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}Category Detail - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <h2 class="font-bold text-xl">Category Detail</h2>
+  <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Icon</p>
+      <div class="flex h-[68px] w-[68px] items-center justify-center rounded-2xl shadow-sm {{ category.icon_bg_class }} {{ category.icon_text_class }}">
+        {% include 'dashboard/admin/partials/category-icon-svg.html' with icon_key=category.icon_key icon_size='h-6 w-6' %}
+      </div>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Category Name</p>
+      <p class="font-bold text-lg">{{ category.name }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Slug</p>
+      <p>{{ category.slug }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Status</p>
+      <p>{% if category.is_active %}<span class="text-green-600 font-semibold">Active</span>{% else %}<span class="text-red-500 font-semibold">Inactive</span>{% endif %}</p>
+    </div>
+  </div>
+  <div class="flex gap-3">
+    <a
+      href="{% url 'panel_admin:category_update' category.pk %}"
+      class="flex h-12 items-center rounded-full bg-custom-blue px-6 font-semibold text-white hover:ring-2 ring-custom-blue transition-300"
+      >Edit</a
+    >
+    <form
+      method="post"
+      action="{% url 'panel_admin:category_delete' category.pk %}"
+    >
+      {% csrf_token %}
+      <button
+        type="submit"
+        class="flex h-12 items-center rounded-full border-2 border-red-500 px-6 font-semibold text-red-500 hover:bg-red-50 transition-300"
+        onclick="return confirm('Are you sure?');"
+      >
+        Delete
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

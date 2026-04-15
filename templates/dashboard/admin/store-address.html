@@ -1,0 +1,716 @@
+{% load static %}
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Store Address - Kopmas Shop</title>
+  <link rel="stylesheet" href="{% static 'dashboard/assets/css/main.css' %}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Lexend Deca', ui-sans-serif, system-ui; margin: 0; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .transition-300 { transition: all 300ms ease; }
+    .bg-custom-background { background-color: #f3f5f9; }
+    .bg-custom-blue { background-color: #1053d5; }
+    .bg-custom-blue-10 { background-color: rgba(16, 83, 213, 0.1); }
+    .bg-custom-black { background-color: #292d32; }
+    .text-custom-blue { color: #1053d5; }
+    .text-custom-grey { color: #6a7686; }
+    .text-custom-black { color: #292d32; }
+    .border-custom-stroke { border-color: #e8e8e8; }
+    .sidebar-item.active { background-color: rgba(16, 83, 213, 0.1); }
+    .sidebar-item.active .sidebar-label { color: #1053d5; }
+    .sidebar-item.active .icon-default { opacity: 0; }
+    .sidebar-item.active .icon-active { opacity: 1; }
+    .sidebar-item.active .active-bar { display: flex; }
+    .branch-line { position: absolute; top: 10px; bottom: 40px; left: calc(100% - 22px); width: 1px; background-color: #e5e7eb; border-radius: 999px; transform: none !important; }
+    .branch-line:last-child { height: auto !important; }
+    .curve-branch { position: absolute; left: -22px; top: 0; width: 22px; height: 28px; border-left: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; border-bottom-left-radius: 14px; background: transparent; z-index: 1; transform: none; }
+    .custom-select {
+      height: 52px;
+      width: 100%;
+      appearance: none;
+      border-radius: 14px;
+      border: 1.5px solid #e8e8e8;
+      padding-left: 1rem;
+      padding-right: 2.5rem;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      background-color: white;
+      cursor: pointer;
+      background-image: url('/static/dashboard/assets/images/icons/arrow-down-black.svg');
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1.25rem;
+      transition: all 300ms ease;
+    }
+    .custom-select:focus { border-color: #1053d5; outline: none; }
+    .custom-input {
+      height: 52px;
+      width: 100%;
+      border-radius: 14px;
+      border: 1.5px solid #e8e8e8;
+      padding: 0 1rem;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      transition: all 300ms ease;
+    }
+    .custom-input:focus { border-color: #1053d5; outline: none; }
+    .custom-textarea {
+      width: 100%;
+      border-radius: 14px;
+      border: 1.5px solid #e8e8e8;
+      padding: 0.9rem 1rem;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      resize: vertical;
+      transition: all 300ms ease;
+    }
+    .custom-textarea:focus { border-color: #1053d5; outline: none; }
+    .field-title {
+      font-weight: 700;
+      font-size: 0.9375rem;
+      color: #292d32;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fixed-location-box {
+      border: 1.5px solid #e8e8e8;
+      border-radius: 14px;
+      background: #f8fbff;
+      padding: 0.875rem 1rem;
+    }
+    .map-canvas {
+      width: 100%;
+      height: 300px;
+      border-radius: 14px;
+      border: 1.5px solid #e8e8e8;
+      overflow: hidden;
+    }
+    .btn-current-location {
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 16px;
+      background: rgba(16, 83, 213, 0.1);
+      color: #1053d5;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 300ms ease;
+    }
+    .btn-current-location:hover { opacity: 0.9; }
+    .btn-current-location:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(16, 83, 213, 0.25);
+    }
+    .action-btn { cursor: pointer; }
+    .action-btn:disabled { cursor: not-allowed; }
+  
+      :root {
+        /* Ubah nilai ini untuk atur padding kanan-kiri secara manual */
+        --page-side-padding-mobile-min: 20px;
+        --page-side-padding-fluid: 5vw;
+        --page-side-padding-desktop: 160px;
+      }
+
+      body .px-55 {
+        padding-left: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+        padding-right: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+      }
+
+      @media (min-width: 1280px) {
+        body .px-55 {
+          padding-left: var(--page-side-padding-desktop) !important;
+          padding-right: var(--page-side-padding-desktop) !important;
+        }
+      }
+    </style>
+  <script src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js" async></script>
+</head>
+<body class="bg-custom-background text-custom-black">
+  <div id="admin-app" data-page-title="Store Address" data-role="seller" data-product-access-ready="{% if seller_product_access_ready %}true{% else %}false{% endif %}">
+    <form id="address-form" method="post" action="{% url 'panel_admin:store_address' %}" class="rounded-[20px] bg-white p-5 md:p-6 flex flex-col gap-6">
+      {% csrf_token %}
+      <h2 class="font-bold text-xl">Alamat Toko</h2>
+
+      {% if show_empty_address_warning %}
+      <div class="rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
+        Alamat toko masih kosong. Mohon lengkapi data alamat lalu klik <strong>Simpan Alamat</strong>.
+      </div>
+      {% endif %}
+
+      <section class="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3 md:gap-5">
+        <div class="field-title"><span class="text-red-500">*</span> Lokasi</div>
+        <div class="flex flex-col gap-3">
+          <div class="fixed-location-box">
+            <p class="text-xs font-medium text-custom-grey">Wilayah Tetap</p>
+            <p class="font-semibold text-custom-black mt-1">Indonesia</p>
+            <p class="font-semibold text-custom-black">DI Yogyakarta</p>
+            <p class="font-semibold text-custom-black">Kabupaten Sleman</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <select class="custom-select" id="kapanewon" name="district">
+              <option value="">Pilih Kapanewon (Sleman)</option>
+            </select>
+            <select class="custom-select" id="kalurahan" name="village">
+              <option value="">Pilih Kalurahan</option>
+            </select>
+            <input type="hidden" id="district-name" name="district_name" value="{{ initial_district_name|default:'' }}">
+            <input type="hidden" id="village-name" name="village_name" value="{{ initial_village_name|default:'' }}">
+          </div>
+        </div>
+      </section>
+
+      <section class="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3 md:gap-5">
+        <div class="field-title"><span class="text-red-500">*</span> Kode Pos</div>
+        <div class="max-w-[240px]">
+          <input type="text" class="custom-input" id="kode-pos" name="postal_code" maxlength="5" value="{{ initial_postal_code|default:'' }}" placeholder="Masukkan kode pos">
+        </div>
+      </section>
+
+      <section class="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3 md:gap-5">
+        <div class="field-title"><span class="text-red-500">*</span> Alamat</div>
+        <textarea class="custom-textarea" id="alamat-lengkap" name="address" rows="4" placeholder="Masukkan alamat lengkap">{{ initial_address|default:'' }}</textarea>
+      </section>
+
+      <section class="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3 md:gap-5">
+        <div class="field-title">Map Lokasi</div>
+        <div class="flex flex-col gap-3">
+          <div id="store-map" class="map-canvas"></div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="btn-current-location" class="btn-current-location">Gunakan Lokasi Saat Ini</button>
+            <a id="google-maps-link" href="https://www.google.com/maps?q={{ initial_latitude|default:'-7.71636' }},{{ initial_longitude|default:'110.35530' }}" target="_blank" rel="noopener noreferrer" class="h-10 inline-flex items-center rounded-full px-4 border border-custom-stroke text-custom-grey font-semibold text-sm hover:bg-[#f7f8fb] transition-300">Buka di Google Maps</a>
+          </div>
+          <p class="text-xs text-custom-grey">Klik peta atau geser pin untuk menyesuaikan titik lokasi toko agar lebih akurat.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input id="latitude" name="latitude" class="custom-input" readonly value="{{ initial_latitude|default:'-7.71636' }}" aria-label="Latitude">
+            <input id="longitude" name="longitude" class="custom-input" readonly value="{{ initial_longitude|default:'110.35530' }}" aria-label="Longitude">
+          </div>
+        </div>
+      </section>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="btn-reset-address" type="button" class="action-btn h-11 rounded-full px-6 border border-custom-stroke font-semibold text-custom-grey hover:bg-[#f7f8fb] transition-300">Reset</button>
+        <button id="btn-save-address" type="submit" class="action-btn h-11 rounded-full px-6 bg-custom-blue text-white font-semibold hover:opacity-95 transition-300">Simpan Alamat</button>
+      </div>
+    </form>
+  </div>
+  <script>
+    window.__DJANGO_MESSAGES__ = [
+      {% for message in messages %}
+      { level: "{{ message.tags|default:'info'|escapejs }}", text: "{{ message|escapejs }}" },
+      {% endfor %}
+    ];
+  </script>
+  <script src="{% static 'dashboard/assets/js/admin-layout.js' %}?v=20260401c" defer></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    const BASE_URL = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+    const SLEMAN_REGENCY_ID = '3404';
+    const INITIAL_POSTAL_CODE = "{{ initial_postal_code|default:''|escapejs }}";
+    const INITIAL_ADDRESS = "{{ initial_address|default:''|escapejs }}";
+    const INITIAL_DISTRICT_NAME = "{{ initial_district_name|default:''|escapejs }}";
+    const INITIAL_VILLAGE_NAME = "{{ initial_village_name|default:''|escapejs }}";
+    const DEFAULT_POINT = {
+      lat: Number("{{ initial_latitude|default:'-7.71636'|escapejs }}") || -7.71636,
+      lng: Number("{{ initial_longitude|default:'110.35530'|escapejs }}") || 110.35530
+    };
+
+    let slemanDistricts = [];
+    let mapInstance = null;
+    let markerInstance = null;
+    const locationLookupCache = {};
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(initializePage, 0);
+      }, { once: true });
+    } else {
+      setTimeout(initializePage, 0);
+    }
+
+    async function initializePage() {
+      bindEvents();
+      initMap();
+      await loadKapanewonFromApi();
+    }
+
+    function showToast(icon, title) {
+      if (typeof Swal === 'undefined') return;
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: icon,
+        title: title,
+        showConfirmButton: false,
+        timer: 2600,
+        timerProgressBar: true
+      });
+    }
+
+    function bindEvents() {
+      const form = document.getElementById('address-form');
+      const kapanewonSelect = document.getElementById('kapanewon');
+      const kalurahanSelect = document.getElementById('kalurahan');
+      const currentLocationBtn = document.getElementById('btn-current-location');
+      const resetBtn = document.getElementById('btn-reset-address');
+      const saveBtn = document.getElementById('btn-save-address');
+
+      form.addEventListener('submit', function () {
+        syncLocationNames();
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.classList.add('opacity-70', 'pointer-events-none');
+        }
+      });
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', async function (event) {
+          event.preventDefault();
+          await resetAddressForm();
+          showToast('info', 'Mengembalikan form ke nilai awal...');
+        });
+      }
+
+      kapanewonSelect.addEventListener('change', function () {
+        syncLocationNames();
+        clearPostalCode();
+        loadKalurahanFromApi(this.value);
+      });
+
+      kalurahanSelect.addEventListener('change', function () {
+        syncLocationNames();
+        updateMapFromSelection();
+      });
+
+      currentLocationBtn.addEventListener('click', function () {
+        if (!navigator.geolocation) {
+          showToast('error', 'Geolocation tidak didukung browser Anda.');
+          return;
+        }
+        currentLocationBtn.disabled = true;
+        currentLocationBtn.textContent = 'Memproses...';
+        navigator.geolocation.getCurrentPosition(
+          async function (position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            
+            console.log('GPS Position:', { lat, lng, accuracy: accuracy + 'm' });
+            setMapPoint(lat, lng, true);
+            
+            // Reverse geocode untuk autofill Kapanewon, Kalurahan, dan Kode Pos
+            try {
+              const lookup = await reverseGeocodeLocation(lat, lng);
+              if (lookup) {
+                const success = await applyGeolocationResult(lookup, lat, lng);
+                if (success) {
+                  showToast('success', 'Lokasi saat ini berhasil dimuat!');
+                }
+              } else {
+                showToast('warning', 'Alamat tidak ditemukan. Silakan pilih manual.');
+              }
+            } catch (error) {
+              console.error('Error reverse geocoding:', error);
+              showToast('error', 'Gagal mengisi data alamat otomatis.');
+            }
+            
+            currentLocationBtn.disabled = false;
+            currentLocationBtn.textContent = 'Gunakan Lokasi Saat Ini';
+          },
+          function (error) {
+            let errorMsg = 'Gagal mendapatkan lokasi';
+            if (error.code === error.PERMISSION_DENIED) {
+              errorMsg = 'Izin geolocation ditolak. Periksa browser settings.';
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+              errorMsg = 'Lokasi tidak tersedia (sinyal GPS lemah).';
+            } else if (error.code === error.TIMEOUT) {
+              errorMsg = 'Timeout. Coba lagi.';
+            }
+            showToast('error', errorMsg);
+            currentLocationBtn.disabled = false;
+            currentLocationBtn.textContent = 'Gunakan Lokasi Saat Ini';
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        );
+      });
+    }
+
+    async function resetAddressForm() {
+      const form = document.getElementById('address-form');
+      const saveBtn = document.getElementById('btn-save-address');
+      const postalCodeInput = document.getElementById('kode-pos');
+      const addressInput = document.getElementById('alamat-lengkap');
+      const districtNameEl = document.getElementById('district-name');
+      const villageNameEl = document.getElementById('village-name');
+      if (!form) return;
+
+      form.reset();
+
+      if (postalCodeInput) postalCodeInput.value = '';
+      if (addressInput) addressInput.value = '';
+      if (districtNameEl) districtNameEl.value = '';
+      if (villageNameEl) villageNameEl.value = '';
+
+      clearLocationSelection();
+      setMapPoint(DEFAULT_POINT.lat, DEFAULT_POINT.lng, true);
+      syncLocationNames();
+
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.classList.remove('opacity-70', 'pointer-events-none');
+      }
+    }
+
+    function clearPostalCode() {
+      const postalCodeInput = document.getElementById('kode-pos');
+      if (postalCodeInput) {
+        postalCodeInput.value = '';
+      }
+    }
+
+    function initMap() {
+      const mapEl = document.getElementById('store-map');
+      if (!mapEl || typeof L === 'undefined') return;
+
+      // Fix marker icon path so image never breaks on repeated soft-navigation.
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+      });
+
+      if (window.__storeAddressLeafletMap && typeof window.__storeAddressLeafletMap.remove === 'function') {
+        window.__storeAddressLeafletMap.remove();
+        window.__storeAddressLeafletMap = null;
+      }
+
+      mapEl.innerHTML = '';
+
+      mapInstance = L.map(mapEl).setView([DEFAULT_POINT.lat, DEFAULT_POINT.lng], 13);
+      window.__storeAddressLeafletMap = mapInstance;
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        attribution: '&copy; CartoDB, &copy; OpenStreetMap contributors'
+      }).addTo(mapInstance);
+
+      markerInstance = L.marker([DEFAULT_POINT.lat, DEFAULT_POINT.lng], { draggable: true }).addTo(mapInstance);
+      markerInstance.on('dragend', function () {
+        const p = markerInstance.getLatLng();
+        updateCoordinates(p.lat, p.lng);
+      });
+
+      mapInstance.on('click', function (e) {
+        setMapPoint(e.latlng.lat, e.latlng.lng, false);
+      });
+
+      updateCoordinates(DEFAULT_POINT.lat, DEFAULT_POINT.lng);
+      setTimeout(function () {
+        mapInstance.invalidateSize();
+      }, 180);
+      setTimeout(function () {
+        if (mapInstance) mapInstance.invalidateSize();
+      }, 420);
+    }
+
+    function setMapPoint(lat, lng, moveCamera) {
+      if (!markerInstance || !mapInstance) return;
+      markerInstance.setLatLng([lat, lng]);
+      if (moveCamera) {
+        mapInstance.setView([lat, lng], 15);
+      }
+      updateCoordinates(lat, lng);
+    }
+
+    function updateCoordinates(lat, lng) {
+      const latValue = Number(lat).toFixed(6);
+      const lngValue = Number(lng).toFixed(6);
+      document.getElementById('latitude').value = latValue;
+      document.getElementById('longitude').value = lngValue;
+      document.getElementById('google-maps-link').href = 'https://www.google.com/maps?q=' + latValue + ',' + lngValue;
+    }
+
+    async function loadKapanewonFromApi() {
+      const kapanewonSelect = document.getElementById('kapanewon');
+      const kalurahanSelect = document.getElementById('kalurahan');
+
+      try {
+        const response = await fetch(`${BASE_URL}/districts/${SLEMAN_REGENCY_ID}.json`);
+        const data = await response.json();
+        slemanDistricts = Array.isArray(data) ? data : [];
+
+        kapanewonSelect.innerHTML = '<option value="">Pilih Kapanewon (Sleman)</option>';
+        slemanDistricts.forEach(function (district) {
+          const option = document.createElement('option');
+          option.value = district.id;
+          option.textContent = toTitleCase(district.name);
+          kapanewonSelect.appendChild(option);
+        });
+
+        kalurahanSelect.innerHTML = '<option value="">Pilih Kalurahan</option>';
+        kalurahanSelect.disabled = true;
+        await applyDefaultLocation();
+      } catch (error) {
+        console.error('Error loading Sleman districts:', error);
+      }
+    }
+
+    async function applyDefaultLocation() {
+      const kapanewonSelect = document.getElementById('kapanewon');
+
+      if (!INITIAL_DISTRICT_NAME) {
+        clearLocationSelection();
+        return;
+      }
+
+      const preferredDistrict = slemanDistricts.find(function (d) {
+        return toTitleCase(d.name) === INITIAL_DISTRICT_NAME;
+      });
+      const defaultDistrict = preferredDistrict || slemanDistricts[0];
+
+      if (!defaultDistrict) return;
+      kapanewonSelect.value = defaultDistrict.id;
+      await loadKalurahanFromApi(defaultDistrict.id, INITIAL_VILLAGE_NAME);
+      syncLocationNames();
+    }
+
+    function clearLocationSelection() {
+      const kapanewonSelect = document.getElementById('kapanewon');
+      const kalurahanSelect = document.getElementById('kalurahan');
+      if (kapanewonSelect) kapanewonSelect.value = '';
+      if (kalurahanSelect) {
+        kalurahanSelect.innerHTML = '<option value="">Pilih Kalurahan</option>';
+        kalurahanSelect.value = '';
+        kalurahanSelect.disabled = true;
+      }
+    }
+
+    async function loadKalurahanFromApi(districtId, preferredVillageName, skipMapUpdate) {
+      const kalurahanSelect = document.getElementById('kalurahan');
+
+      if (!districtId) {
+        kalurahanSelect.innerHTML = '<option value="">Pilih Kalurahan</option>';
+        kalurahanSelect.disabled = true;
+        return;
+      }
+
+      try {
+        const response = await fetch(`${BASE_URL}/villages/${districtId}.json`);
+        const villages = await response.json();
+
+        kalurahanSelect.innerHTML = '<option value="">Pilih Kalurahan</option>';
+        (Array.isArray(villages) ? villages : []).forEach(function (village) {
+          const option = document.createElement('option');
+          option.value = village.id;
+          option.textContent = toTitleCase(village.name);
+          kalurahanSelect.appendChild(option);
+        });
+
+        kalurahanSelect.disabled = false;
+
+        const defaultVillage = Array.from(kalurahanSelect.options).find(function (opt) {
+          return (opt.textContent || '').trim() === (preferredVillageName || '').trim();
+        }) || Array.from(kalurahanSelect.options).find(function (opt) {
+          return (opt.textContent || '').toUpperCase().includes('CATURTUNGGAL');
+        }) || kalurahanSelect.options[1];
+
+        if (defaultVillage) {
+          kalurahanSelect.value = defaultVillage.value;
+        }
+        syncLocationNames();
+        
+        // Skip map update jika dari geolocation flow
+        if (!skipMapUpdate) {
+          await updateMapFromSelection();
+        }
+      } catch (error) {
+        console.error('Error loading Kalurahan:', error);
+      }
+    }
+
+    function syncLocationNames() {
+      const districtNameEl = document.getElementById('district-name');
+      const villageNameEl = document.getElementById('village-name');
+      if (districtNameEl) districtNameEl.value = getSelectedText('kapanewon');
+      if (villageNameEl) villageNameEl.value = getSelectedText('kalurahan');
+    }
+
+    async function updateMapFromSelection() {
+      const kapanewonText = getSelectedText('kapanewon');
+      const kalurahanText = getSelectedText('kalurahan');
+      if (!kapanewonText || !kalurahanText) {
+        clearPostalCode();
+        return;
+      }
+
+      try {
+        const lookup = await lookupVillageLocation(kalurahanText, kapanewonText);
+        if (lookup) {
+          setMapPoint(Number(lookup.lat), Number(lookup.lon), true);
+          applyPostalCode(lookup);
+        }
+      } catch (error) {
+        console.error('Error updating map location:', error);
+      }
+    }
+
+    async function lookupVillageLocation(villageName, districtName) {
+      const cacheKey = [villageName, districtName].join('|').toLowerCase();
+      if (locationLookupCache[cacheKey]) {
+        return locationLookupCache[cacheKey];
+      }
+
+      const query = [
+        villageName,
+        districtName,
+        'Sleman',
+        'Daerah Istimewa Yogyakarta',
+        'Indonesia'
+      ].join(', ');
+
+      const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=1&q=' + encodeURIComponent(query);
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      const result = await response.json();
+      const firstResult = Array.isArray(result) && result.length > 0 ? result[0] : null;
+
+      if (firstResult) {
+        locationLookupCache[cacheKey] = firstResult;
+      }
+
+      return firstResult;
+    }
+
+    function applyPostalCode(lookupResult) {
+      const postalCodeInput = document.getElementById('kode-pos');
+      if (!postalCodeInput) return;
+
+      const postcode = lookupResult && lookupResult.address ? String(lookupResult.address.postcode || '').trim() : '';
+      if (postcode) {
+        postalCodeInput.value = postcode;
+      }
+    }
+
+    async function reverseGeocodeLocation(lat, lng) {
+      const url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + lat + '&lon=' + lng + '&zoom=15&addressdetails=1';
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      const result = await response.json();
+      return result;
+    }
+
+    function isLocationInSleman(address) {
+      if (!address) return false;
+      const addressStr = JSON.stringify(address).toLowerCase();
+      return addressStr.includes('sleman') || addressStr.includes('kabupaten sleman');
+    }
+
+    async function applyGeolocationResult(reverseResult, lat, lng) {
+      const address = reverseResult.address || {};
+      
+      console.log('Reverse geocode result:', reverseResult);
+      console.log('Using GPS coordinates:', { lat, lng });
+
+      // Cek apakah lokasi ada di Sleman
+      if (!isLocationInSleman(address)) {
+        showToast('warning', 'Lokasi tidak di Kabupaten Sleman. Silakan pilih manual.');
+        clearLocationSelection();
+        return false;
+      }
+
+      // Extract village/hamlet dan district
+      const village = address.village || address.hamlet || address.suburb || '';
+      const district = address.county || address.state_district || '';
+
+      console.log('Extracted:', { village, district, postcode: address.postcode });
+
+      let foundMatch = false;
+
+      if (village) {
+        const normalizedVillage = toTitleCase(village).trim();
+        
+        // Cari district yang cocok (loop semua dan cari village)
+        for (let i = 0; i < slemanDistricts.length; i++) {
+          const d = slemanDistricts[i];
+          try {
+            const villagesResp = await fetch(`${BASE_URL}/villages/${d.id}.json`);
+            const villages = await villagesResp.json();
+            
+            const matchedVillage = villages.find(function (v) {
+              return toTitleCase(v.name).trim() === normalizedVillage;
+            });
+            
+            if (matchedVillage) {
+              document.getElementById('kapanewon').value = d.id;
+              // Pass true untuk skipMapUpdate - jangan lookup ke nominatim, keep GPS coords
+              await loadKalurahanFromApi(d.id, normalizedVillage, true);
+              foundMatch = true;
+              break;
+            }
+          } catch (e) {
+            console.error('Error searching district', d.id, e);
+          }
+        }
+      }
+
+      // Apply postal code dari reverse geocode jika ada
+      if (address.postcode) {
+        document.getElementById('kode-pos').value = String(address.postcode).trim();
+        console.log('Applied postal code:', address.postcode);
+      }
+      
+      if (foundMatch) {
+        syncLocationNames();
+        console.log('Geolocation applied successfully. Map kept at GPS coords:', { lat, lng });
+        return true;
+      }
+      
+      showToast('warning', 'Nama desa/kalurahan tidak cocok. Silakan pilih manual.');
+      clearLocationSelection();
+      return false;
+    }
+
+    function getSelectedText(selectId) {
+      const select = document.getElementById(selectId);
+      if (!select || select.selectedIndex < 0) return '';
+      return (select.options[select.selectedIndex].textContent || '').trim();
+    }
+
+    function toTitleCase(value) {
+      return String(value || '').toLowerCase().replace(/\b\w/g, function (ch) { return ch.toUpperCase(); });
+    }
+  </script>
+</body>
+</html>
+
+

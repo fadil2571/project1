@@ -1,0 +1,283 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}Category List - Kopmas Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+  #add-category-modal { display:none; }
+  #add-category-modal.active { display:flex; }
+  #edit-category-modal { display:none; }
+  #edit-category-modal.active { display:flex; }
+  .icon-pack-card {
+    display: block;
+    border: 1px solid #dbe3ef;
+    border-radius: 14px;
+    padding: 10px;
+    transition: all .2s ease;
+    background: #fff;
+  }
+  .icon-pack-card:hover {
+    border-color: #93c5fd;
+    background: #f8fbff;
+  }
+  .icon-pack-input:checked + .icon-pack-card {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, .15);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 class="font-bold text-xl">Category List</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <form method="get" class="flex items-center gap-2">
+        <input
+          type="text"
+          name="q"
+          value="{{ search_query }}"
+          placeholder="Cari kategori..."
+          class="h-11 w-56 rounded-full border border-custom-stroke px-4 text-sm focus:outline-none focus:ring-2 ring-custom-blue"
+        />
+        <button type="submit" class="h-11 rounded-full border border-custom-stroke px-4 text-sm font-semibold text-custom-grey hover:bg-gray-50 transition-300">Cari</button>
+      </form>
+      <button
+        type="button"
+        onclick="document.getElementById('add-category-modal').classList.add('active')"
+        class="flex h-12 items-center rounded-full bg-custom-blue px-6 font-semibold text-white hover:ring-2 ring-custom-blue transition-300"
+      >+ Add Category</button>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-custom-stroke">
+          <th class="py-3 px-4 font-semibold text-custom-grey">No</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Icon</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Name</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for category in categories %}
+        <tr class="border-b border-custom-stroke">
+          <td class="py-3 px-4">{{ forloop.counter }}</td>
+          <td class="py-3 px-4">
+            <div class="group inline-flex h-[68px] w-[68px] items-center justify-center rounded-2xl shadow-sm {{ category.icon_bg_class }} {{ category.icon_text_class }} transition duration-300 hover:scale-110 hover:shadow-lg hover:-translate-y-1">
+              {% include 'dashboard/admin/partials/category-icon-svg.html' with icon_key=category.icon_key icon_size='h-6 w-6' %}
+            </div>
+          </td>
+          <td class="py-3 px-4 font-semibold">{{ category.name }}</td>
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                class="js-open-edit-modal inline-flex h-9 items-center rounded-full border border-custom-blue px-4 text-sm font-semibold text-custom-blue hover:bg-blue-50 transition-300"
+                data-update-url="{% url 'panel_admin:category_update' category.pk %}"
+                data-name="{{ category.name|escape }}"
+                data-icon-key="{{ category.icon_key|default:'food'|escape }}"
+                data-is-active="{% if category.is_active %}1{% else %}0{% endif %}"
+              >Edit</button>
+              <form
+                method="post"
+                action="{% url 'panel_admin:category_delete' category.pk %}"
+                onsubmit="return confirm('Hapus kategori ini?')"
+              >
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="inline-flex h-9 items-center rounded-full border border-red-300 px-4 text-sm font-semibold text-red-600 hover:bg-red-50 transition-300"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="py-3 px-4 text-custom-grey text-center">
+            No categories found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Category Modal -->
+<div id="add-category-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/50">
+  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-xl" style="width:min(840px,96vw);max-height:90vh;overflow-y:auto;">
+    <div class="flex items-center justify-between">
+      <h3 class="font-bold text-lg">Create New Category</h3>
+      <button type="button" id="modal-close-btn" class="text-gray-400 hover:text-gray-600 transition-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <form id="category-form" method="post" action="{% url 'panel_admin:category_create' %}" class="flex flex-col gap-4">
+      {% csrf_token %}
+      {% include 'dashboard/admin/partials/category-icon-picker.html' with selected_icon='food' %}
+
+      <!-- Category Name -->
+      <div class="flex items-center gap-3 rounded-2xl border border-custom-stroke px-4 h-12 focus-within:ring-2 ring-custom-blue transition-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 3H12.75a2.251 2.251 0 00-2.15 1.586m0 0a2.003 2.003 0 01-.044.174m-.044-.174C9.834 4.926 9 5.95 9 7.174V21" />
+        </svg>
+        <input name="name" class="h-full w-full font-medium text-sm focus:outline-none" placeholder="Enter Category Name" required />
+      </div>
+
+
+      <!-- Active checkbox -->
+      <div class="flex items-center gap-3">
+        <input type="checkbox" name="is_active" id="add_is_active" checked
+          class="h-5 w-5 rounded border-custom-stroke text-custom-blue focus:ring-custom-blue" />
+        <label for="add_is_active" class="font-semibold text-custom-grey text-sm">Active</label>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="document.getElementById('add-category-modal').classList.remove('active')"
+          class="h-11 rounded-full border border-custom-stroke px-6 font-semibold text-custom-grey hover:bg-gray-50 transition-300">
+          Cancel
+        </button>
+        <button type="submit"
+          class="h-11 rounded-full bg-custom-blue px-6 font-semibold text-white hover:ring-2 ring-custom-blue transition-300">
+          Save Category
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div id="edit-category-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/50">
+  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-xl" style="width:min(840px,96vw);max-height:90vh;overflow-y:auto;">
+    <div class="flex items-center justify-between">
+      <h3 class="font-bold text-lg">Edit Category</h3>
+      <button type="button" id="edit-modal-close-btn" class="text-gray-400 hover:text-gray-600 transition-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <form id="edit-category-form" method="post" action="" class="flex flex-col gap-4">
+      {% csrf_token %}
+      {% include 'dashboard/admin/partials/category-icon-picker.html' with selected_icon='food' %}
+
+      <div class="flex items-center gap-3 rounded-2xl border border-custom-stroke px-4 h-12 focus-within:ring-2 ring-custom-blue transition-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 3H12.75a2.251 2.251 0 00-2.15 1.586m0 0a2.003 2.003 0 01-.044.174m-.044-.174C9.834 4.926 9 5.95 9 7.174V21" />
+        </svg>
+        <input id="edit-category-name" name="name" class="h-full w-full font-medium text-sm focus:outline-none" placeholder="Enter Category Name" required />
+      </div>
+
+
+      <div class="flex items-center gap-3">
+        <input type="checkbox" name="is_active" id="edit_is_active"
+          class="h-5 w-5 rounded border-custom-stroke text-custom-blue focus:ring-custom-blue" />
+        <label for="edit_is_active" class="font-semibold text-custom-grey text-sm">Active</label>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" id="edit-modal-cancel-btn"
+          class="h-11 rounded-full border border-custom-stroke px-6 font-semibold text-custom-grey hover:bg-gray-50 transition-300">
+          Cancel
+        </button>
+        <button type="submit"
+          class="h-11 rounded-full bg-custom-blue px-6 font-semibold text-white hover:ring-2 ring-custom-blue transition-300">
+          Update Category
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function initCategoryListModal() {
+  const addModal = document.getElementById('add-category-modal');
+  const editModal = document.getElementById('edit-category-modal');
+  const modalCloseBtn = document.getElementById('modal-close-btn');
+  const editModalCloseBtn = document.getElementById('edit-modal-close-btn');
+  const editModalCancelBtn = document.getElementById('edit-modal-cancel-btn');
+  const editButtons = document.querySelectorAll('.js-open-edit-modal');
+  const editForm = document.getElementById('edit-category-form');
+  const editNameInput = document.getElementById('edit-category-name');
+  const editActiveInput = document.getElementById('edit_is_active');
+
+  const closeEditModal = () => {
+    editModal?.classList.remove('active');
+  };
+
+  modalCloseBtn?.addEventListener('click', () => {
+    addModal?.classList.remove('active');
+  });
+
+  editModalCloseBtn?.addEventListener('click', closeEditModal);
+  editModalCancelBtn?.addEventListener('click', closeEditModal);
+
+  addModal?.addEventListener('click', (e) => {
+    if (e.target === addModal) {
+      addModal.classList.remove('active');
+    }
+  });
+
+  editModal?.addEventListener('click', (e) => {
+    if (e.target === editModal) {
+      closeEditModal();
+    }
+  });
+
+  editButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!editForm) return;
+
+      const updateUrl = button.dataset.updateUrl || '';
+      const name = button.dataset.name || '';
+      const iconKey = button.dataset.iconKey || 'food';
+      const isActive = button.dataset.isActive === '1';
+
+      editForm.action = updateUrl;
+      if (editNameInput) editNameInput.value = name;
+      if (editActiveInput) editActiveInput.checked = isActive;
+
+      const iconInputs = editForm.querySelectorAll('input[name="icon_key"]');
+      let selectedIconInput = null;
+      iconInputs.forEach((input) => {
+        const isSelected = input.value === iconKey;
+        input.checked = isSelected;
+        if (isSelected) {
+          selectedIconInput = input;
+        }
+      });
+
+      if (!selectedIconInput) {
+        selectedIconInput = editForm.querySelector('input[name="icon_key"][value="food"]') || editForm.querySelector('input[name="icon_key"]');
+        if (selectedIconInput) {
+          selectedIconInput.checked = true;
+        }
+      }
+
+      selectedIconInput?.dispatchEvent(new Event('change', { bubbles: true }));
+
+      editModal?.classList.add('active');
+    });
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCategoryListModal);
+} else {
+  initCategoryListModal();
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,60 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}Withdrawal List - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <div class="flex items-center justify-between">
+    <h2 class="font-bold text-xl">Withdrawal List</h2>
+    {% if user.is_seller_user %}
+    <a
+      href="#"
+      class="flex h-12 items-center rounded-full bg-custom-blue px-6 font-semibold text-white hover:ring-2 ring-custom-blue transition-300"
+      >+ Request Withdrawal</a
+    >
+    {% endif %}
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-custom-stroke">
+          <th class="py-3 px-4 font-semibold text-custom-grey">No</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Amount</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Status</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Date</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for withdrawal in withdrawals %}
+        <tr class="border-b border-custom-stroke">
+          <td class="py-3 px-4">{{ forloop.counter }}</td>
+          <td class="py-3 px-4 font-semibold text-custom-blue">
+            Rp {{ withdrawal.amount }}
+          </td>
+          <td class="py-3 px-4">
+            <span
+              class="rounded-full px-3 py-1 text-sm font-semibold {% if withdrawal.status == 'approved' %}bg-green-100 text-green-700 {% elif withdrawal.status == 'rejected' %}bg-red-100 text-red-700 {% else %}bg-yellow-100 text-yellow-700{% endif %}"
+            >
+              {{ withdrawal.get_status_display }}
+            </span>
+          </td>
+          <td class="py-3 px-4">{{ withdrawal.created_at|date:"d M Y" }}</td>
+          <td class="py-3 px-4">
+            <a href="#" class="font-semibold text-custom-blue hover:underline"
+              >Detail</a
+            >
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="py-3 px-4 text-custom-grey text-center">
+            No withdrawal requests found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

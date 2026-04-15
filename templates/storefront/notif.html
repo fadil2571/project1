@@ -1,0 +1,83 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}Notifikasi - KOPMAS Shop{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-notif">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Notifikasi 🔔</div>
+      <div class="ph-sub">{{ unread_count }} notifikasi belum dibaca</div>
+    </div>
+    <form method="post" style="margin:0">
+      {% csrf_token %}
+      <button class="btn bp" type="submit">Tandai Semua Dibaca</button>
+    </form>
+  </div>
+  
+  <div style="display:grid;grid-template-columns:1fr 280px;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {% for notification in notifications %}
+      <div style="padding:14px;border-left:4px solid {% if notification.notification_type == 'order' %}var(--blue){% elif notification.notification_type == 'payment' %}var(--orange){% elif notification.notification_type == 'product' %}var(--green){% else %}var(--muted){% endif %};background:{% if notification.is_read %}var(--bg1){% else %}var(--bg2){% endif %};border-radius:8px;cursor:pointer;transition:all .2s" onmouseover="this.style.boxShadow='0 4px 12px rgba(26,78,216,0.12)'" onmouseout="this.style.boxShadow=''">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;gap:10px">
+          <div style="font-size:15.5px;font-weight:700{% if notification.is_read %};color:var(--muted){% endif %}">
+            {{ notification.title }}
+          </div>
+          <div style="font-size:14px;color:var(--muted);white-space:nowrap">{{ notification.created_at|timesince }} lalu</div>
+        </div>
+        <div style="font-size:14.5px;color:var(--muted);line-height:1.4">{{ notification.message }}</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          {% if notification.link %}
+          <a class="btn bp" style="font-size:14px;padding:4px 10px;text-decoration:none" href="{{ notification.link }}">Buka</a>
+          {% else %}
+          <a class="btn bp" style="font-size:14px;padding:4px 10px;text-decoration:none" href="{% url 'orders' %}">Lihat Pesanan</a>
+          {% endif %}
+          <span style="font-size:13px;color:var(--muted);display:inline-flex;align-items:center">
+            {% if notification.is_read %}Sudah dibaca{% else %}Belum dibaca{% endif %}
+          </span>
+        </div>
+      </div>
+      {% empty %}
+      <div class="card" style="padding:18px;color:var(--muted)">
+        Belum ada notifikasi untuk akun ini.
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div class="card" style="padding:18px;height:fit-content">
+      <div style="font-size:14.5px;font-weight:700;margin-bottom:12px;color:var(--muted)">PREFERENSI</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:15px">
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.querySelector('input').checked = !this.querySelector('input').checked">
+          <input type="checkbox" checked style="cursor:pointer;accent-color:var(--blue)">
+          <label style="cursor:pointer">📦 Pesanan</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.querySelector('input').checked = !this.querySelector('input').checked">
+          <input type="checkbox" checked style="cursor:pointer;accent-color:var(--blue)">
+          <label style="cursor:pointer">⚡ Promo & Flash Sale</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.querySelector('input').checked = !this.querySelector('input').checked">
+          <input type="checkbox" checked style="cursor:pointer;accent-color:var(--blue)">
+          <label style="cursor:pointer">🎁 Voucher & Cashback</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.querySelector('input').checked = !this.querySelector('input').checked">
+          <input type="checkbox" checked style="cursor:pointer;accent-color:var(--blue)">
+          <label style="cursor:pointer">💬 Pesan dari Toko</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.querySelector('input').checked = !this.querySelector('input').checked">
+          <input type="checkbox" style="cursor:pointer;accent-color:var(--blue)">
+          <label style="cursor:pointer">📢 Berita & Update</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.querySelector('input').checked = !this.querySelector('input').checked">
+          <input type="checkbox" checked style="cursor:pointer;accent-color:var(--blue)">
+          <label style="cursor:pointer">⭐ Review Request</label>
+        </div>
+      </div>
+      
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px">
+        <div style="font-size:14.5px;font-weight:700;margin-bottom:10px;color:var(--muted)">PENGATURAN</div>
+        <button class="btn" style="width:100%;background:var(--blue);color:white;font-size:14px" onclick="toast('Preferensi disimpan ✓','success')">💾 Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

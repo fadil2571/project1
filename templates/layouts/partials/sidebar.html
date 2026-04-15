@@ -1,0 +1,461 @@
+{% load static %}
+<!-- Sidebar -->
+<aside
+  id="sidebar"
+  class="fixed top-0 left-0 h-screen w-[280px] bg-white border-r border-custom-stroke flex flex-col z-50 transition-300 lg:translate-x-0 -translate-x-full"
+>
+  <!-- Logo -->
+  <div class="flex items-center gap-3 px-5 py-5">
+    <a href="{% url 'landing_app:home' %}" class="flex items-center gap-2">
+      <img
+        src="{% static 'dashboard/assets/images/logos/logokopmas.png' %}"
+        class="h-8 w-auto"
+        alt="Kopmas Shop"
+      />
+    </a>
+  </div>
+
+  <!-- Menu -->
+  <nav class="flex flex-col gap-1 px-4 flex-1 overflow-y-auto hide-scrollbar">
+    <p
+      class="px-4 py-3 text-xs font-bold text-custom-grey uppercase tracking-wider"
+    >
+      Menu Utama
+    </p>
+
+    {% if user.is_admin %}
+    <!-- ====== MENU ADMIN ====== -->
+
+    <!-- Dashboard -->
+    <a
+      href="{% url 'panel_admin:dashboard_admin' %}"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Dashboard' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/home-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/home-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Dasbor</span
+      >
+    </a>
+
+    <!-- Categories -->
+    <a
+      href="{% url 'panel_admin:category_list' %}"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Categories' or page_title == 'Category Create' or page_title == 'Category Edit' or page_title == 'Category Detail' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/stickynote-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/stickynote-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Kategori</span
+      >
+    </a>
+
+    <!-- Product -->
+    <a
+      href="{% url 'panel_admin:product_manage' %}"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Products' or page_title == 'Product Create' or page_title == 'Product Edit' or page_title == 'Product Detail' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/bag-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/bag-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Produk</span
+      >
+    </a>
+
+    <!-- List Store -->
+    <a
+      href="#"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Store List' or page_title == 'Store Create' or page_title == 'Store Edit' or page_title == 'Store Detail' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/shop-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/shop-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Daftar Toko</span
+      >
+    </a>
+
+    <!-- List Transaction -->
+    <a
+      href="{% url 'panel_admin:order_list' %}"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Transactions' or page_title == 'Transaction Detail' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/note-text-grey.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/note-text-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Daftar Transaksi</span
+      >
+    </a>
+
+    <!-- Store Wallet -->
+    <a
+      href="#"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Store Wallet' or page_title == 'Store Balance Detail' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/wallet-2-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/wallet-2-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Dompet Toko</span
+      >
+    </a>
+
+    <!-- Withdrawal -->
+    <a
+      href="#"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Withdrawal' or page_title == 'Withdrawal Create' or page_title == 'Withdrawal Detail' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/money-grey.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/wallet-3-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Penarikan Dana</span
+      >
+    </a>
+
+    <!-- Manage Users -->
+    <a
+      href="{% url 'panel_admin:user_list' %}"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Users' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/profile-2user-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/profile-2user-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Kelola Pengguna</span
+      >
+    </a>
+
+    <!-- Manage Reviews -->
+    <a
+      href="#"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Reviews' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/message-text-grey.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/message-text-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Kelola Ulasan</span
+      >
+    </a>
+
+    <!-- Settings -->
+    <a
+      href="#"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Settings' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/setting-2-grey.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/setting-black.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Pengaturan</span
+      >
+    </a>
+
+    {% elif user.is_seller_user %}
+    <!-- ====== MENU PENJUAL ====== -->
+
+    <!-- Dashboard -->
+    <a
+      href="{% url 'panel_admin:dashboard_seller' %}"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Dashboard' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/home-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/home-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Dasbor</span
+      >
+    </a>
+
+    <!-- Product -->
+    <a
+      href="{% url 'panel_admin:product_manage' %}"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Products' or page_title == 'Product Create' or page_title == 'Product Edit' or page_title == 'Product Detail' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/bag-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/bag-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Produk</span
+      >
+    </a>
+
+    <!-- My Store -->
+    <a
+      href="#"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'My Store' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/shop-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/shop-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Toko Saya</span
+      >
+    </a>
+
+    <!-- List Transaction -->
+    <a
+      href="{% url 'panel_admin:order_list' %}"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Transactions' or page_title == 'Transaction Detail' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/note-text-grey.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/note-text-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Daftar Transaksi</span
+      >
+    </a>
+
+    <!-- Withdrawal (Bank) -->
+    <a
+      href="#"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Withdrawal' or page_title == 'Withdrawal Create' or page_title == 'Withdrawal Detail' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/bank-black.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/wallet-3-blue-fill.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Penarikan Dana</span
+      >
+    </a>
+
+    <p
+      class="px-4 py-3 mt-2 text-xs font-bold text-custom-grey uppercase tracking-wider"
+    >
+      Akun
+    </p>
+
+    <!-- Settings (Profile) -->
+    <a
+      href="#"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl relative {% if page_title == 'Settings' %}active{% else %}hover:bg-gray-50{% endif %} transition-300"
+    >
+      <div
+        class="hidden active-bar absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-custom-blue rounded-r-full"
+      ></div>
+      <div class="relative flex size-6 shrink-0">
+        <img
+          src="{% static 'dashboard/assets/images/icons/setting-2-grey.svg' %}"
+          class="icon-default size-6 absolute inset-0 transition-300"
+          alt=""
+        />
+        <img
+          src="{% static 'dashboard/assets/images/icons/setting-black.svg' %}"
+          class="icon-active size-6 absolute inset-0 opacity-0 transition-300"
+          alt=""
+        />
+      </div>
+      <span class="sidebar-label font-semibold text-custom-grey transition-300"
+        >Pengaturan</span
+      >
+    </a>
+
+    {% endif %}
+  </nav>
+
+  <!-- Footer -->
+  <div class="px-4 pb-4 pt-2 border-t border-custom-stroke">
+    <a
+      href="{% url 'landing_app:logout' %}"
+      class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 transition-300"
+    >
+      <img
+        src="{% static 'dashboard/assets/images/icons/logout.svg' %}"
+        class="size-6"
+        alt=""
+      />
+      <span class="sidebar-label font-semibold text-red-500">Keluar</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Mobile Overlay -->
+<div
+  id="sidebar-overlay"
+  class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"
+></div>

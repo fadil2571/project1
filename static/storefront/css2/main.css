@@ -1,0 +1,224 @@
+/* Kopmas Shop - Main Styles */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Header Styles */
+.header {
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.top-bar {
+    font-size: 0.85rem;
+}
+
+.navbar-brand {
+    text-decoration: none;
+}
+
+/* Product Card Styles */
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+
+.product-card .card-img-top {
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+/* Category Card Styles */
+.category-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.category-card:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.category-card:hover .text-primary {
+    color: white !important;
+}
+
+.category-card:hover .text-muted {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Offer Card */
+.offer-card {
+    transition: transform 0.3s ease;
+}
+
+.offer-card:hover {
+    transform: scale(1.02);
+}
+
+/* Progress Tracker */
+.progress-tracker {
+    position: relative;
+    padding: 20px 0;
+}
+
+.progress-tracker::before {
+    content: '';
+    position: absolute;
+    top: 35px;
+    left: 10%;
+    right: 10%;
+    height: 3px;
+    background: #e9ecef;
+    z-index: 0;
+}
+
+/* Cart Styles */
+.cart-item {
+    border-bottom: 1px solid #e9ecef;
+    padding: 20px 0;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+/* Form Styles */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Button Styles */
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0b5ed7;
+    transform: translateY(-2px);
+}
+
+/* Badge Styles */
+.badge {
+    font-weight: 500;
+}
+
+/* Footer Styles */
+.footer {
+    margin-top: auto;
+}
+
+.footer a:hover {
+    color: white !important;
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: var(--primary-color);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Thumbnail Images */
+.thumbnail-img {
+    transition: opacity 0.3s ease;
+}
+
+.thumbnail-img:hover {
+    opacity: 0.8;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .product-card .card-img-top {
+        height: 150px;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

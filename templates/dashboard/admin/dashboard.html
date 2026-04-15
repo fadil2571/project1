@@ -1,0 +1,338 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}{% if user.is_admin %}Admin{% else %}Seller{% endif %} Dashboard - Kopmas Shop{% endblock %}
+{% block content %}
+<!-- Stats Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+  <div
+    class="flex flex-col sm:col-span-2 lg:col-span-1 rounded-[20px] p-5 gap-6 bg-white"
+  >
+    <div class="flex flex-col gap-6">
+      <div
+        class="flex size-[56px] bg-custom-blue-10 items-center justify-center rounded-full"
+      >
+        <img
+          src="{% static 'dashboard/assets/images/icons/wallet-2-blue-fill.svg' %}"
+          class="flex size-6 shrink-0"
+          alt="icon"
+        />
+      </div>
+      <div class="flex flex-col gap-[6px]">
+        <p class="font-bold text-2xl sm:text-4xl">
+          Rp {{ total_revenue|default:"0" }}
+        </p>
+        <p class="font-medium text-lg text-custom-grey">Total Pendapatan</p>
+      </div>
+    </div>
+  </div>
+
+  {% if user.is_admin %}
+  <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
+    <div class="flex flex-col gap-6">
+      <div
+        class="flex size-[56px] bg-custom-blue-10 items-center justify-center rounded-full"
+      >
+        <img
+          src="{% static 'dashboard/assets/images/icons/profile-tick-blue-fill.svg' %}"
+          class="flex size-6 shrink-0"
+          alt="icon"
+        />
+      </div>
+      <div class="flex flex-col gap-[6px]">
+        <p class="font-bold text-4xl">{{ total_sellers|default:"0" }}</p>
+        <p class="font-medium text-lg text-custom-grey">Total Penjual</p>
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
+    <div class="flex flex-col gap-6">
+      <div
+        class="flex size-[56px] bg-custom-blue-10 items-center justify-center rounded-full"
+      >
+        <img
+          src="{% static 'dashboard/assets/images/icons/profile-2user-blue-fill.svg' %}"
+          class="flex size-6 shrink-0"
+          alt="icon"
+        />
+      </div>
+      <div class="flex flex-col gap-[6px]">
+        <p class="font-bold text-4xl">{{ total_buyers|default:"0" }}</p>
+        <p class="font-medium text-lg text-custom-grey">Total Pembeli</p>
+      </div>
+    </div>
+  </div>
+  {% elif user.is_seller_user %}
+  <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
+    <div class="flex flex-col gap-6">
+      <div
+        class="flex size-[56px] bg-custom-blue-10 items-center justify-center rounded-full"
+      >
+        <img
+          src="{% static 'dashboard/assets/images/icons/note-text-blue-fill.svg' %}"
+          class="flex size-6 shrink-0"
+          alt="icon"
+        />
+      </div>
+      <div class="flex flex-col gap-[6px]">
+        <p class="font-bold text-4xl">{{ total_orders|default:"0" }}</p>
+        <p class="font-medium text-lg text-custom-grey">Total Pesanan</p>
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
+    <div class="flex flex-col gap-6">
+      <div
+        class="flex size-[56px] bg-custom-blue-10 items-center justify-center rounded-full"
+      >
+        <img
+          src="{% static 'dashboard/assets/images/icons/shopping-cart-blue-fill.svg' %}"
+          class="flex size-6 shrink-0"
+          alt="icon"
+        />
+      </div>
+      <div class="flex flex-col gap-[6px]">
+        <p class="font-bold text-4xl">{{ active_products|default:"0" }}</p>
+        <p class="font-medium text-lg text-custom-grey">Produk Aktif</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Bottom Row -->
+<div class="flex flex-col lg:flex-row gap-5 flex-1">
+  <!-- Left Column -->
+  <div class="flex flex-col gap-5 w-full lg:w-[440px] lg:shrink-0">
+    <div class="flex flex-col rounded-[20px] p-5 gap-6 bg-white">
+      <div class="flex flex-col gap-6">
+        <div
+          class="flex size-[56px] bg-custom-blue-10 items-center justify-center rounded-full"
+        >
+          <img
+            src="{% static 'dashboard/assets/images/icons/shopping-cart-blue-fill.svg' %}"
+            class="flex size-6 shrink-0"
+            alt="icon"
+          />
+        </div>
+        <div class="flex flex-col gap-[6px]">
+          <p class="font-bold text-4xl">{{ total_products|default:"0" }}</p>
+          <p class="font-medium text-lg text-custom-grey">Total Produk</p>
+        </div>
+      </div>
+    </div>
+
+    {% if user.is_admin %}
+    <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
+      <div class="flex flex-col gap-6">
+        <div
+          class="flex size-[56px] bg-custom-blue-10 items-center justify-center rounded-full"
+        >
+          <img
+            src="{% static 'dashboard/assets/images/icons/shop-blue-fill.svg' %}"
+            class="flex size-6 shrink-0"
+            alt="icon"
+          />
+        </div>
+        <div class="flex flex-col gap-[6px]">
+          <p class="font-bold text-4xl">{{ total_sellers|default:"0" }}</p>
+          <p class="font-medium text-lg text-custom-grey">Total Toko</p>
+        </div>
+      </div>
+      <hr class="border-custom-stroke" />
+      <div class="flex flex-col flex-1 gap-5">
+        <p class="font-bold text-xl">Toko Terbaru</p>
+        <div class="flex flex-col gap-5">
+          {% for seller in top_sellers %}
+          <div
+            class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white"
+          >
+            <div class="flex items-center gap-[14px]">
+              <div
+                class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden"
+              >
+                <img
+                  src="{% static 'dashboard/assets/images/icons/shop-grey.svg' %}"
+                  class="m-auto size-8"
+                  alt="icon toko"
+                />
+              </div>
+              <div class="flex flex-col gap-[6px] w-full overflow-hidden">
+                <p class="font-bold text-lg leading-tight w-full truncate">
+                  {{ seller.store_name|default:seller.username }}
+                </p>
+                <p
+                  class="flex items-center gap-1 font-semibold text-custom-grey leading-none"
+                >
+                  <img
+                    src="{% static 'dashboard/assets/images/icons/user-grey.svg' %}"
+                    class="size-5"
+                    alt="icon"
+                  />
+                  {{ seller.get_full_name|default:seller.username }}
+                </p>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-custom-grey text-sm">Belum ada toko.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% elif user.is_seller_user %}
+    <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
+      <div class="flex flex-col gap-6">
+        <div
+          class="flex size-[56px] bg-custom-blue-10 items-center justify-center rounded-full"
+        >
+          <img
+            src="{% static 'dashboard/assets/images/icons/note-2-blue-fill.svg' %}"
+            class="flex size-6 shrink-0"
+            alt="icon"
+          />
+        </div>
+        <div class="flex flex-col gap-[6px]">
+          <p class="font-bold text-4xl">{{ pending_orders|default:"0" }}</p>
+          <p class="font-medium text-lg text-custom-grey">Pesanan Menunggu</p>
+        </div>
+      </div>
+      <hr class="border-custom-stroke" />
+      <div class="flex flex-col flex-1 gap-5">
+        <p class="font-bold text-xl">Produk Terlaris</p>
+        <div class="flex flex-col gap-5">
+          {% for product in top_products %}
+          <div
+            class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white"
+          >
+            <div class="flex items-center gap-[14px]">
+              <div
+                class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden"
+              >
+                {% if product.main_image %}
+                <img
+                  src="{{ product.main_image.url }}"
+                  class="size-full object-cover"
+                  alt="photo"
+                />
+                {% else %}
+                <img
+                  src="{% static 'dashboard/assets/images/logos/logo-notext.png' %}"
+                  class="size-full object-cover"
+                  alt="photo"
+                />
+                {% endif %}
+              </div>
+              <div class="flex flex-col gap-[6px] w-full overflow-hidden">
+                <p class="font-bold text-lg leading-tight w-full truncate">
+                  {{ product.name }}
+                </p>
+                <p class="font-semibold text-custom-grey leading-none">
+                  {{ product.sales_count }} terjual
+                </p>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-custom-grey text-sm">Belum ada produk.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right Column -->
+  <div class="flex flex-col w-full gap-5">
+    <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
+      <div class="flex flex-col gap-6">
+        <div
+          class="flex size-[56px] bg-custom-blue-10 items-center justify-center rounded-full"
+        >
+          <img
+            src="{% static 'dashboard/assets/images/icons/note-text-blue-fill.svg' %}"
+            class="flex size-6 shrink-0"
+            alt="icon"
+          />
+        </div>
+        <div class="flex flex-col gap-[6px]">
+          <p class="font-bold text-4xl">{{ total_orders|default:"0" }}</p>
+          <p class="font-medium text-lg text-custom-grey">Total Transaksi</p>
+        </div>
+      </div>
+      <hr class="border-custom-stroke" />
+      <div class="flex flex-col flex-1 gap-5">
+        <p class="font-bold text-xl">Transaksi Terbaru</p>
+        <div class="flex flex-col gap-5">
+          {% for order in recent_orders %}
+          <div
+            class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white"
+          >
+            <div class="flex items-center gap-[14px] w-full overflow-hidden">
+              <div
+                class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden"
+              >
+                <img
+                  src="{% static 'dashboard/assets/images/icons/photo-profile-default.svg' %}"
+                  class="size-full object-cover"
+                  alt="photo"
+                />
+              </div>
+              <div
+                class="flex flex-col gap-[6px] w-full flex-grow-0 overflow-hidden"
+              >
+                <p class="font-bold text-lg leading-tight w-full">
+                  {{ order.buyer.get_full_name|default:order.buyer.username }}
+                </p>
+              </div>
+              <div class="flex flex-col gap-2 items-end">
+                <p
+                  class="font-bold text-lg leading-tight text-custom-blue text-nowrap"
+                >
+                  Rp {{ order.total }}
+                </p>
+                <p
+                  class="flex items-center gap-1 font-semibold text-custom-grey leading-none text-nowrap"
+                >
+                  Total Harga
+                </p>
+              </div>
+            </div>
+            <hr class="border-custom-stroke" />
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-[10px]">
+                <div
+                  class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center"
+                >
+                  <img
+                    src="{% static 'dashboard/assets/images/icons/shopping-cart-black.svg' %}"
+                    class="flex size-6 shrink-0"
+                    alt="icon"
+                  />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <p class="font-bold text-lg leading-none">
+                    {{ order.items.count }}
+                  </p>
+                  <p class="font-semibold text-custom-grey">Total Produk</p>
+                </div>
+              </div>
+              <a
+                href="{% url 'panel_admin:order_detail' order.order_number %}"
+                class="flex w-[96px] h-[56px] shrink-0 rounded-2xl py-[18px] px-5 bg-custom-blue-10 gap-2 hover:ring-2 ring-custom-blue transition-300"
+              >
+                <span class="font-semibold text-custom-blue leading-none"
+                  >Detail</span
+                >
+              </a>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-custom-grey text-sm">Belum ada transaksi.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

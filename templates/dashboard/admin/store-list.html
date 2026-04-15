@@ -1,0 +1,59 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static humanize %}
+{% block title %}Store List - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 class="font-bold text-xl">Store List</h2>
+    <form method="get" class="flex items-center gap-2">
+      <input
+        type="text"
+        name="search"
+        value="{{ search_query }}"
+        placeholder="Cari toko..."
+        class="h-11 w-60 rounded-full border border-custom-stroke px-4 text-sm focus:outline-none focus:ring-2 ring-custom-blue"
+      />
+      <button type="submit" class="h-11 rounded-full border border-custom-stroke px-4 text-sm font-semibold text-custom-grey hover:bg-gray-50 transition-300">Cari</button>
+    </form>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-custom-stroke">
+          <th class="py-3 px-4 font-semibold text-custom-grey">No</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Store Name</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Owner</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Total Produk</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Total Order</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Pendapatan</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for store in stores %}
+        <tr class="border-b border-custom-stroke">
+          <td class="py-3 px-4">{{ forloop.counter }}</td>
+          <td class="py-3 px-4 font-semibold">{{ store.name }}</td>
+          <td class="py-3 px-4">
+            {{ store.seller.get_full_name|default:store.seller.username }}
+          </td>
+          <td class="py-3 px-4">{{ store.total_products|intcomma }}</td>
+          <td class="py-3 px-4">{{ store.total_orders|intcomma }}</td>
+          <td class="py-3 px-4 font-semibold text-custom-blue">Rp {{ store.total_revenue|floatformat:0|intcomma }}</td>
+          <td class="py-3 px-4">
+            <a href="{% url 'panel_admin:store_detail' store.pk %}" class="font-semibold text-custom-blue hover:underline">Detail</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="py-3 px-4 text-custom-grey text-center">
+            No stores found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

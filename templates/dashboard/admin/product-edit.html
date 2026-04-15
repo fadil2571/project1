@@ -1,0 +1,1886 @@
+{% load static %}
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Product Edit - Kopmas Shop</title>
+  <link rel="stylesheet" href="{% static 'dashboard/assets/css/main.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Lexend Deca', ui-sans-serif, system-ui; margin: 0; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .transition-300 { transition: none; }
+    .bg-custom-background { background-color: #f3f5f9; }
+    .bg-custom-blue { background-color: #1053d5; }
+    .bg-custom-blue-10 { background-color: rgba(16, 83, 213, 0.1); }
+    .bg-custom-black { background-color: #292d32; }
+    .bg-custom-icon-background { background-color: #f3f3f3; }
+    .bg-custom-stroke { background-color: #e8e8e8; }
+    .text-custom-blue { color: #1053d5; }
+    .text-custom-grey { color: #6a7686; }
+    .text-custom-black { color: #292d32; }
+    .border-custom-stroke { border-color: #e8e8e8; }
+    .ring-custom-blue { --tw-ring-color: #1053d5; }
+    .sidebar-item.active { background-color: rgba(16, 83, 213, 0.1); }
+    .sidebar-item.active .sidebar-label { color: #1053d5; }
+    .sidebar-item.active .icon-default { opacity: 0; }
+    .sidebar-item.active .icon-active { opacity: 1; }
+    .sidebar-item.active .active-bar { display: flex; }
+    .branch-line { position: absolute; top: 10px; bottom: 40px; left: calc(100% - 22px); width: 1px; background-color: #e5e7eb; border-radius: 999px; transform: none !important; }
+    .branch-line:last-child { height: auto !important; }
+    .curve-branch { position: absolute; left: -22px; top: 0; width: 22px; height: 28px; border-left: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; border-bottom-left-radius: 14px; background: transparent; z-index: 1; transform: none; }
+    .border-custom-border { border-color: #e8e8e8; }
+    .custom-input {
+      height: 76px; width: 100%; appearance: none; border-radius: 18px; border-width: 1.5px;
+      border-color: #e8e8e8; padding-left: 5rem; padding-right: 1.5rem;
+      padding-bottom: 15px; padding-top: 15px; font-weight: 600; transition: none;
+    }
+    .custom-input:placeholder-shown { padding-top: 14.5px; }
+    .custom-input:focus { border-color: #292d32; outline: none; }
+    .input-placeholder {
+      position: absolute; left: 81px; top: 25px; transform: translateY(-50%);
+      font-size: 0.875rem; font-weight: 600; color: #6a7686; transition: none;
+    }
+    .group:focus-within .input-placeholder { top: 25px; }
+    .plain-field .custom-input {
+      padding-top: 15px;
+      padding-bottom: 15px;
+      color: #292d32;
+    }
+    .plain-field .custom-input::placeholder {
+      color: #292d32;
+      font-size: 1rem;
+      font-weight: 700;
+      opacity: 1;
+    }
+    .plain-field .input-placeholder {
+      display: none;
+    }
+    .price-field .custom-input {
+      padding-left: 5rem;
+    }
+    .price-field .custom-input::placeholder {
+      color: #6a7686;
+      font-size: 1rem;
+      font-weight: 700;
+      opacity: 1;
+    }
+    .input-icon {
+      position: absolute; top: 50%; left: 1.5rem; display: flex; height: 28px;
+      transform: translateY(-50%); align-items: center; border-right: 1.5px solid #e8e8e8; padding-right: 1rem;
+    }
+    .bg-custom-red { background-color: #ff133d; }
+    .variation-box {
+      border: 1.5px solid #e8e8e8;
+      border-radius: 18px;
+      padding: 16px;
+      background: #fff;
+    }
+    .variation-toggle {
+      width: 44px;
+      height: 24px;
+      border-radius: 999px;
+      background: #d5dbe4;
+      position: relative;
+      transition: background-color .2s ease;
+      cursor: pointer;
+      appearance: none;
+      outline: none;
+    }
+    .variation-toggle::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      background: #fff;
+      transition: transform .2s ease;
+    }
+    .variation-toggle:checked {
+      background: #1053d5;
+    }
+    .variation-toggle:checked::before {
+      transform: translateX(20px);
+    }
+    .variation-inline-input {
+      height: 58px;
+      width: 100%;
+      border-radius: 14px;
+      border: 1.5px solid #e8e8e8;
+      padding: 0 14px;
+      font-weight: 600;
+      color: #292d32;
+      outline: none;
+      background: #fff;
+    }
+    .variation-inline-input:focus {
+      border-color: #292d32;
+    }
+    .variation-add-btn {
+      height: 58px;
+      border-radius: 14px;
+      padding: 0 18px;
+      background: #1053d5;
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .variation-add-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+    .variation-chip-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .variation-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1.5px solid #d5dbe4;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a5565;
+      background: #f7f9fc;
+    }
+    .variation-chip-remove {
+      border: none;
+      background: transparent;
+      color: #6a7686;
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+    .variation-group-card {
+      border: 1.5px solid #e8e8e8;
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #f8fafc;
+    }
+    .variation-group-remove {
+      height: 58px;
+      border-radius: 14px;
+      padding: 0 14px;
+      background: #ffeff2;
+      color: #b20f30;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .variation-group-add {
+      height: 44px;
+      border-radius: 12px;
+      padding: 0 14px;
+      background: #eef4ff;
+      color: #1053d5;
+      font-weight: 700;
+      border: 1px solid #c7d9ff;
+      cursor: pointer;
+      width: fit-content;
+    }
+    .variation-result-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6a7686;
+    }
+    .variation-showcase {
+      border: 1.5px solid #e8e8e8;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .variation-showcase-group {
+      padding: 14px;
+      border-top: 1px solid #eef1f5;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .variation-showcase-group:first-child {
+      border-top: none;
+    }
+    .variation-showcase-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #292d32;
+    }
+    .variation-showcase-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .variation-showcase-option {
+      border: 1.5px solid #eceff3;
+      border-radius: 10px;
+      background: #f5f6f8;
+      color: #404a58;
+      font-size: 15px;
+      font-weight: 600;
+      height: 52px;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      cursor: pointer;
+      transition: border-color .16s ease, color .16s ease, background-color .16s ease;
+    }
+    .variation-showcase-option.active {
+      border-color: #1053d5;
+      color: #1053d5;
+      background: #f3f8ff;
+    }
+    .variation-showcase-check {
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      width: 0;
+      height: 0;
+      border-top: 19px solid #1053d5;
+      border-right: 19px solid transparent;
+      opacity: 0;
+      transition: opacity .16s ease;
+    }
+    .variation-showcase-check::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: -16px;
+      width: 7px;
+      height: 4px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg);
+    }
+    .variation-showcase-option.active .variation-showcase-check {
+      opacity: 1;
+    }
+    .variation-note {
+      color: #6a7686;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .variation-price-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .variation-price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+    .variation-price-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #404a58;
+      flex: 1;
+      min-width: 0;
+    }
+    .variation-price-input {
+      width: 190px;
+      height: 42px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #292d32;
+      outline: none;
+      text-align: right;
+    }
+    .variation-price-input:focus {
+      border-color: #292d32;
+    }
+    .variation-total-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .variation-total-row {
+      border: 1.5px dashed #d5dbe4;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fbfcfe;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .variation-total-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #404a58;
+    }
+    .variation-total-calc {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6a7686;
+    }
+    .variation-total-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: #1053d5;
+    }
+    .required-asterisk {
+      color: #ef4444;
+      font-weight: 800;
+      margin-left: 4px;
+    }
+    /* Preview image styling - untuk tampilkan gambar dengan benar */
+    img[data-preview-image].preview-image {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+    .image-remove-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.78);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+    }
+    .image-remove-btn.hidden {
+      display: none;
+    }
+  
+      :root {
+        /* Ubah nilai ini untuk atur padding kanan-kiri secara manual */
+        --page-side-padding-mobile-min: 20px;
+        --page-side-padding-fluid: 5vw;
+        --page-side-padding-desktop: 160px;
+      }
+
+      body .px-55 {
+        padding-left: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+        padding-right: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+      }
+
+      @media (min-width: 1280px) {
+        body .px-55 {
+          padding-left: var(--page-side-padding-desktop) !important;
+          padding-right: var(--page-side-padding-desktop) !important;
+        }
+      }
+    </style>
+  <script src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js" async></script>
+</head>
+<body class="bg-custom-background text-custom-black">
+  <div id="admin-app" data-page-title="Product Edit" data-role="seller" data-product-access-ready="{% if seller_product_access_ready %}true{% else %}false{% endif %}">
+
+    <form method="post" enctype="multipart/form-data" action="{% url 'panel_admin:product_update' object.pk %}" class="flex flex-col w-full rounded-3xl p-5 gap-5 bg-white">
+      {% csrf_token %}
+      <h2 class="font-bold text-xl capitalize">Complete the form</h2>
+      {% if messages %}
+      <div class="flex flex-col gap-2">
+        {% for message in messages %}
+        <div class="rounded-xl border border-custom-stroke bg-custom-background px-4 py-3 font-semibold text-sm text-custom-black">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if form.errors %}
+      <div class="rounded-xl border border-[#ffd9df] bg-[#fff5f7] px-4 py-3 text-sm text-[#b20f30]">
+        <p class="font-bold mb-1">Periksa kembali data produk:</p>
+        {{ form.errors }}
+      </div>
+      {% endif %}
+      <!-- Product Images -->
+      <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-1">
+          <p class="font-semibold text-custom-grey">Product Images<span class="required-asterisk">*</span></p>
+          <p class="text-xs font-semibold text-custom-grey">Slot paling kiri dipakai sebagai thumbnail utama buyer.</p>
+        </div>
+        <div class="flex items-center gap-4 w-1/2">
+          <div class="relative w-[100px] h-[100px] rounded-2xl overflow-hidden bg-custom-background flex items-center justify-center cursor-pointer">
+            <img
+              src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}"
+              data-preview-image
+              data-placeholder-src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}"
+              class="pointer-events-none"
+              style="max-width: 100px; max-height: 100px; width: auto; height: auto;"
+              alt="Product image preview 1"
+            >
+            <button type="button" data-image-remove class="image-remove-btn hidden" aria-label="Hapus gambar">&times;</button>
+            <input name="images" type="file" accept="image/*" data-image-input data-slot-index="0" class="absolute inset-0 opacity-0 cursor-pointer pointer-events-auto z-10">
+          </div>
+          <div class="relative w-[100px] h-[100px] rounded-2xl overflow-hidden bg-custom-background flex items-center justify-center cursor-pointer">
+            <img
+              src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}"
+              data-preview-image
+              data-placeholder-src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}"
+              class="pointer-events-none"
+              style="max-width: 100px; max-height: 100px; width: auto; height: auto;"
+              alt="Product image preview 2"
+            >
+            <button type="button" data-image-remove class="image-remove-btn hidden" aria-label="Hapus gambar">&times;</button>
+            <input name="images" type="file" accept="image/*" data-image-input data-slot-index="1" class="absolute inset-0 opacity-0 cursor-pointer pointer-events-auto z-10">
+          </div>
+          <div class="relative w-[100px] h-[100px] rounded-2xl overflow-hidden bg-custom-background flex items-center justify-center cursor-pointer">
+            <img
+              src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}"
+              data-preview-image
+              data-placeholder-src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}"
+              class="pointer-events-none"
+              style="max-width: 100px; max-height: 100px; width: auto; height: auto;"
+              alt="Product image preview 3"
+            >
+            <button type="button" data-image-remove class="image-remove-btn hidden" aria-label="Hapus gambar">&times;</button>
+            <input name="images" type="file" accept="image/*" data-image-input data-slot-index="2" class="absolute inset-0 opacity-0 cursor-pointer pointer-events-auto z-10">
+          </div>
+          <div class="relative w-[100px] h-[100px] rounded-2xl overflow-hidden bg-custom-background flex items-center justify-center cursor-pointer">
+            <img
+              src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}"
+              data-preview-image
+              data-placeholder-src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}"
+              class="pointer-events-none"
+              style="max-width: 100px; max-height: 100px; width: auto; height: auto;"
+              alt="Product image preview 4"
+            >
+            <button type="button" data-image-remove class="image-remove-btn hidden" aria-label="Hapus gambar">&times;</button>
+            <input name="images" type="file" accept="image/*" data-image-input data-slot-index="3" class="absolute inset-0 opacity-0 cursor-pointer pointer-events-auto z-10">
+          </div>
+        </div>
+      </div>
+      <!-- Product Name -->
+      <div class="flex items-center justify-between">
+        <p class="font-semibold text-custom-grey">Nama Produk<span class="required-asterisk">*</span></p>
+        <div class="flex flex-col gap-2 w-1/2">
+          <label class="group plain-field relative">
+            <div class="input-icon"><img src="{% static 'dashboard/assets/images/icons/shopping-cart-grey.svg' %}" class="flex size-6 shrink-0" alt="icon"></div>
+            <input name="name" type="text" class="custom-input" placeholder="Masukkan Nama Produk" value="{{ form.name.value|default:'' }}" required>
+          </label>
+        </div>
+      </div>
+      <!-- Weight -->
+      <div class="flex items-center justify-between">
+        <p class="font-semibold text-custom-grey">Berat<span class="required-asterisk">*</span></p>
+        <div class="flex items-center gap-4 w-1/2">
+          <label class="group plain-field relative flex-1">
+            <div class="input-icon"><img src="{% static 'dashboard/assets/images/icons/box-2-grey.svg' %}" class="flex size-6 shrink-0" alt="icon"></div>
+            <input id="weight-display" type="number" step="0.01" min="0" class="custom-input" placeholder="Masukkan Berat Produk" value="{{ form.weight.value|default:object.weight|default:'' }}" required>
+            <input id="weight" name="weight" type="hidden" value="{{ form.weight.value|default:object.weight|default:'' }}">
+          </label>
+          <label class="flex items-center h-[76px] rounded-[18px] border-[1.5px] border-custom-border py-4 px-5 bg-white focus-within:border-custom-black transition-300">
+            <select id="weight-unit" name="weight_unit" class="text-custom-black font-semibold appearance-none focus:outline-none p-2">
+              <option value="kg" class="font-semibold" {% if request.POST.weight_unit == 'kg' %}selected{% endif %}>KG</option>
+              <option value="gram" class="font-semibold" {% if request.POST.weight_unit != 'kg' %}selected{% endif %}>G</option>
+            </select>
+            <img src="{% static 'dashboard/assets/images/icons/arrow-down-black.svg' %}" class="flex size-6 shrink-0 -ml-1" alt="icon">
+          </label>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="flex justify-between">
+        <p class="font-semibold text-custom-grey mt-5">Deskripsi<span class="required-asterisk">*</span></p>
+        <div class="flex flex-col gap-2 w-1/2">
+          <label class="group floating-field flex py-4 px-6 rounded-3xl border-2 border-custom-border focus-within:border-custom-black transition-300 w-full">
+            <div class="flex h-full pr-4 pt-2 border-r-[1.5px] border-custom-border"><img src="{% static 'dashboard/assets/images/icons/stickynote-grey.svg' %}" class="flex size-6 shrink-0" alt="icon"></div>
+            <div class="flex flex-col gap-1.5 pl-4 w-full">
+              <p class="font-semibold text-custom-grey text-sm">Masukkan Deskripsi Produk</p>
+              <textarea name="description" class="appearance-none outline-none w-full font-semibold leading-[160%]" rows="3" placeholder="" required>{{ form.description.value|default:'' }}</textarea>
+            </div>
+          </label>
+        </div>
+      </div>
+      <!-- Category -->
+      <div class="flex items-center justify-between">
+        <p class="font-semibold text-custom-grey">Kategori<span class="required-asterisk">*</span></p>
+        <div class="flex flex-col gap-2 w-1/2">
+          <label class="group relative">
+            <div class="input-icon"><img src="{% static 'dashboard/assets/images/icons/bag-grey.svg' %}" class="flex size-6 shrink-0" alt="icon"></div>
+            <div class="absolute right-6 top-1/2 -translate-y-1/2"><img src="{% static 'dashboard/assets/images/icons/arrow-down-black.svg' %}" class="flex size-6 shrink-0" alt="icon"></div>
+            <select id="category-select" name="category" class="custom-input pr-14" style="cursor:pointer; padding-top:17.5px; padding-bottom:11.5px; font-weight:700;" required>
+              <option value="" disabled {% if not form.category.value %}selected{% endif %}>Pilih Kategori</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}" {% if form.category.value|stringformat:'s' == cat.id|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+      </div>
+      <!-- Price -->
+      <div class="flex items-center justify-between">
+        <p class="font-semibold text-custom-grey">Harga<span class="required-asterisk">*</span></p>
+        <div class="flex flex-col gap-2 w-1/2">
+          <label class="group plain-field price-field relative">
+            <div class="input-icon"><img src="/static/images/icons/money.svg" class="flex size-6 shrink-0" alt="icon"></div>
+            <input id="price-display" type="text" inputmode="numeric" autocomplete="off" class="custom-input" placeholder="Masukkan Harga" value="{{ form.price.value|default:'' }}" required>
+            <input id="price" name="price" type="hidden" value="{{ form.price.value|default:'' }}">
+          </label>
+        </div>
+      </div>
+      <input type="hidden" name="status" value="{{ form.status.value|default:'active' }}">
+      <input id="main-image-hidden" type="hidden" name="main_image" value="">
+      <div id="image-delete-inputs" class="hidden"></div>
+
+      <!-- Variasi -->
+      <div class="flex items-start justify-between">
+        <p class="font-semibold text-custom-grey">Variasi</p>
+        <div class="flex flex-col gap-2 w-1/2">
+          <div class="variation-box flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <p class="font-semibold text-sm text-custom-grey">Aktifkan Variasi Produk</p>
+              <input type="hidden" name="has_variation" value="0">
+              <input id="enable-variation" name="has_variation" value="1" type="checkbox" class="variation-toggle" {% if existing_variation_names %}checked{% endif %}>
+            </div>
+
+            <div id="variation-builder" class="hidden flex-col gap-3">
+              <div id="variation-groups" class="flex flex-col gap-3"></div>
+              <button id="add-variation-group" type="button" class="variation-group-add">+ Tambah Variasi Lagi</button>
+
+              <p class="variation-result-title">Preview variasi (seperti di halaman pembeli):</p>
+              <div id="variation-showcase-empty" class="text-xs font-semibold text-custom-grey">Belum ada variasi yang bisa dipreview.</div>
+              <div id="variation-showcase" class="variation-showcase hidden"></div>
+
+              <p class="variation-result-title">Daftar kombinasi tersimpan:</p>
+              <div id="variation-generated-empty" class="text-xs font-semibold text-custom-grey">Belum ada variasi yang dihasilkan.</div>
+              <div id="variation-generated-preview" class="variation-chip-wrap"></div>
+              <p class="variation-result-title">Harga per kombinasi (opsional):</p>
+              <div id="variation-price-preview" class="variation-price-list"></div>
+              <p class="variation-result-title">Preview total harga per kombinasi:</p>
+              <div id="variation-total-empty" class="text-xs font-semibold text-custom-grey">Belum ada total harga untuk dipreview.</div>
+              <div id="variation-total-preview" class="variation-total-list"></div>
+              
+              <div id="variation-hidden-inputs" class="hidden"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex items-center justify-end gap-4">
+        <a href="{% url 'panel_admin:product_manage' %}" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg">Cancel</a>
+        <button type="submit" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg">Update Now</button>
+      </div>
+    </form>
+    {{ existing_variation_names|json_script:"existing-variation-names" }}
+    {{ existing_variation_prices|json_script:"existing-variation-prices" }}
+    {{ existing_variation_rows|json_script:"existing-variation-rows" }}
+    {{ existing_image_slots|json_script:"existing-image-slots" }}
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var category = document.getElementById('category-select');
+
+      function getPriceElements() {
+        return {
+          priceDisplay: document.getElementById('price-display'),
+          priceHidden: document.getElementById('price')
+        };
+      }
+
+      function getWeightElements() {
+        return {
+          weightDisplay: document.getElementById('weight-display'),
+          weightHidden: document.getElementById('weight'),
+          weightUnit: document.getElementById('weight-unit')
+        };
+      }
+
+      function formatWeightNumber(value) {
+        var number = Number(value);
+        if (!Number.isFinite(number)) return '';
+        var rounded = Math.round(number * 100) / 100;
+        return String(rounded)
+          .replace(/\.0+$/, '')
+          .replace(/(\.\d*[1-9])0+$/, '$1');
+      }
+
+      function syncWeightHiddenFromDisplay() {
+        var refs = getWeightElements();
+        var weightDisplay = refs.weightDisplay;
+        var weightHidden = refs.weightHidden;
+        var weightUnit = refs.weightUnit;
+        if (!weightDisplay || !weightHidden || !weightUnit) return;
+
+        var raw = String(weightDisplay.value || '').replace(',', '.').trim();
+        if (!raw) {
+          weightHidden.value = '';
+          return;
+        }
+
+        var numeric = Number(raw);
+        if (!Number.isFinite(numeric) || numeric < 0) {
+          weightHidden.value = '';
+          return;
+        }
+
+        var grams = weightUnit.value === 'kg' ? numeric * 1000 : numeric;
+        weightHidden.value = formatWeightNumber(grams);
+      }
+
+      function syncWeightDisplayFromHidden() {
+        var refs = getWeightElements();
+        var weightDisplay = refs.weightDisplay;
+        var weightHidden = refs.weightHidden;
+        var weightUnit = refs.weightUnit;
+        if (!weightDisplay || !weightHidden || !weightUnit) return;
+
+        var raw = String(weightHidden.value || '').replace(',', '.').trim();
+        if (!raw) {
+          weightDisplay.value = '';
+          return;
+        }
+
+        var grams = Number(raw);
+        if (!Number.isFinite(grams) || grams < 0) {
+          weightDisplay.value = '';
+          return;
+        }
+
+        var displayValue = weightUnit.value === 'kg' ? grams / 1000 : grams;
+        weightDisplay.value = formatWeightNumber(displayValue);
+      }
+
+      function formatRupiah(value) {
+        var digits = String(value || '').replace(/\D+/g, '');
+        if (!digits) {
+          return '';
+        }
+
+        return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      }
+
+      function syncPriceField() {
+        var refs = getPriceElements();
+        var priceDisplay = refs.priceDisplay;
+        var priceHidden = refs.priceHidden;
+        if (!priceDisplay || !priceHidden) return;
+
+        var digits = String(priceDisplay.value || '').replace(/\D+/g, '');
+        priceHidden.value = digits;
+        priceDisplay.value = formatRupiah(digits);
+        renderVariationTotalPreview();
+      }
+
+      function getBasePriceDigits() {
+        var refs = getPriceElements();
+        var priceHidden = refs.priceHidden;
+        return String(priceHidden ? priceHidden.value : '').replace(/\D+/g, '');
+      }
+
+      function renderVariationTotalPreview() {
+        var totalList = document.getElementById('variation-total-preview');
+        var totalEmpty = document.getElementById('variation-total-empty');
+        var priceInputs = document.querySelectorAll('[data-variation-role="variant-price-display"]');
+        if (!totalList || !totalEmpty) return;
+
+        totalList.innerHTML = '';
+
+        if (!priceInputs.length) {
+          totalEmpty.classList.remove('hidden');
+          return;
+        }
+
+        totalEmpty.classList.add('hidden');
+
+        var baseDigits = getBasePriceDigits();
+        var baseValue = Number(baseDigits || '0');
+
+        priceInputs.forEach(function (input) {
+          var variantName = normalizeVariationText(input.dataset.variantName || '');
+          if (!variantName) return;
+
+          var extraDigits = String(input.value || '').replace(/\D+/g, '');
+          var extraValue = Number(extraDigits || '0');
+          var totalValue = baseValue + extraValue;
+
+          var row = document.createElement('div');
+          row.className = 'variation-total-row';
+
+          var name = document.createElement('div');
+          name.className = 'variation-total-name';
+          name.textContent = variantName;
+
+          var calc = document.createElement('div');
+          calc.className = 'variation-total-calc';
+          calc.textContent = 'Rp ' + formatRupiah(baseDigits) + ' + Rp ' + formatRupiah(extraDigits) + ' (tambahan)';
+
+          var total = document.createElement('div');
+          total.className = 'variation-total-value';
+          total.textContent = 'Total: Rp ' + formatRupiah(String(totalValue));
+
+          row.appendChild(name);
+          row.appendChild(calc);
+          row.appendChild(total);
+          totalList.appendChild(row);
+        });
+      }
+
+      document.addEventListener('input', function (event) {
+        var target = event && event.target;
+        if (!target || target.id !== 'price-display') return;
+        syncPriceField();
+      });
+
+      document.addEventListener('keyup', function (event) {
+        var target = event && event.target;
+        if (!target || target.id !== 'price-display') return;
+        syncPriceField();
+      });
+
+      document.addEventListener('change', function (event) {
+        var target = event && event.target;
+        if (!target || target.id !== 'price-display') return;
+        syncPriceField();
+      });
+
+      document.addEventListener('blur', function (event) {
+        var target = event && event.target;
+        if (!target || target.id !== 'price-display') return;
+        syncPriceField();
+      }, true);
+
+      document.addEventListener('paste', function (event) {
+        var target = event && event.target;
+        if (!target || target.id !== 'price-display') return;
+
+        if (!event.clipboardData) {
+          window.setTimeout(syncPriceField, 0);
+          return;
+        }
+
+        event.preventDefault();
+        var pasted = event.clipboardData.getData('text') || '';
+        target.value = pasted.replace(/\D+/g, '');
+        syncPriceField();
+      });
+
+      document.addEventListener('submit', function (event) {
+        var form = event && event.target;
+        if (!form || !form.matches('form')) return;
+        if (!form.querySelector('#price-display')) return;
+        syncPriceField();
+        syncWeightHiddenFromDisplay();
+        updateVariationGeneratedOutputs();
+
+        var toggle = document.getElementById('enable-variation');
+        var isEnabled = !!(toggle && toggle.checked);
+        form.querySelectorAll('input[name="variant_name"]').forEach(function (input) {
+          input.disabled = !isEnabled;
+        });
+        form.querySelectorAll('input[name="variant_price"]').forEach(function (input) {
+          input.disabled = !isEnabled;
+        });
+      });
+
+      function initializeWeightAndPriceFields() {
+        syncPriceField();
+        syncWeightDisplayFromHidden();
+        syncWeightHiddenFromDisplay();
+      }
+
+      function ensureVariationStateAfterRerender() {
+        loadExistingVariationNamesFromDom();
+        loadExistingVariationPricesFromDom();
+        loadExistingVariationRowsFromDom();
+        mergeVariationRowsIntoPriceMap();
+        variationPriceByName = Object.assign({}, existingVariationPrices);
+        if (!Array.isArray(existingVariationNames) || !existingVariationNames.length) return;
+
+        var toggle = document.getElementById('enable-variation');
+        var groupsContainer = getVariationGroupsContainer();
+        if (!toggle || !groupsContainer) return;
+
+        if (!toggle.checked) {
+          toggle.checked = true;
+        }
+
+        if (shouldHydrateFromExisting() || !groupsContainer.querySelector('[data-variation-group]')) {
+          hydrateVariationFromExisting();
+        }
+      }
+
+      // admin-layout.js merender ulang #admin-app, jadi perlu sinkron ulang setelah DOM berubah.
+      var appRoot = document.getElementById('admin-app');
+      if (appRoot && window.MutationObserver) {
+        var rerenderSyncQueued = false;
+        var observer = new MutationObserver(function () {
+          if (rerenderSyncQueued) return;
+          rerenderSyncQueued = true;
+
+          window.requestAnimationFrame(function () {
+            rerenderSyncQueued = false;
+            initializeWeightAndPriceFields();
+            ensureVariationStateAfterRerender();
+          });
+        });
+        observer.observe(appRoot, { childList: true });
+      }
+
+      initializeWeightAndPriceFields();
+
+      document.addEventListener('input', function (event) {
+        var target = event && event.target;
+        if (!target || target.id !== 'weight-display') return;
+        syncWeightHiddenFromDisplay();
+      });
+
+      document.addEventListener('change', function (event) {
+        var target = event && event.target;
+        if (!target || target.id !== 'weight-unit') return;
+        syncWeightDisplayFromHidden();
+      });
+
+      var variationGroupId = 0;
+      var variationSelectedByGroup = {};
+      var existingVariationNames = [];
+      var existingVariationPrices = {};
+      var existingVariationRows = [];
+      var variationPriceByName = {};
+      var existingImageSlots = [];
+      var pendingDeleteImageIds = {};
+
+      function loadExistingImageSlotsFromDom() {
+        var node = document.getElementById('existing-image-slots');
+        var parsed = [];
+
+        if (node) {
+          try {
+            parsed = JSON.parse(node.textContent || '[]');
+          } catch (error) {
+            parsed = [];
+          }
+        }
+
+        if (!Array.isArray(parsed)) {
+          parsed = [];
+        }
+
+        existingImageSlots = parsed;
+      }
+
+      function initializeExistingImagePreviews() {
+        var inputs = document.querySelectorAll('[data-image-input]');
+        inputs.forEach(function (input, index) {
+          var slot = existingImageSlots[index] || null;
+          var elements = getPreviewElements(input);
+          if (!elements || !elements.img) return;
+
+          if (slot && slot.url) {
+            input.dataset.existingImageId = String(slot.id || '');
+            elements.img.src = slot.url;
+            elements.img.style.width = '100%';
+            elements.img.style.height = '100%';
+            elements.img.style.objectFit = 'cover';
+            elements.img.classList.add('preview-image');
+          } else {
+            delete input.dataset.existingImageId;
+            resetImagePreview(elements.slot, elements.img);
+          }
+
+          updateRemoveButtonState(input);
+        });
+      }
+
+      function addDeleteImageId(imageId) {
+        var normalized = String(imageId || '').trim();
+        if (!normalized) return;
+        pendingDeleteImageIds[normalized] = true;
+      }
+
+      function syncDeleteImageInputs() {
+        var container = document.getElementById('image-delete-inputs');
+        if (!container) return;
+
+        container.innerHTML = '';
+        Object.keys(pendingDeleteImageIds).forEach(function (id) {
+          if (!pendingDeleteImageIds[id]) return;
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'delete_images';
+          input.value = id;
+          container.appendChild(input);
+        });
+      }
+
+      function loadExistingVariationNamesFromDom() {
+        var existingVariationNode = document.getElementById('existing-variation-names');
+        var parsed = [];
+
+        if (existingVariationNode) {
+          try {
+            parsed = JSON.parse(existingVariationNode.textContent || '[]');
+          } catch (error) {
+            parsed = [];
+          }
+        }
+
+        if (!Array.isArray(parsed)) {
+          parsed = [];
+        }
+
+        existingVariationNames = parsed
+          .map(function (value) {
+            return normalizeVariationText(value);
+          })
+          .filter(function (value) {
+            return !!value;
+          });
+      }
+
+      function loadExistingVariationPricesFromDom() {
+        var existingPricesNode = document.getElementById('existing-variation-prices');
+        var parsed = {};
+
+        if (existingPricesNode) {
+          try {
+            parsed = JSON.parse(existingPricesNode.textContent || '{}');
+          } catch (error) {
+            parsed = {};
+          }
+        }
+
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+          parsed = {};
+        }
+
+        existingVariationPrices = {};
+        Object.keys(parsed).forEach(function (key) {
+          var variantKey = toCanonicalVariantName(key);
+          if (!variantKey) return;
+
+          var rawValue = String(parsed[key] || '').replace(/\D+/g, '');
+          if (!rawValue) return;
+
+          existingVariationPrices[variantKey] = rawValue;
+          existingVariationPrices[normalizeVariationText(key)] = rawValue;
+          existingVariationPrices[toLooseVariantName(key)] = rawValue;
+        });
+      }
+
+      function loadExistingVariationRowsFromDom() {
+        var existingRowsNode = document.getElementById('existing-variation-rows');
+        var parsed = [];
+
+        if (existingRowsNode) {
+          try {
+            parsed = JSON.parse(existingRowsNode.textContent || '[]');
+          } catch (error) {
+            parsed = [];
+          }
+        }
+
+        if (!Array.isArray(parsed)) {
+          parsed = [];
+        }
+
+        existingVariationRows = parsed;
+      }
+
+      function mergeVariationRowsIntoPriceMap() {
+        (existingVariationRows || []).forEach(function (row) {
+          if (!row || typeof row !== 'object') return;
+          var name = String(row.variant_name || '');
+          var digits = String(row.price == null ? '' : row.price).replace(/\D+/g, '');
+          if (!name || !digits) return;
+
+          var canonical = toCanonicalVariantName(name);
+          if (canonical) existingVariationPrices[canonical] = digits;
+          existingVariationPrices[normalizeVariationText(name)] = digits;
+          existingVariationPrices[toLooseVariantName(name)] = digits;
+        });
+      }
+
+      function getCurrentVariantNames() {
+        var groups = getVariationGroupsData();
+        return buildVariantNameCombinations(groups)
+          .map(function (name) {
+            return normalizeVariationText(name);
+          })
+          .filter(function (value) {
+            return !!value;
+          });
+      }
+
+      function hasBlankGroupNames() {
+        var container = getVariationGroupsContainer();
+        if (!container) return false;
+
+        var groupNameInputs = container.querySelectorAll('[data-variation-role="group-name"]');
+        return Array.from(groupNameInputs).some(function (input) {
+          return !normalizeVariationText(input.value);
+        });
+      }
+
+      function shouldHydrateFromExisting() {
+        if (!existingVariationNames.length) return false;
+        if (hasBlankGroupNames()) return true;
+
+        var currentVariantNames = getCurrentVariantNames();
+        if (currentVariantNames.length !== existingVariationNames.length) {
+          return true;
+        }
+
+        var currentSorted = currentVariantNames.slice().sort();
+        var existingSorted = existingVariationNames.slice().sort();
+        for (var i = 0; i < existingSorted.length; i += 1) {
+          if (currentSorted[i] !== existingSorted[i]) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      loadExistingVariationNamesFromDom();
+      loadExistingVariationPricesFromDom();
+      loadExistingVariationRowsFromDom();
+      loadExistingImageSlotsFromDom();
+      mergeVariationRowsIntoPriceMap();
+      variationPriceByName = Object.assign({}, existingVariationPrices);
+
+      function normalizeVariationText(value) {
+        return String(value || '').replace(/\s+/g, ' ').trim();
+      }
+
+      function toCanonicalVariantName(value) {
+        var text = normalizeVariationText(value);
+        if (!text) return '';
+
+        return text
+          .split('|')
+          .map(function (part, index) {
+            var piece = normalizeVariationText(part);
+            if (!piece) return '';
+
+            if (piece.indexOf(':') !== -1) {
+              var splitColon = piece.split(':');
+              var leftColon = normalizeVariationText(splitColon.shift());
+              var rightColon = normalizeVariationText(splitColon.join(':'));
+              return (leftColon || ('Variasi ' + (index + 1))) + ': ' + rightColon;
+            }
+
+            if (piece.indexOf('：') !== -1) {
+              var splitWide = piece.split('：');
+              var leftWide = normalizeVariationText(splitWide.shift());
+              var rightWide = normalizeVariationText(splitWide.join('：'));
+              return (leftWide || ('Variasi ' + (index + 1))) + ': ' + rightWide;
+            }
+
+            if (piece.indexOf(' - ') !== -1) {
+              var splitDash = piece.split(' - ');
+              var leftDash = normalizeVariationText(splitDash.shift());
+              var rightDash = normalizeVariationText(splitDash.join(' - '));
+              return (leftDash || ('Variasi ' + (index + 1))) + ': ' + rightDash;
+            }
+
+            return 'Variasi ' + (index + 1) + ': ' + piece;
+          })
+          .filter(function (item) {
+            return !!item;
+          })
+          .join(' | ');
+      }
+
+      function toLooseVariantName(value) {
+        return normalizeVariationText(value)
+          .toLowerCase()
+          .replace(/\s*\|\s*/g, '|')
+          .replace(/\s*[:：-]\s*/g, ':');
+      }
+
+      function getVariationPriceDigits(variantName) {
+        var canonicalKey = toCanonicalVariantName(variantName);
+        var direct = String(variationPriceByName[canonicalKey] || '').replace(/\D+/g, '');
+        if (direct) return direct;
+
+        var normalizedDirect = String(variationPriceByName[normalizeVariationText(variantName)] || '').replace(/\D+/g, '');
+        if (normalizedDirect) return normalizedDirect;
+
+        var looseTarget = toLooseVariantName(variantName);
+        var looseDirect = String(variationPriceByName[looseTarget] || '').replace(/\D+/g, '');
+        if (looseDirect) return looseDirect;
+
+        var keys = Object.keys(variationPriceByName || {});
+        for (var i = 0; i < keys.length; i += 1) {
+          var key = keys[i];
+          if (toLooseVariantName(key) === looseTarget) {
+            var candidate = String(variationPriceByName[key] || '').replace(/\D+/g, '');
+            if (candidate) return candidate;
+          }
+        }
+
+        return '';
+      }
+
+      function getVariationGroupsContainer() {
+        return document.getElementById('variation-groups');
+      }
+
+      function createVariationGroupElement() {
+        variationGroupId += 1;
+
+        var group = document.createElement('div');
+        group.className = 'variation-group-card';
+        group.dataset.variationGroup = String(variationGroupId);
+
+        group.innerHTML = '' +
+          '<div class="flex items-center gap-2">' +
+            '<input type="text" class="variation-inline-input" data-variation-role="group-name" placeholder="Nama variasi (contoh: Warna)">' +
+            '<button type="button" class="variation-group-remove" data-variation-role="remove-group">Hapus</button>' +
+          '</div>' +
+          '<div class="flex items-center gap-2">' +
+            '<input type="text" class="variation-inline-input" data-variation-role="option-input" placeholder="Tulis opsi variasi (contoh: Merah)">' +
+            '<button type="button" class="variation-add-btn" data-variation-role="add-option">Tambah</button>' +
+          '</div>' +
+          '<div class="text-xs font-semibold text-custom-grey" data-variation-role="empty-state">Belum ada opsi untuk variasi ini.</div>' +
+          '<div class="variation-chip-wrap" data-variation-role="option-list"></div>';
+
+        return group;
+      }
+
+      function addVariationGroup() {
+        var container = getVariationGroupsContainer();
+        if (!container) return;
+        container.appendChild(createVariationGroupElement());
+        updateVariationGeneratedOutputs();
+      }
+
+      function getOptionListElement(groupElement) {
+        return groupElement ? groupElement.querySelector('[data-variation-role="option-list"]') : null;
+      }
+
+      function getEmptyStateElement(groupElement) {
+        return groupElement ? groupElement.querySelector('[data-variation-role="empty-state"]') : null;
+      }
+
+      function syncGroupEmptyState(groupElement) {
+        var list = getOptionListElement(groupElement);
+        var emptyState = getEmptyStateElement(groupElement);
+        if (!list || !emptyState) return;
+
+        if (list.children.length) {
+          emptyState.classList.add('hidden');
+        } else {
+          emptyState.classList.remove('hidden');
+        }
+      }
+
+      function addOptionToGroup(groupElement, optionValue) {
+        var list = getOptionListElement(groupElement);
+        if (!list) return;
+
+        var normalizedOption = normalizeVariationText(optionValue);
+        if (!normalizedOption) return;
+
+        var duplicate = Array.from(list.querySelectorAll('[data-variation-role="option-chip"]')).some(function (chip) {
+          return String(chip.dataset.optionValue || '').toLowerCase() === normalizedOption.toLowerCase();
+        });
+
+        if (duplicate) return;
+
+        var chip = document.createElement('div');
+        chip.className = 'variation-chip';
+        chip.dataset.variationRole = 'option-chip';
+        chip.dataset.optionValue = normalizedOption;
+
+        var text = document.createElement('span');
+        text.textContent = normalizedOption;
+
+        var remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'variation-chip-remove';
+        remove.textContent = 'x';
+        remove.dataset.variationRole = 'remove-option';
+
+        chip.appendChild(text);
+        chip.appendChild(remove);
+        list.appendChild(chip);
+        syncGroupEmptyState(groupElement);
+      }
+
+      function getVariationGroupsData() {
+        var container = getVariationGroupsContainer();
+        if (!container) return [];
+
+        var groups = [];
+        container.querySelectorAll('[data-variation-group]').forEach(function (groupElement) {
+          var groupNameInput = groupElement.querySelector('[data-variation-role="group-name"]');
+          var groupName = normalizeVariationText(groupNameInput ? groupNameInput.value : '');
+
+          var options = Array.from(groupElement.querySelectorAll('[data-variation-role="option-chip"]'))
+            .map(function (chip) {
+              return normalizeVariationText(chip.dataset.optionValue || chip.textContent || '');
+            })
+            .filter(function (item) {
+              return !!item;
+            });
+
+          if (!options.length) return;
+
+          if (!groupName) {
+            groupName = 'Variasi ' + (groups.length + 1);
+          }
+
+          groups.push({
+            groupId: String(groupElement.dataset.variationGroup || ''),
+            groupName: groupName,
+            options: options,
+          });
+        });
+
+        return groups;
+      }
+
+      function buildVariantNameCombinations(groups) {
+        if (!groups.length) return [];
+
+        var combinations = [[]];
+
+        groups.forEach(function (group) {
+          var nextCombinations = [];
+          group.options.forEach(function (option) {
+            combinations.forEach(function (previous) {
+              var label = group.groupName ? (group.groupName + ': ' + option) : option;
+              nextCombinations.push(previous.concat([label]));
+            });
+          });
+          combinations = nextCombinations;
+        });
+
+        return combinations.map(function (parts) {
+          return parts.join(' | ');
+        });
+      }
+
+      function parseExistingVariationPart(part, index) {
+        var cleaned = normalizeVariationText(part);
+        if (!cleaned) return null;
+
+        var separatorIndex = cleaned.indexOf(':');
+        if (separatorIndex === -1) {
+          separatorIndex = cleaned.indexOf('：');
+        }
+
+        if (separatorIndex === -1 && cleaned.indexOf(' - ') !== -1) {
+          separatorIndex = cleaned.indexOf(' - ');
+          var parsedGroupNameDash = normalizeVariationText(cleaned.slice(0, separatorIndex));
+          var parsedOptionDash = normalizeVariationText(cleaned.slice(separatorIndex + 3));
+          if (parsedOptionDash) {
+            return {
+              groupName: parsedGroupNameDash || ('Variasi ' + (index + 1)),
+              option: parsedOptionDash,
+            };
+          }
+        }
+
+        if (separatorIndex === -1) {
+          return {
+            groupName: 'Variasi ' + (index + 1),
+            option: cleaned,
+          };
+        }
+
+        var parsedGroupName = normalizeVariationText(cleaned.slice(0, separatorIndex));
+
+        return {
+          groupName: parsedGroupName || ('Variasi ' + (index + 1)),
+          option: normalizeVariationText(cleaned.slice(separatorIndex + 1)),
+        };
+      }
+
+      function ensureGroupNamesFilled() {
+        var container = getVariationGroupsContainer();
+        if (!container) return;
+
+        var index = 0;
+        container.querySelectorAll('[data-variation-group]').forEach(function (groupElement) {
+          index += 1;
+          var groupNameInput = groupElement.querySelector('[data-variation-role="group-name"]');
+          if (!groupNameInput) return;
+
+          var normalized = normalizeVariationText(groupNameInput.value);
+          groupNameInput.value = normalized || ('Variasi ' + index);
+        });
+      }
+
+      function hydrateVariationFromExisting() {
+        if (!existingVariationNames.length) return;
+
+        var groupedByIndex = [];
+
+        existingVariationNames.forEach(function (variantName) {
+          var parts = String(variantName || '')
+            .split('|')
+            .map(function (part) {
+              return normalizeVariationText(part);
+            })
+            .filter(function (part) {
+              return !!part;
+            });
+
+          parts.forEach(function (part, index) {
+            var parsed = parseExistingVariationPart(part, index);
+            if (!parsed || !parsed.option) return;
+
+            if (!groupedByIndex[index]) {
+              groupedByIndex[index] = {
+                groupName: parsed.groupName,
+                options: [],
+              };
+            }
+
+            if (!groupedByIndex[index].groupName && parsed.groupName) {
+              groupedByIndex[index].groupName = parsed.groupName;
+            }
+
+            if (groupedByIndex[index].options.indexOf(parsed.option) === -1) {
+              groupedByIndex[index].options.push(parsed.option);
+            }
+          });
+        });
+
+        var normalizedGroups = groupedByIndex.filter(function (group) {
+          return !!(group && group.options && group.options.length);
+        });
+
+        if (!normalizedGroups.length) return;
+
+        var container = getVariationGroupsContainer();
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        normalizedGroups.forEach(function (groupData) {
+          if (!groupData.groupName) {
+            groupData.groupName = 'Variasi';
+          }
+
+          var groupElement = createVariationGroupElement();
+          var groupNameInput = groupElement.querySelector('[data-variation-role="group-name"]');
+          if (groupNameInput && groupData.groupName) {
+            groupNameInput.value = groupData.groupName;
+          }
+
+          container.appendChild(groupElement);
+
+          groupData.options.forEach(function (option) {
+            addOptionToGroup(groupElement, option);
+          });
+        });
+
+        var toggle = document.getElementById('enable-variation');
+        if (toggle) {
+          toggle.checked = true;
+        }
+
+        ensureGroupNamesFilled();
+        updateVariationGeneratedOutputs();
+      }
+
+      function renderVariationShowcase(groups) {
+        var showcase = document.getElementById('variation-showcase');
+        var showcaseEmpty = document.getElementById('variation-showcase-empty');
+        if (!showcase || !showcaseEmpty) return;
+
+        showcase.innerHTML = '';
+
+        if (!groups.length) {
+          showcase.classList.add('hidden');
+          showcaseEmpty.classList.remove('hidden');
+          variationSelectedByGroup = {};
+          return;
+        }
+
+        showcase.classList.remove('hidden');
+        showcaseEmpty.classList.add('hidden');
+
+        var validSelectionMap = {};
+
+        groups.forEach(function (group, index) {
+          var groupId = String(group.groupId || index);
+          var selectedOption = variationSelectedByGroup[groupId];
+
+          if (!selectedOption || group.options.indexOf(selectedOption) === -1) {
+            selectedOption = group.options[0];
+          }
+          validSelectionMap[groupId] = selectedOption;
+
+          var groupWrap = document.createElement('div');
+          groupWrap.className = 'variation-showcase-group';
+
+          var title = document.createElement('p');
+          title.className = 'variation-showcase-title';
+          title.textContent = group.groupName || ('Variasi ' + (index + 1));
+
+          var optionsWrap = document.createElement('div');
+          optionsWrap.className = 'variation-showcase-options';
+
+          group.options.forEach(function (option) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'variation-showcase-option' + (selectedOption === option ? ' active' : '');
+            button.dataset.variationRole = 'showcase-select';
+            button.dataset.showcaseGroupId = groupId;
+            button.dataset.showcaseOption = option;
+
+            var check = document.createElement('span');
+            check.className = 'variation-showcase-check';
+
+            var text = document.createElement('span');
+            text.textContent = option;
+
+            button.appendChild(check);
+            button.appendChild(text);
+            optionsWrap.appendChild(button);
+          });
+
+          groupWrap.appendChild(title);
+          groupWrap.appendChild(optionsWrap);
+          showcase.appendChild(groupWrap);
+        });
+
+        variationSelectedByGroup = validSelectionMap;
+      }
+
+      function updateVariationGeneratedOutputs() {
+        var hiddenInputsContainer = document.getElementById('variation-hidden-inputs');
+        var previewList = document.getElementById('variation-generated-preview');
+        var priceList = document.getElementById('variation-price-preview');
+        var previewEmpty = document.getElementById('variation-generated-empty');
+        var totalList = document.getElementById('variation-total-preview');
+        var totalEmpty = document.getElementById('variation-total-empty');
+        if (!hiddenInputsContainer || !previewList || !priceList || !previewEmpty) return;
+
+          ensureGroupNamesFilled();
+          var groups = getVariationGroupsData();
+          var variantNames = buildVariantNameCombinations(groups);
+          renderVariationShowcase(groups);
+
+        Array.from(priceList.querySelectorAll('[data-variation-role="variant-price-display"]')).forEach(function (input) {
+          var variantName = normalizeVariationText(input.dataset.variantName || '');
+          var variantKey = toCanonicalVariantName(variantName);
+          if (!variantKey) return;
+          var inputDigits = String(input.value || '').replace(/\D+/g, '');
+          if (!inputDigits) return;
+          variationPriceByName[variantKey] = inputDigits;
+          variationPriceByName[toLooseVariantName(variantName)] = inputDigits;
+        });
+
+        hiddenInputsContainer.innerHTML = '';
+        previewList.innerHTML = '';
+        priceList.innerHTML = '';
+        if (totalList) totalList.innerHTML = '';
+
+        if (!variantNames.length) {
+          previewEmpty.classList.remove('hidden');
+          if (totalEmpty) totalEmpty.classList.remove('hidden');
+          return;
+        }
+
+        previewEmpty.classList.add('hidden');
+
+        variantNames.forEach(function (variantName) {
+          var variantKey = toCanonicalVariantName(variantName);
+          var savedPriceDigits = getVariationPriceDigits(variantName);
+
+          var hiddenName = document.createElement('input');
+          hiddenName.type = 'hidden';
+          hiddenName.name = 'variant_name';
+          hiddenName.value = variantName;
+          hiddenInputsContainer.appendChild(hiddenName);
+
+          var hiddenPrice = document.createElement('input');
+          hiddenPrice.type = 'hidden';
+          hiddenPrice.name = 'variant_price';
+          hiddenPrice.value = savedPriceDigits;
+          hiddenPrice.dataset.variantKey = variantKey;
+          hiddenInputsContainer.appendChild(hiddenPrice);
+
+          var chip = document.createElement('div');
+          chip.className = 'variation-chip';
+          var text = document.createElement('span');
+          text.textContent = variantName;
+          chip.appendChild(text);
+          previewList.appendChild(chip);
+
+          var priceRow = document.createElement('label');
+          priceRow.className = 'variation-price-row';
+
+          var nameLabel = document.createElement('span');
+          nameLabel.className = 'variation-price-name';
+          nameLabel.textContent = variantName;
+
+          var priceInput = document.createElement('input');
+          priceInput.type = 'text';
+          priceInput.className = 'variation-price-input';
+          priceInput.placeholder = 'Harga (opsional)';
+          priceInput.value = formatRupiah(savedPriceDigits);
+          priceInput.dataset.variationRole = 'variant-price-display';
+          priceInput.dataset.variantName = variantName;
+          priceInput.dataset.variantKey = variantKey;
+
+          priceRow.appendChild(nameLabel);
+          priceRow.appendChild(priceInput);
+          priceList.appendChild(priceRow);
+        });
+
+        renderVariationTotalPreview();
+      }
+
+      function toggleVariationBuilder() {
+        var toggle = document.getElementById('enable-variation');
+        var builder = document.getElementById('variation-builder');
+        if (!toggle || !builder) return;
+
+        var nameInputs = document.querySelectorAll('input[name="variant_name"]');
+        var priceInputs = document.querySelectorAll('input[name="variant_price"]');
+
+        if (toggle.checked) {
+          builder.classList.remove('hidden');
+          builder.classList.add('flex');
+          var groupsContainer = getVariationGroupsContainer();
+          if (groupsContainer && !groupsContainer.querySelector('[data-variation-group]')) {
+            addVariationGroup();
+          }
+          updateVariationGeneratedOutputs();
+          nameInputs.forEach(function (input) {
+            input.disabled = false;
+          });
+          priceInputs.forEach(function (input) {
+            input.disabled = false;
+          });
+          return;
+        }
+
+        builder.classList.add('hidden');
+        builder.classList.remove('flex');
+        nameInputs.forEach(function (input) {
+          input.disabled = true;
+        });
+        priceInputs.forEach(function (input) {
+          input.disabled = true;
+        });
+      }
+
+      document.addEventListener('change', function (event) {
+        var target = event && event.target;
+        if (!target) return;
+
+        if (target.id === 'enable-variation') {
+          toggleVariationBuilder();
+          return;
+        }
+
+        if (target.dataset && target.dataset.variationRole === 'group-name') {
+          updateVariationGeneratedOutputs();
+        }
+      });
+
+      document.addEventListener('input', function (event) {
+        var target = event && event.target;
+        if (!target) return;
+
+        if (target.dataset && target.dataset.variationRole === 'group-name') {
+          updateVariationGeneratedOutputs();
+          return;
+        }
+
+        if (target.dataset && target.dataset.variationRole === 'variant-price-display') {
+          var variantKey = toCanonicalVariantName(target.dataset.variantKey || target.dataset.variantName || '');
+          if (!variantKey) return;
+          var digits = String(target.value || '').replace(/\D+/g, '');
+          variationPriceByName[variantKey] = digits;
+          variationPriceByName[toLooseVariantName(target.dataset.variantName || '')] = digits;
+          target.value = formatRupiah(digits);
+          document.querySelectorAll('input[name="variant_price"]').forEach(function (hiddenPrice) {
+            if (toCanonicalVariantName(hiddenPrice.dataset.variantKey || '') === variantKey) {
+              hiddenPrice.value = digits;
+            }
+          });
+          renderVariationTotalPreview();
+        }
+      });
+
+      document.addEventListener('click', function (event) {
+        var target = event && event.target;
+        if (!target) return;
+
+        var actionTarget = target.closest('[data-variation-role], #add-variation-group');
+        if (!actionTarget) return;
+
+        if (actionTarget.id === 'add-variation-group') {
+          addVariationGroup();
+          return;
+        }
+
+        var role = actionTarget.dataset.variationRole;
+        var groupElement = actionTarget.closest('[data-variation-group]');
+
+        if (role === 'add-option') {
+          if (!groupElement) return;
+          var input = groupElement.querySelector('[data-variation-role="option-input"]');
+          var optionValue = normalizeVariationText(input ? input.value : '');
+          if (!optionValue) return;
+          addOptionToGroup(groupElement, optionValue);
+          if (input) input.value = '';
+          updateVariationGeneratedOutputs();
+          return;
+        }
+
+        if (role === 'showcase-select') {
+          var groupId = String(actionTarget.dataset.showcaseGroupId || '');
+          var option = String(actionTarget.dataset.showcaseOption || '');
+          if (!groupId || !option) return;
+          variationSelectedByGroup[groupId] = option;
+          renderVariationShowcase(getVariationGroupsData());
+          return;
+        }
+
+        if (role === 'remove-option') {
+          var chip = actionTarget.closest('[data-variation-role="option-chip"]');
+          if (!chip || !groupElement) return;
+          chip.remove();
+          syncGroupEmptyState(groupElement);
+          updateVariationGeneratedOutputs();
+          return;
+        }
+
+        if (role === 'remove-group') {
+          if (!groupElement) return;
+          groupElement.remove();
+          updateVariationGeneratedOutputs();
+        }
+      });
+
+      document.addEventListener('keydown', function (event) {
+        var target = event && event.target;
+        if (!target || !(target.dataset && target.dataset.variationRole === 'option-input')) return;
+
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          var groupElement = target.closest('[data-variation-group]');
+          if (!groupElement) return;
+          var optionValue = normalizeVariationText(target.value);
+          if (!optionValue) return;
+          addOptionToGroup(groupElement, optionValue);
+          target.value = '';
+          updateVariationGeneratedOutputs();
+        }
+      });
+
+      if (existingVariationNames.length) {
+        var initialToggle = document.getElementById('enable-variation');
+        if (initialToggle) {
+          initialToggle.checked = true;
+        }
+      }
+
+      hydrateVariationFromExisting();
+      toggleVariationBuilder();
+      ensureVariationStateAfterRerender();
+
+      function getPreviewElements(input) {
+        var slot = input ? input.closest('.relative') : null;
+        var img = slot ? slot.querySelector('[data-preview-image]') : null;
+        var removeButton = slot ? slot.querySelector('[data-image-remove]') : null;
+        return { slot: slot, img: img, removeButton: removeButton };
+      }
+
+      function updateRemoveButtonState(input) {
+        var elements = getPreviewElements(input);
+        var removeButton = elements.removeButton;
+        if (!removeButton) return;
+
+        var hasExisting = !!String(input && input.dataset ? input.dataset.existingImageId || '' : '').trim();
+        var hasNewFile = !!(input && input.files && input.files.length);
+        removeButton.classList.toggle('hidden', !(hasExisting || hasNewFile));
+      }
+
+      function resetImagePreview(slot, img) {
+        if (!slot || !img) return;
+
+        var placeholderSrc = img.dataset.placeholderSrc;
+        img.src = placeholderSrc;
+        img.classList.remove('preview-image');
+        img.style.width = 'auto';
+        img.style.height = 'auto';
+        img.style.objectFit = 'inherit';
+      }
+
+      function applyImagePreview(input) {
+        var elements = getPreviewElements(input);
+        var slot = elements.slot;
+        var img = elements.img;
+        var file = input.files && input.files[0];
+
+        if (!slot || !img) {
+          return;
+        }
+
+        if (!file) {
+          resetImagePreview(slot, img);
+          updateRemoveButtonState(input);
+          return;
+        }
+
+        if (!file.type || file.type.indexOf('image/') !== 0) {
+          resetImagePreview(slot, img);
+          updateRemoveButtonState(input);
+          return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function (event) {
+          if (!event || !event.target || !event.target.result) {
+            resetImagePreview(slot, img);
+            return;
+          }
+
+          img.src = event.target.result;
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          img.classList.add('preview-image');
+          updateRemoveButtonState(input);
+        };
+        reader.onerror = function () {
+          resetImagePreview(slot, img);
+          updateRemoveButtonState(input);
+        };
+
+        reader.readAsDataURL(file);
+      }
+
+      function syncMainImageInput() {
+        var mainInput = document.getElementById('main-image-hidden');
+        if (!mainInput) return;
+
+        var slotZeroInput = document.querySelector('[data-image-input][data-slot-index="0"]');
+        if (!slotZeroInput) {
+          mainInput.value = '';
+          return;
+        }
+
+        var zeroHasNewFile = !!(slotZeroInput.files && slotZeroInput.files.length);
+        if (zeroHasNewFile) {
+          // Tell backend to make the first newly uploaded image as main.
+          mainInput.value = '__FIRST_NEW__';
+          return;
+        }
+
+        var zeroExistingId = String(slotZeroInput.dataset.existingImageId || '').trim();
+        if (zeroExistingId && !pendingDeleteImageIds[zeroExistingId]) {
+          mainInput.value = zeroExistingId;
+          return;
+        }
+
+        var firstExistingId = '';
+        var allInputs = document.querySelectorAll('[data-image-input]');
+        allInputs.forEach(function (input) {
+          if (firstExistingId) return;
+          var existingId = String(input.dataset.existingImageId || '').trim();
+          if (existingId && !pendingDeleteImageIds[existingId]) {
+            firstExistingId = existingId;
+          }
+        });
+        mainInput.value = firstExistingId;
+      }
+
+      document.addEventListener('change', function (event) {
+        var target = event.target;
+        if (!target || !target.matches('[data-image-input]')) {
+          return;
+        }
+
+        var replacedId = String(target.dataset.existingImageId || '').trim();
+        var hasNewFile = !!(target.files && target.files.length);
+        if (replacedId && hasNewFile) {
+          addDeleteImageId(replacedId);
+          delete target.dataset.existingImageId;
+          syncDeleteImageInputs();
+        }
+
+        applyImagePreview(target);
+        updateRemoveButtonState(target);
+        syncMainImageInput();
+      });
+
+      document.addEventListener('click', function (event) {
+        var removeButton = event && event.target ? event.target.closest('[data-image-remove]') : null;
+        if (!removeButton) return;
+
+        var slot = removeButton.closest('.relative');
+        var input = slot ? slot.querySelector('[data-image-input]') : null;
+        var img = slot ? slot.querySelector('[data-preview-image]') : null;
+        if (!slot || !input || !img) return;
+
+        var existingId = String(input.dataset.existingImageId || '').trim();
+        if (existingId) {
+          addDeleteImageId(existingId);
+          delete input.dataset.existingImageId;
+        }
+
+        input.value = '';
+        resetImagePreview(slot, img);
+        updateRemoveButtonState(input);
+        syncDeleteImageInputs();
+        syncMainImageInput();
+      });
+
+      document.addEventListener('submit', function (event) {
+        var form = event && event.target;
+        if (!form || !form.matches('form')) return;
+        syncDeleteImageInputs();
+        syncMainImageInput();
+      });
+
+      initializeExistingImagePreviews();
+      syncDeleteImageInputs();
+      syncMainImageInput();
+    });
+  </script>
+  <script>
+    window.__DJANGO_MESSAGES__ = [
+      {% for message in messages %}
+      { level: "{{ message.tags|default:'info'|escapejs }}", text: "{{ message|escapejs }}" },
+      {% endfor %}
+    ];
+  </script>
+  <script src="{% static 'dashboard/assets/js/admin-layout.js' %}?v=20260401c" defer></script>
+</body>
+</html>

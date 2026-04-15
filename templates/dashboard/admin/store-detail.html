@@ -1,0 +1,84 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static humanize %}
+{% block title %}Store Detail - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5">
+  <div class="flex items-center justify-between rounded-[20px] bg-white p-5">
+    <div>
+      <h2 class="font-bold text-xl">Store Detail</h2>
+      <p class="text-custom-grey text-sm">Pemantauan performa dan pendapatan toko.</p>
+    </div>
+    <a href="{% url 'panel_admin:store_list' %}" class="h-11 rounded-full border border-custom-stroke px-6 font-semibold text-custom-grey hover:bg-gray-50 transition-300 inline-flex items-center">Kembali ke List</a>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div class="rounded-[20px] bg-white p-5">
+      <p class="text-custom-grey text-sm">Total Pendapatan (Paid)</p>
+      <p class="mt-2 text-2xl font-bold text-custom-blue">Rp {{ total_revenue|floatformat:0|intcomma }}</p>
+    </div>
+    <div class="rounded-[20px] bg-white p-5">
+      <p class="text-custom-grey text-sm">Pendapatan Terkirim</p>
+      <p class="mt-2 text-2xl font-bold text-custom-black">Rp {{ delivered_revenue|floatformat:0|intcomma }}</p>
+    </div>
+    <div class="rounded-[20px] bg-white p-5">
+      <p class="text-custom-grey text-sm">Total Produk</p>
+      <p class="mt-2 text-2xl font-bold text-custom-black">{{ total_products|intcomma }}</p>
+    </div>
+    <div class="rounded-[20px] bg-white p-5">
+      <p class="text-custom-grey text-sm">Total Order</p>
+      <p class="mt-2 text-2xl font-bold text-custom-black">{{ total_orders|intcomma }}</p>
+    </div>
+  </div>
+
+  <div class="rounded-[20px] bg-white p-5">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h3 class="font-bold text-lg">Informasi Toko</h3>
+        <p class="text-custom-grey text-sm">Detail owner dan aktivitas order terbaru.</p>
+      </div>
+      <span class="rounded-full bg-custom-blue-10 px-3 py-1 text-sm font-semibold text-custom-blue">Paid Orders: {{ paid_orders_count|intcomma }}</span>
+    </div>
+
+    <div class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div>
+        <p class="text-custom-grey text-sm">Nama Toko</p>
+        <p class="font-bold text-lg">{{ store.name }}</p>
+      </div>
+      <div>
+        <p class="text-custom-grey text-sm">Owner</p>
+        <p class="font-bold text-lg">{{ store.seller.get_full_name|default:store.seller.username }}</p>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="border-b border-custom-stroke">
+            <th class="py-3 px-4 font-semibold text-custom-grey">Order</th>
+            <th class="py-3 px-4 font-semibold text-custom-grey">Status</th>
+            <th class="py-3 px-4 font-semibold text-custom-grey">Payment</th>
+            <th class="py-3 px-4 font-semibold text-custom-grey">Total</th>
+            <th class="py-3 px-4 font-semibold text-custom-grey">Tanggal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in latest_orders %}
+          <tr class="border-b border-custom-stroke">
+            <td class="py-3 px-4 font-semibold">{{ order.order_number }}</td>
+            <td class="py-3 px-4">{{ order.get_status_display }}</td>
+            <td class="py-3 px-4">{{ order.get_payment_status_display }}</td>
+            <td class="py-3 px-4 font-semibold">Rp {{ order.total|floatformat:0|intcomma }}</td>
+            <td class="py-3 px-4 text-custom-grey">{{ order.created_at|date:'d M Y H:i' }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="py-4 px-4 text-center text-custom-grey">Belum ada order untuk toko ini.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,39 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}Product Detail - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <h2 class="font-bold text-xl">Product Detail</h2>
+  <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Product Name</p>
+      <p class="font-bold text-lg">{{ product.name }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Price</p>
+      <p class="font-bold text-lg text-custom-blue">Rp {{ product.price }}</p>
+    </div>
+  </div>
+  <div class="flex gap-3">
+    <a
+      href="{% url 'panel_admin:product_update' product.pk %}"
+      class="flex h-12 items-center rounded-full bg-custom-blue px-6 font-semibold text-white hover:ring-2 ring-custom-blue transition-300"
+      >Edit</a
+    >
+    <form
+      method="post"
+      action="{% url 'panel_admin:product_delete' product.pk %}"
+    >
+      {% csrf_token %}
+      <button
+        type="submit"
+        class="flex h-12 items-center rounded-full border-2 border-red-500 px-6 font-semibold text-red-500 hover:bg-red-50 transition-300"
+        onclick="return confirm('Are you sure?');"
+      >
+        Delete
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

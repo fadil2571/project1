@@ -1,0 +1,84 @@
+<header class="header">
+
+    <!-- Main Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'landing_app:home' %}">
+                <span class="text-primary fw-bold fs-3">Kopmas</span><span class="text-dark fw-bold fs-3">Shop</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Search Bar -->
+                <form class="d-flex mx-auto w-50" action="{% url 'landing_app:search' %}" method="get">
+                    <div class="input-group">
+                        <input type="search" name="q" class="form-control" placeholder="Cari produk..." value="{{ query|default:'' }}">
+                        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+                
+                <!-- Navigation -->
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'landing_app:home' %}">Beranda</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Kategori</a>
+                        <ul class="dropdown-menu">
+                            {% for cat in all_categories %}
+                            <li><a class="dropdown-item" href="{% url 'landing_app:category' slug=cat.slug %}">{{ cat.name }}</a></li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'landing_app:product_list' %}">Semua Produk</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Cart -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'landing_app:cart' %}">
+                            <i class="bi bi-cart3 fs-5"></i>
+                            {% if cart_items_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ cart_items_count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="rounded-circle" width="30" height="30">
+                            {% else %}
+                            <i class="bi bi-person-circle fs-5"></i>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'landing_app:profile' %}"><i class="bi bi-person"></i> Profil</a></li>
+                            <li><a class="dropdown-item" href="{% url 'landing_app:order_history' %}"><i class="bi bi-bag"></i> Pesanan Saya</a></li>
+                            <li><a class="dropdown-item" href="{% url 'landing_app:addresses' %}"><i class="bi bi-geo-alt"></i> Alamat</a></li>
+                            {% if user.is_seller_user or user.is_admin %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'panel_admin:dashboard_seller' %}"><i class="bi bi-shop"></i> Dashboard Seller</a></li>
+                            {% endif %}
+                            {% if user.is_admin %}
+                            <li><a class="dropdown-item" href="{% url 'panel_admin:dashboard_admin' %}"><i class="bi bi-speedometer2"></i> Dashboard Admin</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'landing_app:logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="{% url 'landing_app:login' %}">Masuk</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>

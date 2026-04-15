@@ -1,0 +1,822 @@
+
+{% extends 'layouts/base/base.html' %}
+{% load static currency %}
+
+{% block title %}Beranda - KOPMAS Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+  #pg-home .lp-hero {
+    margin-top: 14px;
+  }
+
+  #pg-home .lp-hero-slide-3 {
+    background: #1A4ED8 !important;
+    background-image: none !important;
+  }
+
+  /* Kategori Product Card Style (copy dari kategori.html) */
+  #pg-home .lp-kategori-table {
+    min-width: 0 !important;
+  }
+  .kat-products-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .kat-product-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e4ebf5;
+    border-radius: 14px;
+    background: #ffffff;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .kat-product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12);
+    border-color: #c6d8f8;
+  }
+  .kat-product-image {
+    height: 130px;
+    background: #f3f6fb;
+    overflow: hidden;
+  }
+  .kat-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .kat-product-body {
+    padding: 11px;
+    display: grid;
+    gap: 8px;
+  }
+  .kat-product-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    min-height: 36px;
+    color: #1e293b;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .kat-product-price {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 900;
+    color: #1d4ed8;
+  }
+  .kat-product-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .kat-product-rating {
+    font-size: 12px;
+    color: #f59e0b;
+    font-weight: 700;
+  }
+  .kat-product-location {
+    margin: 4px 0 0;
+    font-size: 11px;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+  }
+  .kat-product-cart {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid #bfdbfe;
+    background: #edf3ff;
+    color: #1e40af;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .kat-product-cart svg {
+    width: 16px;
+    height: 16px;
+  }
+  .kat-product-card:hover .kat-product-cart {
+    background: #dbeafe;
+    transform: translateY(-1px);
+  }
+  .kat-empty {
+    grid-column: 1 / -1;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    text-align: center;
+    padding: 30px 20px;
+    color: #64748b;
+  }
+  @media (min-width: 1280px) {
+    /* Hapus absolute positioning agar grid Tailwind mengatur jarak antar kolom secara seragam */
+
+    #pg-home .lp-service-grid > article > div:first-child svg {
+      width: 56.7px;
+      height: 56.7px;
+    }
+
+    /* Hapus absolute pada h3 dan p agar teks layanan tampil normal di grid */
+  }
+  @media (max-width: 1320px) {
+    .kat-products-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 1024px) {
+    .kat-products-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 900px) {
+    .kat-products-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 768px) {
+    .kat-products-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .kat-product-image {
+      height: 115px;
+    }
+  }
+  @media (max-width: 480px) {
+    .kat-products-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .kat-product-body {
+      padding: 8px;
+      gap: 4px;
+    }
+    .kat-product-name {
+      font-size: 11px;
+      min-height: 22px;
+    }
+    .kat-product-price {
+      font-size: 11px;
+    }
+    .kat-product-rating {
+      font-size: 9px;
+    }
+    .kat-product-location {
+      font-size: 8.5px;
+      margin-top: 2px;
+      max-width: 72px;
+    }
+    .kat-product-cart {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+    }
+    .kat-product-cart svg {
+      width: 10px;
+      height: 10px;
+    }
+  }
+
+  /* Hero, layanan, dan kategori responsiveness */
+  @media (max-width: 1024px) {
+    #pg-home .lp-hero {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    #pg-home .lp-hero-side {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    #pg-home .lp-hero-main {
+      min-height: 0;
+    }
+
+    #pg-home .lp-kategori-wrap {
+      margin-left: -10px;
+      margin-right: -10px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    #pg-home .lp-hero-side {
+      grid-template-columns: 1fr;
+    }
+
+    #pg-home .lp-hero {
+      gap: 12px;
+    }
+
+    #pg-home .lp-hero-main,
+    #pg-home .lp-side-card {
+      padding: 16px;
+    }
+
+    #pg-home .lp-hero-title,
+    #pg-home .lp-side-card h3 {
+      text-align: center;
+    }
+
+    #pg-home .lp-hero-desc,
+    #pg-home .lp-side-card p {
+      text-align: center;
+    }
+
+    #pg-home .lp-hero-btns {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    #pg-home .lp-hero-btns .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    #pg-home .lp-kategori-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    #pg-home .lp-kategori-wrap {
+      margin-left: -8px;
+      margin-right: -8px;
+      overflow-x: hidden;
+    }
+
+    #pg-home .lp-kategori-table {
+      width: 100%;
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 10px;
+      min-width: 0 !important;
+      table-layout: auto !important;
+    }
+
+    #pg-home .lp-kategori-table tbody,
+    #pg-home .lp-kategori-table tr {
+      display: contents !important;
+    }
+
+    #pg-home .lp-kategori-table td {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid #f3f4f6;
+      box-shadow: 0 2px 8px 0 #0f172a0a;
+      margin-bottom: 8px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #pg-home .lp-hero {
+      gap: 10px;
+    }
+
+    #pg-home .lp-hero-main,
+    #pg-home .lp-side-card {
+      padding: 14px;
+    }
+
+    #pg-home .lp-hero-title {
+      font-size: 22px;
+    }
+
+    #pg-home .lp-hero-desc {
+      font-size: 14px;
+    }
+
+    #pg-home .lp-hero-btns .btn {
+      width: 100%;
+    }
+
+    #pg-home .lp-kategori-wrap {
+      margin-left: -6px;
+      margin-right: -6px;
+      overflow-x: hidden;
+    }
+
+    #pg-home .lp-kategori-table {
+      width: 100%;
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 10px;
+      min-width: 0 !important;
+      table-layout: auto !important;
+    }
+
+    #pg-home .lp-kategori-table tbody,
+    #pg-home .lp-kategori-table tr {
+      display: contents !important;
+    }
+
+    #pg-home .lp-kategori-table td {
+      display: block;
+      width: 100%;
+      padding: 10px;
+    }
+
+    #pg-home .lp-service-highlights .lp-service-card {
+      padding: 14px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-home">
+
+  <!-- Hero Section with 3 Slides -->
+  <div class="lp-hero">
+    <div class="lp-hero-main">
+      <!-- Slide 1: Belanja Produk Lokal -->
+      <div class="lp-hero-slide lp-hero-slide-1 active">
+        <div class="lp-hero-circles">
+          <div class="lp-circle lp-circle-1"></div>
+          <div class="lp-circle lp-circle-2"></div>
+          <div class="lp-circle lp-circle-3"></div>
+        </div>
+        <div class="lp-hero-content">
+          <div class="lp-hero-badge">✦ PRODUK UNGGULAN UMKM</div>
+          <h2 class="lp-hero-title">Belanja Produk<br><em>Lokal Terbaik</em><br>Sekarang!</h2>
+          <p class="lp-hero-desc">Temukan ribuan produk berkualitas dari pengusaha lokal pilihan. Dukung UMKM Sleman, dapatkan produk terbaik langsung dari tangan pembuatnya.</p>
+          <div class="lp-hero-btns">
+          </div>
+        </div>
+      </div>
+      <!-- Slide 2: Bergabung Berkembang Bersama -->
+      <div class="lp-hero-slide lp-hero-slide-2">
+        <div class="lp-hero-circles">
+          <div class="lp-circle lp-circle-s2-1"></div>
+          <div class="lp-circle lp-circle-s2-2"></div>
+
+        </div>
+        <div class="lp-hero-content lp-hero-content-s2">
+          <div class="lp-hero-s2-left">
+            <div class="lp-hero-badge lp-badge-blue">✦ DAFTARKAN UMKM ANDA</div>
+            <h2 class="lp-hero-title lp-title-s2">Bergabung<br><em>Berkembang</em><br>Bersama!</h2>
+            <p class="lp-hero-desc">Jadi bagian dari komunitas UMKM Sleman. jangkau lebih banyak pelanggan dan kembangkan usaha anda bersama kami.</p>
+            <div class="lp-hero-btns">
+            </div>
+          </div>
+          <div class="lp-hero-s2-right">
+            <h4 class="lp-s2-right-title">CARA BERGABUNG</h4>
+            <div class="lp-s2-step">
+              <span class="lp-s2-num">1</span>
+              <div><strong>Daftarkan Usaha</strong><p>isi formulir pendaftaran UMKM sleman secara online</p></div>
+            </div>
+            <div class="lp-s2-step">
+              <span class="lp-s2-num">2</span>
+              <div><strong>Unggah Produk</strong><p>Tambahkan foto & deskripsi produk unggulan anda ke platform</p></div>
+            </div>
+            <div class="lp-s2-step">
+              <span class="lp-s2-num">3</span>
+              <div><strong>Mulai Belanja</strong><p>Terima pesanan dan jangkau ribuan pembeli di seluruh kab.sleman</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Slide 3: Hadiah Lebaran -->
+      <div class="lp-hero-slide lp-hero-slide-3">
+        <div class="lp-hero-circles">
+          <div class="lp-circle lp-circle-s3-1"></div>
+        </div>
+        <div class="lp-hero-s3-decor">
+        </div>
+        <div class="lp-hero-content">
+          <div class="lp-hero-badge">✦ PRODUK UNGGULAN UMKM</div>
+          <h2 class="lp-hero-title lp-title-s3">Hadiah Lebaran<br><em>Dari Tangan Lokal</em><br>Sleman!</h2>
+          <p class="lp-hero-desc">Rayakan Idul Fitri dengan hampers, kue khas, dan busana lebaran pilihan UMKM Sleman– langsung dari pembuatanya</p>
+          <div class="lp-hero-btns">
+          </div>
+        </div>
+      </div>
+      <!-- Dots -->
+      <div class="lp-hero-dots">
+        <span class="lp-dot active" onclick="heroGoTo(0)"></span>
+        <span class="lp-dot" onclick="heroGoTo(1)"></span>
+        <span class="lp-dot" onclick="heroGoTo(2)"></span>
+      </div>
+    </div>
+    <div class="lp-hero-side">
+      <div class="lp-side-card lp-side-card-top">
+        <div class="lp-side-card-inner">
+          <div class="lp-side-badge-green">TENTANG TOKO</div>
+          <h3>USAHA LOKAL<br>KUALITAS NYATA</h3>
+          <p>Kami UMKM lokal yang berdiri dengan semangat melayani pelanggan sepenuh hati mengutamakan produk-produk pilihan terbaik</p>
+        </div>
+      </div>
+      <div class="lp-side-card lp-side-card-bottom">
+        <div class="lp-side-card-inner">
+          <div class="lp-side-badge-green">✓ JAMINAN KUALITAS</div>
+          <h3 class="lp-side-title-alt">100% Produk Terjamin</h3>
+          <p>Setiap produk melewati seleksi ketat. Tidak puas? kami siap ganti atau kembalikan dana anda</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Highlights (Tailwind) -->
+  <section class="my-1 mb-8 lp-service-highlights" aria-label="Keunggulan layanan">
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-4 lp-service-grid">
+      <article class="group border border-slate-200 bg-white px-5 py-6 text-center shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg lp-service-card">
+        <div class="mx-auto mb-4 flex h-11 w-11 items-center justify-center bg-blue-50 text-blue-600">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="1" y="3" width="15" height="13" rx="2"></rect>
+            <path d="M16 8h4l3 3v5h-7V8z"></path>
+            <circle cx="5.5" cy="18.5" r="1.5"></circle>
+            <circle cx="18.5" cy="18.5" r="1.5"></circle>
+          </svg>
+        </div>
+        <h3 class="mb-2 text-[19px] font-bold text-slate-900">Curb side-Pickup</h3>
+        <p class="text-base leading-relaxed text-slate-500">Pesanan diantar langsung ke rumah Anda dengan cepat.</p>
+      </article>
+
+      <article class="group border border-slate-200 bg-white px-5 py-6 text-center shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg lp-service-card">
+        <div class="mx-auto mb-4 flex h-11 w-11 items-center justify-center bg-blue-50 text-blue-600">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3l7 3v5c0 5-3.5 8.2-7 10-3.5-1.8-7-5-7-10V6l7-3z"></path>
+            <path d="M9.3 11.8l2 2 3.7-3.8"></path>
+          </svg>
+        </div>
+        <h3 class="mb-2 text-[19px] font-bold text-slate-900">Secure Payment</h3>
+        <p class="text-base leading-relaxed text-slate-500">Pembayaran aman dengan berbagai metode pilihan.</p>
+      </article>
+
+      <article class="group border border-slate-200 bg-white px-5 py-6 text-center shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg lp-service-card">
+        <div class="mx-auto mb-4 flex h-11 w-11 items-center justify-center bg-blue-50 text-blue-600">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 14v-3a8 8 0 0 1 16 0v3"></path>
+            <rect x="2" y="13" width="4" height="7" rx="1.3"></rect>
+            <rect x="18" y="13" width="4" height="7" rx="1.3"></rect>
+            <path d="M20 20a3 3 0 0 1-3 3h-2"></path>
+          </svg>
+        </div>
+        <h3 class="mb-2 text-[19px] font-bold text-slate-900">24/7 Support</h3>
+        <p class="text-base leading-relaxed text-slate-500">Layanan pelanggan siap membantu kapan saja Anda butuhkan.</p>
+      </article>
+
+      <article class="group border border-slate-200 bg-white px-5 py-6 text-center shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg lp-service-card">
+        <div class="mx-auto mb-4 flex h-11 w-11 items-center justify-center bg-blue-50 text-blue-600">
+          <svg class="h-6 w-6" viewBox="0 0 42 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M20.1202 9.58889C20.1895 9.43985 20.2999 9.31371 20.4385 9.22532C20.577 9.13693 20.7379 9.08997 20.9023 9.08997C21.0666 9.08997 21.2276 9.13693 21.3661 9.22532C21.5047 9.31371 21.6151 9.43985 21.6843 9.58889L23.6075 13.5298C23.7351 13.7897 23.9738 13.9717 24.2526 14.0189L28.4298 14.7135C29.1386 14.8317 29.4221 15.7389 28.9141 16.2682L25.923 19.4011C25.8246 19.5057 25.7513 19.6313 25.7087 19.7685C25.6661 19.9056 25.6554 20.0506 25.6773 20.1926L26.3364 24.5635C26.4475 25.3054 25.708 25.8654 25.07 25.5251L21.3016 23.5192C21.1786 23.4539 21.0415 23.4197 20.9023 23.4197C20.763 23.4197 20.6259 23.4539 20.503 23.5192L16.7345 25.5251C16.0966 25.8654 15.3571 25.3054 15.4681 24.5635L16.1273 20.1926C16.1492 20.0506 16.1384 19.9056 16.0958 19.7685C16.0533 19.6313 15.98 19.5057 15.8816 19.4011L12.8905 16.2705C12.3848 15.7413 12.666 14.834 13.3748 14.7159L17.552 14.0213C17.691 13.9978 17.8222 13.941 17.9345 13.8559C18.0468 13.7707 18.1369 13.6597 18.197 13.5322L20.1202 9.58889Z" stroke="#1A4ED8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M37.441 18.5387C37.441 20.7106 37.0132 22.8613 36.1821 24.8678C35.3509 26.8744 34.1327 28.6976 32.5969 30.2334C31.0611 31.7691 29.2379 32.9874 27.2314 33.8185C25.2248 34.6497 23.0742 35.0775 20.9023 35.0775C18.7304 35.0775 16.5797 34.6497 14.5732 33.8185C12.5666 32.9874 10.7434 31.7691 9.20761 30.2334C7.67184 28.6976 6.45361 26.8744 5.62246 24.8678C4.79131 22.8613 4.36353 20.7106 4.36353 18.5387C4.36353 14.1524 6.10599 9.9457 9.20761 6.84408C12.3092 3.74247 16.5159 2 20.9023 2C25.2886 2 29.4953 3.74247 32.5969 6.84408C35.6985 9.9457 37.441 14.1524 37.441 18.5387Z" stroke="#1A4ED8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M23.265 35.8854L27.1067 46.0686C27.8817 48.117 28.2692 49.1448 28.9425 49.2535C29.6183 49.1542 30.4452 48.0249 31.2532 45.9859C31.8321 44.5257 32.1203 43.7957 32.7181 43.4011C32.9008 43.2814 33.0985 43.1869 33.3111 43.1176C34.001 42.9002 34.7925 43.1129 36.3779 43.5429C38.0719 44.0012 39.2485 43.8736 39.714 43.5429C39.851 43.446 39.714 43.5358 39.714 43.5358C39.988 43.0491 39.6195 42.293 38.8799 40.7785L33.7931 30.3521M18.5397 35.8854L14.698 46.0638C13.923 48.1146 13.1575 49.1448 12.4841 49.2535C11.8084 49.1542 11.4044 48.1335 10.594 46.0946C10.0175 44.6344 9.68437 43.7933 9.08662 43.4011C8.90312 43.2794 8.70351 43.184 8.49359 43.1176C7.80369 42.8979 7.01219 43.1129 5.42683 43.5405C3.7328 43.9989 2.55618 43.8642 2.09074 43.5334C1.81667 43.0467 2.18524 42.2907 2.92476 40.7762L8.0116 30.3521" stroke="#1A4ED8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </div>
+        <h3 class="mb-2 text-[19px] font-bold text-slate-900">Produk Terjamin</h3>
+        <p class="text-base leading-relaxed text-slate-500">Semua produk telah melalui seleksi ketat dan terjamin kualitasnya.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Kategori Section (Tailwind + Single Table Row) -->
+  <section class="mb-8 lp-kategori-block">
+    <div class="lp-kategori-head">
+      <h2 class="mb-0 text-2xl font-extrabold text-[#21428f]">
+        <a href="/kategori/" style="color:inherit;text-decoration:none;">Kategori</a>
+      </h2>
+      <a href="/kategori/" class="lp-kategori-all">Semua Kategori</a>
+    </div>
+    <div class="overflow-x-auto lp-kategori-wrap">
+      <table class="w-full lp-kategori-table">
+        <tbody>
+          <tr>
+            <td class="p-3 text-center transition duration-200 hover:bg-slate-50">
+              <button type="button" onclick="window.location.href='{% url 'landing_app:category' slug='makanan' %}'" class="group w-full text-center">
+                <span class="mx-auto mb-2 flex h-10 w-10 items-center justify-center bg-indigo-50 text-indigo-600 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-sm">
+                  <svg class="h-5 w-5" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M27.8438 12.375H0.84375C0.619974 12.375 0.405362 12.4639 0.247129 12.6221C0.0888947 12.7804 0 12.995 0 13.2188C0.00501768 15.8716 0.743134 18.4715 2.13283 20.7313C3.52253 22.991 5.50974 24.8227 7.875 26.0241V26.7188C7.875 27.2409 8.08242 27.7417 8.45163 28.1109C8.82085 28.4801 9.3216 28.6875 9.84375 28.6875H18.8438C19.3659 28.6875 19.8667 28.4801 20.2359 28.1109C20.6051 27.7417 20.8125 27.2409 20.8125 26.7188V26.0241C23.1778 24.8227 25.165 22.991 26.5547 20.7313C27.9444 18.4715 28.6825 15.8716 28.6875 13.2188C28.6875 12.995 28.5986 12.7804 28.4404 12.6221C28.2821 12.4639 28.0675 12.375 27.8438 12.375ZM19.6172 24.7275C19.4704 24.7948 19.346 24.9027 19.2588 25.0386C19.1716 25.1744 19.1251 25.3325 19.125 25.4939V26.7188C19.125 26.7934 19.0954 26.8649 19.0426 26.9176C18.9899 26.9704 18.9183 27 18.8438 27H9.84375C9.76916 27 9.69762 26.9704 9.64488 26.9176C9.59213 26.8649 9.5625 26.7934 9.5625 26.7188V25.4939C9.56238 25.3325 9.51595 25.1744 9.42871 25.0386C9.34146 24.9027 9.21708 24.7948 9.07031 24.7275C7.00049 23.773 5.22555 22.2792 3.93156 20.4028C2.63757 18.5264 1.87218 16.3365 1.71563 14.0625H26.9719C26.8153 16.3365 26.0499 18.5264 24.7559 20.4028C23.462 22.2792 21.687 23.773 19.6172 24.7275ZM8.06063 4.25251C8.77078 3.36939 9.10266 2.60298 8.97188 2.14314C8.87063 1.78736 8.46 1.64111 8.45578 1.6397C8.26918 1.57418 8.11152 1.44519 8.01034 1.27526C7.90916 1.10533 7.87089 0.905263 7.90221 0.709988C7.93353 0.514713 8.03245 0.336644 8.18169 0.206878C8.33093 0.0771114 8.52102 0.00389399 8.71875 1.14369e-05C8.80366 -0.000438195 8.88811 0.0123724 8.96906 0.0379803C9.09703 0.0773553 10.2206 0.459855 10.5834 1.64673C10.9012 2.68595 10.4948 3.91782 9.37687 5.31001C8.66672 6.19314 8.33484 6.95954 8.46562 7.41939C8.56687 7.77517 8.9775 7.92142 8.98172 7.92282C9.16832 7.98834 9.32598 8.11733 9.42716 8.28726C9.52833 8.45719 9.56661 8.65726 9.53529 8.85254C9.50397 9.04781 9.40505 9.22588 9.25581 9.35565C9.10657 9.48541 8.91648 9.55863 8.71875 9.56251C8.63384 9.56296 8.54939 9.55015 8.46844 9.52454C8.34047 9.48517 7.21687 9.10267 6.85406 7.91579C6.53625 6.87657 6.94266 5.6447 8.06063 4.25251ZM13.6856 4.25251C14.3958 3.36939 14.7277 2.60298 14.5969 2.14314C14.4956 1.78736 14.085 1.64111 14.0808 1.6397C13.8942 1.57418 13.7365 1.44519 13.6353 1.27526C13.5342 1.10533 13.4959 0.905263 13.5272 0.709988C13.5585 0.514713 13.6574 0.336644 13.8067 0.206878C13.9559 0.0771114 14.146 0.00389399 14.3438 1.14369e-05C14.4287 -0.000438195 14.5131 0.0123724 14.5941 0.0379803C14.722 0.0773553 15.8456 0.459855 16.2084 1.64673C16.5262 2.68595 16.1198 3.91782 15.0019 5.31001C14.2917 6.19314 13.9598 6.95954 14.0906 7.41939C14.1919 7.77517 14.6025 7.92142 14.6067 7.92282C14.7933 7.98834 14.951 8.11733 15.0522 8.28726C15.1533 8.45719 15.1916 8.65726 15.1603 8.85254C15.129 9.04781 15.0301 9.22588 14.8808 9.35565C14.7316 9.48541 14.5415 9.55863 14.3438 9.56251C14.2588 9.56296 14.1744 9.55015 14.0934 9.52454C13.9655 9.48517 12.8419 9.10267 12.4791 7.91579C12.1613 6.87657 12.5677 5.6447 13.6856 4.25251ZM19.3106 4.25251C20.0208 3.36939 20.3527 2.60298 20.2219 2.14314C20.1206 1.78736 19.71 1.64111 19.7058 1.6397C19.5192 1.57418 19.3615 1.44519 19.2603 1.27526C19.1592 1.10533 19.1209 0.905263 19.1522 0.709988C19.1835 0.514713 19.2824 0.336644 19.4317 0.206878C19.5809 0.0771114 19.771 0.00389399 19.9688 1.14369e-05C20.0537 -0.000438195 20.1381 0.0123724 20.2191 0.0379803C20.347 0.0773553 21.4706 0.459855 21.8334 1.64673C22.1512 2.68595 21.7448 3.91782 20.6269 5.31001C19.9167 6.19314 19.5848 6.95954 19.7156 7.41939C19.8169 7.77517 20.2275 7.92142 20.2317 7.92282C20.4183 7.98834 20.576 8.11733 20.6772 8.28726C20.7783 8.45719 20.8166 8.65726 20.7853 8.85254C20.754 9.04781 20.6551 9.22588 20.5058 9.35565C20.3566 9.48541 20.1665 9.55863 19.9688 9.56251C19.8838 9.56296 19.7994 9.55015 19.7184 9.52454C19.5905 9.48517 18.4669 9.10267 18.1041 7.91579C17.7863 6.87657 18.1927 5.6447 19.3106 4.25251Z" fill="#0D99FF"></path>
+                  </svg>
+                </span>
+                <span class="block text-[14px] font-semibold text-slate-800">Makanan</span>
+              </button>
+            </td>
+            <td class="p-3 text-center transition duration-200 hover:bg-slate-50">
+              <button type="button" onclick="window.location.href='{% url 'landing_app:category' slug='minuman' %}'" class="group w-full text-center">
+                <span class="mx-auto mb-2 flex h-10 w-10 items-center justify-center bg-emerald-50 text-emerald-600 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-sm">
+                  <svg class="h-5 w-5" viewBox="0 0 15 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M3 27H6V18C4.4087 18 2.88258 17.3679 1.75736 16.2426C0.632141 15.1174 0 13.5913 0 12V3C0 2.20435 0.31607 1.44129 0.87868 0.87868C1.44129 0.31607 2.20435 0 3 0H12C12.7956 0 13.5587 0.31607 14.1213 0.87868C14.6839 1.44129 15 2.20435 15 3V12C15 13.5913 14.3679 15.1174 13.2426 16.2426C12.1174 17.3679 10.5913 18 9 18V27H12C12.3978 27 12.7794 27.158 13.0607 27.4393C13.342 27.7206 13.5 28.1022 13.5 28.5C13.5 28.8978 13.342 29.2794 13.0607 29.5607C12.7794 29.842 12.3978 30 12 30H3C2.60218 30 2.22064 29.842 1.93934 29.5607C1.65804 29.2794 1.5 28.8978 1.5 28.5C1.5 28.1022 1.65804 27.7206 1.93934 27.4393C2.22064 27.158 2.60218 27 3 27ZM3 3V12C3 12.7956 3.31607 13.5587 3.87868 14.1213C4.44129 14.6839 5.20435 15 6 15H9C9.79565 15 10.5587 14.6839 11.1213 14.1213C11.6839 13.5587 12 12.7956 12 12V3H3Z" fill="#22A896"></path>
+                  </svg>
+                </span>
+                <span class="block text-[14px] font-semibold text-slate-800">Minuman</span>
+              </button>
+            </td>
+            <td class="p-3 text-center transition duration-200 hover:bg-slate-50">
+              <button type="button" onclick="window.location.href='{% url 'landing_app:category' slug='craft' %}'" class="group w-full text-center">
+                <span class="mx-auto mb-2 flex h-10 w-10 items-center justify-center bg-violet-50 text-violet-600 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-sm">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l2.7 5.4 6 .9-4.3 4.2 1 5.9L12 16.8 6.6 19.4l1-5.9-4.3-4.2 6-.9L12 3z"></path>
+                  </svg>
+                </span>
+                <span class="block text-[14px] font-semibold text-slate-800">Craft</span>
+              </button>
+            </td>
+            <td class="p-3 text-center transition duration-200 hover:bg-slate-50">
+              <button type="button" onclick="window.location.href='{% url 'landing_app:category' slug='fashion-aksesoris' %}'" class="group w-full text-center">
+                <span class="mx-auto mb-2 flex h-10 w-10 items-center justify-center bg-pink-50 text-pink-600 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-sm">
+                  <svg class="h-5 w-5" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M28.1918 3.19L21.6218 1C21.6218 2.5913 20.9896 4.11742 19.8644 5.24264C18.7392 6.36786 17.2131 7 15.6218 7C14.0305 7 12.5043 6.36786 11.3791 5.24264C10.2539 4.11742 9.62176 2.5913 9.62176 1L3.05176 3.19C2.37284 3.41619 1.79713 3.87762 1.42855 4.49101C1.05996 5.1044 0.922781 5.82935 1.04176 6.535L1.91176 11.74C1.96888 12.0924 2.14978 12.4128 2.42198 12.6438C2.69417 12.8747 3.0398 13.001 3.39676 13H6.62176V28C6.62176 29.65 7.97176 31 9.62176 31H21.6218C22.4174 31 23.1805 30.6839 23.7431 30.1213C24.3057 29.5587 24.6218 28.7956 24.6218 28V13H27.8468C28.2037 13.001 28.5494 12.8747 28.8216 12.6438C29.0937 12.4128 29.2746 12.0924 29.3318 11.74L30.2018 6.535C30.3207 5.82935 30.1836 5.1044 29.815 4.49101C29.4464 3.87762 28.8707 3.41619 28.1918 3.19Z" stroke="#D42060" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                </span>
+                <span class="block text-[14px] font-semibold text-slate-800">Fashion &amp; Aksesoris</span>
+              </button>
+            </td>
+            <td class="p-3 text-center transition duration-200 hover:bg-slate-50">
+              <button type="button" onclick="window.location.href='{% url 'landing_app:category' slug='pertanian' %}'" class="group w-full text-center">
+                <span class="mx-auto mb-2 flex h-10 w-10 items-center justify-center bg-green-50 text-green-600 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-sm">
+                  <svg class="h-5 w-5" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M36 2.25C36 9.85078 30.6141 16.193 23.4563 17.6766C22.9008 13.5914 21.0656 9.91406 18.3586 7.06641C21.1781 2.8125 26.0086 0 31.5 0H33.75C34.9945 0 36 1.00547 36 2.25ZM0 6.75C0 5.50547 1.00547 4.5 2.25 4.5H4.5C13.1977 4.5 20.25 11.5523 20.25 20.25V33.75C20.25 34.9945 19.2445 36 18 36C16.7555 36 15.75 34.9945 15.75 33.75V22.5C7.05234 22.5 0 15.4477 0 6.75Z" fill="#1A9A4A"></path>
+                  </svg>
+                </span>
+                <span class="block text-[14px] font-semibold text-slate-800">Pertanian</span>
+              </button>
+            </td>
+            <td class="p-3 text-center transition duration-200 hover:bg-slate-50">
+              <button type="button" onclick="window.location.href='{% url 'landing_app:category' slug='jasa' %}'" class="group w-full text-center">
+                <span class="mx-auto mb-2 flex h-10 w-10 items-center justify-center bg-sky-50 text-sky-600 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-sm">
+                  <svg class="h-5 w-5" viewBox="0 0 30 23" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M16.605 9.61506C17.5162 8.34195 18.0061 6.81563 18.0061 5.25006C18.0061 3.68448 17.5162 2.15816 16.605 0.885055C17.4582 0.303852 18.4677 -0.00474651 19.5 5.51947e-05C20.8924 5.51947e-05 22.2277 0.553179 23.2123 1.53774C24.1969 2.52231 24.75 3.85767 24.75 5.25006C24.75 6.64244 24.1969 7.9778 23.2123 8.96237C22.2277 9.94693 20.8924 10.5001 19.5 10.5001C18.4677 10.5049 17.4582 10.1963 16.605 9.61506ZM5.25 5.25006C5.25 4.2117 5.55791 3.19667 6.13478 2.33331C6.71166 1.46995 7.5316 0.797048 8.49091 0.399688C9.45022 0.00232784 10.5058 -0.10164 11.5242 0.100933C12.5426 0.303505 13.4781 0.803519 14.2123 1.53774C14.9465 2.27197 15.4466 3.20743 15.6491 4.22583C15.8517 5.24423 15.7477 6.29983 15.3504 7.25914C14.953 8.21845 14.2801 9.03839 13.4167 9.61527C12.5534 10.1921 11.5384 10.5001 10.5 10.5001C9.10761 10.5001 7.77226 9.94693 6.78769 8.96237C5.80312 7.9778 5.25 6.64244 5.25 5.25006ZM8.25 5.25006C8.25 5.69506 8.38196 6.13008 8.62919 6.50009C8.87643 6.8701 9.22783 7.15849 9.63896 7.32878C10.0501 7.49908 10.5025 7.54364 10.939 7.45682C11.3754 7.37001 11.7763 7.15571 12.091 6.84105C12.4057 6.52638 12.62 6.12547 12.7068 5.68901C12.7936 5.25255 12.749 4.80015 12.5787 4.38902C12.4084 3.97788 12.12 3.62648 11.75 3.37925C11.38 3.13202 10.945 3.00006 10.5 3.00006C9.90326 3.00006 9.33097 3.23711 8.90901 3.65906C8.48705 4.08102 8.25 4.65332 8.25 5.25006ZM21 19.5001V22.5001H0V19.5001C0 19.5001 0 13.5001 10.5 13.5001C21 13.5001 21 19.5001 21 19.5001ZM18 19.5001C17.79 18.3301 16.005 16.5001 10.5 16.5001C4.995 16.5001 3.105 18.4651 3 19.5001M20.925 13.5001C21.8444 14.2152 22.596 15.1228 23.1273 16.1594C23.6585 17.1959 23.9564 18.3361 24 19.5001V22.5001H30V19.5001C30 19.5001 30 14.0551 20.91 13.5001H20.925Z" fill="#2255C6"></path>
+                  </svg>
+                </span>
+                <span class="block text-[14px] font-semibold text-slate-800">Jasa</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Terlaris Section (6 kolom seperti kategori) -->
+  <section class="lp-home-products" aria-label="Produk terlaris">
+    <div class="lp-home-products-head">
+      <h2 class="lp-terlaris-title">{{ best_seller_section_title|default:'Terlaris' }}</h2>
+    </div>
+
+    <div class="lp-home-products-wrap">
+      <div class="kat-products-grid lp-home-products-grid">
+        {% for product in best_sellers %}
+        <a class="kat-product-card" href="{% url 'landing_app:product_detail' slug=product.slug %}" aria-label="Lihat produk {{ product.name }}">
+          <div class="kat-product-image">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% elif "Mukenah" in product.name or "Mukena" in product.name %}
+            <img src="{% static 'store/album/mukena.jpg' %}" alt="{{ product.name }}">
+            {% elif "Jamu" in product.name %}
+            <img src="{% static 'store/album/jamu_botol.jpg' %}" alt="{{ product.name }}">
+            {% elif "Tas Bambu" in product.name %}
+            <img src="{% static 'store/album/tas_bambu.jpg' %}" alt="{{ product.name }}">
+            {% elif "Yogurt" in product.name %}
+            <img src="{% static 'store/album/yogurt.jpg' %}" alt="{{ product.name }}">
+            {% elif "Abon Salmon" in product.name or "Abon Rendang" in product.name %}
+            <img src="{% static 'store/album/abon_salmon.jpg' %}" alt="{{ product.name }}">
+            {% elif "Sabun Cuci Piring" in product.name %}
+            <img src="{% static 'store/album/sabun_cuci_piring.jpg' %}" alt="{{ product.name }}">
+            {% elif "Daster" in product.name %}
+            <img src="{% static 'store/album/daster_motif.jpg' %}" alt="{{ product.name }}">
+            {% else %}
+            <img src="{% static 'store/album/produk1.png' %}" alt="{{ product.name }}">
+            {% endif %}
+          </div>
+          <div class="kat-product-body">
+            <p class="kat-product-name">{{ product.name }}</p>
+            <p class="kat-product-price">Rp {{ product.final_price|rupiah }}</p>
+            <div class="kat-product-foot">
+              <div>
+                <div class="kat-product-rating">
+                  {% if product.rating %}
+                  ★ {{ product.rating|floatformat:1 }}
+                  {% else %}
+                  Baru
+                  {% endif %}
+                </div>
+                <p class="kat-product-location">{{ product.seller.store_name|default:'UMKM Sleman' }}</p>
+              </div>
+              <span class="kat-product-cart" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="20" r="1"></circle>
+                  <circle cx="18" cy="20" r="1"></circle>
+                  <path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H8"></path>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </a>
+        {% empty %}
+        <div class="kat-empty">
+          <h3>Belum ada produk aktif</h3>
+          <p>Tambahkan produk aktif terlebih dahulu agar section ini terisi.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+<!-- Produk Rekomendasi Banner -->
+<div class="rekomendasi-section">
+  <div class="rekomendasi-slider" id="rekomendasiSlider">
+    <div class="rekomendasi-slide active">
+      <div class="rekomendasi-side rekomendasi-left">
+        <img src="{% static 'store/album/abon_salmon.jpg' %}" alt="Abon Salmon">
+      </div>
+      <div class="rekomendasi-middle-gap" aria-hidden="true"></div>
+      <div class="rekomendasi-side rekomendasi-right">
+        <img src="{% static 'store/album/yogurt.jpg' %}" alt="Yogurt">
+      </div>
+    </div>
+
+    <div class="rekomendasi-slide">
+      <div class="rekomendasi-side rekomendasi-left">
+        <img src="{% static 'store/album/mukena.jpg' %}" alt="Mukena">
+      </div>
+      <div class="rekomendasi-middle-gap" aria-hidden="true"></div>
+      <div class="rekomendasi-side rekomendasi-right">
+        <img src="{% static 'store/album/jamu_botol.jpg' %}" alt="Jamu Botol">
+      </div>
+    </div>
+
+    <div class="rekomendasi-slide">
+      <div class="rekomendasi-side rekomendasi-left">
+        <img src="{% static 'store/album/daster_motif.jpg' %}" alt="Daster Remaja">
+      </div>
+      <div class="rekomendasi-middle-gap" aria-hidden="true"></div>
+      <div class="rekomendasi-side rekomendasi-right">
+        <img src="{% static 'store/album/tas_bambu.jpg' %}" alt="Tas Bambu">
+      </div>
+    </div>
+
+    <div class="rekomendasi-content rekomendasi-content-static" aria-hidden="true">
+      <span class="rekomendasi-subtitle">Pilihan Terbaik</span>
+      <h3>REKOMENDASI</h3>
+    </div>
+
+    <div class="rekomendasi-dots" aria-label="Navigasi slider rekomendasi">
+      <button type="button" class="rekomendasi-dot active" onclick="rekomendasiGoTo(0)" aria-label="Slide rekomendasi 1"></button>
+      <button type="button" class="rekomendasi-dot" onclick="rekomendasiGoTo(1)" aria-label="Slide rekomendasi 2"></button>
+      <button type="button" class="rekomendasi-dot" onclick="rekomendasiGoTo(2)" aria-label="Slide rekomendasi 3"></button>
+    </div>
+  </div>
+
+  <div class="rekomendasi-footer">
+    <span class="rekomendasi-label">⭐ 200+ Produk Rekomendasi Tersedia</span>
+    <div class="rekomendasi-footer-right">
+    </div>
+  </div>
+</div>
+
+<!-- Join Our Community -->
+<section class="join-community" aria-label="Gabung komunitas UMKM Sleman">
+  <div class="join-community-banner">
+    
+    <div class="join-community-media">
+      <img src="{% static 'store/album/produk1.png' %}" alt="Meeting komunitas UMKM Sleman">
+    </div>
+
+    <div class="join-community-copy">
+      <h2>Ayok Podo Gabung Sedulur</h2>
+
+      <p class="join-community-intro">
+        Gabung komunitas UMKM Sleman kanggo sinau bareng,
+        promosi produk, lan ngembangke usaha supaya luwih maju.
+      </p>
+
+      <p class="join-community-desc">
+        Ing komunitas iki, para pelaku UMKM bisa saling berbagi pengalaman,
+        mendapatkan informasi pelatihan, memperluas jaringan usaha,
+        lan meningkatkan kualitas produk lokal supaya luwih dikenal masyarakat.
+      </p>
+    </div>
+  </div>
+</section>
+<!-- Trusted Partners -->
+<div class="lp-partners">
+  <h2 class="lp-partners-title">T R U S T E D &nbsp;&nbsp; P A R T N E R S</h2>
+  <div class="lp-partners-grid">
+    <div class="lp-partner-item">
+      <img src="{% static 'store/album/logo_sleman.png' %}" alt="Pemerintah Daerah Kabupaten Sleman">
+    </div>
+    <div class="lp-partner-item">
+      <img src="{% static 'store/album/logo_forkom.png' %}" alt="Forkom UMKM Kabupaten Sleman">
+    </div>
+
+    <div class="lp-partner-item">
+      <img src="{% static 'store/album/kopmas_forkom.png' %}" alt="Kopmas Forkom UMKM Sleman">
+    </div>
+    <div class="lp-partner-item">
+      <img src="{% static 'store/album/opencash.jpeg' %}" alt="OpenCash">
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="lp-footer">
+  <div class="lp-footer-inner">
+    <div class="lp-footer-grid">
+      <div class="lp-footer-brand">
+        <img src="{% static 'store/album/logokopmas.png' %}" alt="KOPMAS" class="lp-footer-logo">
+        <p class="lp-footer-tagline">Emporing UMKM</p>
+        <p class="lp-footer-subtitle">Growing Sleman</p>
+        <p class="lp-footer-desc">
+          "Platform online resmi Koperasi Pemasaran UMKM Kabupaten Sleman untuk
+          memasarkan produk unggulan UMKM lokal secara mudah, aman, dan
+          terpercaya."
+        </p>
+        <div class="lp-footer-social" aria-label="Media sosial">
+          <a href="#" class="lp-footer-social-link" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
+            </svg>
+          </a>
+          <a href="#" class="lp-footer-social-link" aria-label="Website">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="lp-footer-heading">LAYANAN</h4>
+        <ul class="lp-footer-links">
+          <li> > Web Development</li>
+          <li> > AI &amp; Automation</li>
+          <li> > Mobile Applications</li>
+          <li> > Testing</li>
+          <li> > Konsultasi UMKM</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="lp-footer-heading">USEFUL LINKS</h4>
+        <ul class="lp-footer-links">
+          <li> > Tentang Kami</li>
+          <li> > Portofolio Proyek</li>
+          <li> > Cara Berjualan</li>
+          <li> > Syarat &amp; Ketentuan</li>
+          <li> > Kebijakan Privasi</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="lp-footer-heading">HUBUNGI KAMI</h4>
+        <div class="lp-footer-contact-box">
+          <div class="lp-footer-contact-addr">
+            <span class="lp-footer-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </span>
+            <div>
+              <strong>LOKASI</strong>
+              <p>JL. Cangkringan Indah 1 No.17<br>KarangSari, Wedomartani<br>Kec. Ngemplak<br>Kabupaten Sleman<br>Daerah Istimewa Yogyakarta 55584</p>
+            </div>
+          </div>
+
+          <div class="lp-footer-contact-wa">
+            <span class="lp-footer-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.5-4.3A8.5 8.5 0 1 1 21 11.5z"></path>
+              </svg>
+            </span>
+            <div>
+              <strong>OFFICIAL WHATSAPP</strong>
+              <div class="lp-footer-wa-num">081234567890</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lp-footer-bottom">
+    Copyright © 2026 - Kompashop.Com All Rights Reserved
+    <div class="lp-footer-report">Support by OpenCash.ID</div>
+  </div>
+</footer>
+{% endblock %}

@@ -1,0 +1,377 @@
+{% extends 'layouts/base/base.html' %}
+
+{% block title %}Alamat Saya - Kopmas Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ad-wrap {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 18px;
+    }
+
+    .ad-card {
+        background: #fff;
+        border: 1.5px solid var(--surface3);
+        border-radius: var(--rlg);
+        box-shadow: var(--sh-sm);
+    }
+
+    .ad-side {
+        padding: 20px;
+        height: fit-content;
+    }
+
+    .ad-avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 999px;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto 12px;
+        border: 2px solid var(--surface3);
+    }
+
+    .ad-fallback {
+        width: 88px;
+        height: 88px;
+        border-radius: 999px;
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        background: linear-gradient(135deg, var(--blue), var(--orange));
+        color: #fff;
+    }
+
+    .ad-name {
+        text-align: center;
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--ink);
+    }
+
+    .ad-role {
+        text-align: center;
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 4px;
+    }
+
+    .ad-menu {
+        margin-top: 16px;
+        border-top: 1px solid var(--surface3);
+        padding-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .ad-menu a {
+        display: block;
+        text-decoration: none;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--surface3);
+        color: var(--ink3);
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .ad-menu a.active {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+    }
+
+    .ad-menu a.logout {
+        color: var(--red);
+        border-color: rgba(239, 68, 68, .25);
+        background: var(--red-l);
+    }
+
+    .ad-main {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .ad-panel {
+        padding: 20px;
+    }
+
+    .ad-title {
+        font-size: 19px;
+        font-weight: 800;
+        color: var(--ink);
+        margin-bottom: 14px;
+    }
+
+    .ad-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .ad-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .ad-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .ad-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+    }
+
+    .ad-input {
+        width: 100%;
+        border: 1.5px solid var(--surface3);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        outline: none;
+        background: #fff;
+        color: var(--ink);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .ad-input:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(26, 78, 216, .08);
+    }
+
+    .ad-msg {
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        background: var(--green-l);
+        color: #047857;
+        border: 1px solid #A7F3D0;
+    }
+
+    .ad-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .ad-item {
+        border: 1.5px solid var(--surface3);
+        border-radius: 12px;
+        padding: 14px;
+        background: #fff;
+    }
+
+    .ad-item.default {
+        border-color: var(--blue);
+        background: var(--blue-l);
+    }
+
+    .ad-item-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .ad-item-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--ink);
+    }
+
+    .ad-badge {
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        background: var(--blue);
+        border-radius: 999px;
+        padding: 3px 8px;
+    }
+
+    .ad-item-text {
+        font-size: 14px;
+        color: var(--ink3);
+        line-height: 1.55;
+    }
+
+    .ad-actions {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .ad-empty {
+        border: 1.5px dashed var(--surface3);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        color: var(--muted);
+        grid-column: 1 / -1;
+    }
+
+    @media (max-width: 992px) {
+        .ad-wrap {
+            grid-template-columns: 1fr;
+        }
+
+        .ad-grid,
+        .ad-list {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-addresses">
+    <div class="ph">
+        <div>
+            <div class="ph-title">Alamat Saya</div>
+            <div class="ph-sub">Kelola alamat pengiriman untuk checkout lebih cepat</div>
+        </div>
+    </div>
+
+    <div class="ad-wrap">
+        <aside class="ad-card ad-side">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="ad-avatar">
+            {% else %}
+            <div class="ad-fallback">👤</div>
+            {% endif %}
+            <div class="ad-name">{{ user.get_full_name|default:user.username }}</div>
+            <div class="ad-role">{{ user.get_role_display }}</div>
+
+            <div class="ad-menu">
+                <a href="{% url 'landing_app:profile' %}">Profil</a>
+                <a href="{% url 'landing_app:order_history' %}">Pesanan Saya</a>
+                <a href="{% url 'landing_app:addresses' %}" class="active">Alamat</a>
+                <a href="{% url 'landing_app:logout' %}" class="logout">Logout</a>
+            </div>
+        </aside>
+
+        <section class="ad-main">
+            <div class="ad-card ad-panel">
+                <div class="ad-title">{% if edit_address %}Edit Alamat{% else %}Tambah Alamat{% endif %}</div>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="ad-msg">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="{% if edit_address %}edit{% else %}add{% endif %}">
+                    {% if edit_address %}
+                    <input type="hidden" name="address_id" value="{{ edit_address.id }}">
+                    {% endif %}
+
+                    <div class="ad-grid">
+                        <div class="ad-field">
+                            <label class="ad-label">Label Alamat</label>
+                            <input type="text" name="label" class="ad-input" value="{{ edit_address.label|default:'Rumah' }}" placeholder="Rumah, Kantor, dll">
+                        </div>
+
+                        <div class="ad-field">
+                            <label class="ad-label">Nama Penerima</label>
+                            <input type="text" name="recipient_name" class="ad-input" value="{{ edit_address.recipient_name|default:'' }}" required>
+                        </div>
+
+                        <div class="ad-field full">
+                            <label class="ad-label">Nomor Telepon</label>
+                            <input type="tel" name="recipient_phone" class="ad-input" value="{{ edit_address.recipient_phone|default:'' }}" required>
+                        </div>
+
+                        <div class="ad-field">
+                            <label class="ad-label">Provinsi</label>
+                            <input type="text" name="province" class="ad-input" value="{{ edit_address.province|default:'' }}" required>
+                        </div>
+
+                        <div class="ad-field">
+                            <label class="ad-label">Kota/Kabupaten</label>
+                            <input type="text" name="city" class="ad-input" value="{{ edit_address.city|default:'' }}" required>
+                        </div>
+
+                        <div class="ad-field">
+                            <label class="ad-label">Kode Pos</label>
+                            <input type="text" name="postal_code" class="ad-input" value="{{ edit_address.postal_code|default:'' }}" required>
+                        </div>
+
+                        <div class="ad-field full">
+                            <label class="ad-label">Alamat Lengkap</label>
+                            <textarea name="address" class="ad-input" rows="3" required>{{ edit_address.address|default:'' }}</textarea>
+                        </div>
+
+                        <div class="ad-field full" style="flex-direction:row;align-items:center;gap:8px;">
+                            <input type="checkbox" name="is_default" id="isDefault" {% if edit_address.is_default %}checked{% endif %}>
+                            <label for="isDefault" class="ad-label" style="margin:0;">Jadikan alamat utama</label>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                        <button type="submit" class="btn bp">{% if edit_address %}Simpan Perubahan{% else %}Tambah Alamat{% endif %}</button>
+                        {% if edit_address %}
+                        <a href="{% url 'landing_app:addresses' %}" class="btn bg">Batal</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+
+            <div class="ad-card ad-panel">
+                <div class="ad-title">Daftar Alamat</div>
+
+                <div class="ad-list">
+                    {% for address in addresses %}
+                    <article class="ad-item {% if address.is_default %}default{% endif %}">
+                        <div class="ad-item-top">
+                            <div class="ad-item-title">{{ address.label }}</div>
+                            {% if address.is_default %}<span class="ad-badge">Utama</span>{% endif %}
+                        </div>
+
+                        <div class="ad-item-text">
+                            <strong>{{ address.recipient_name }}</strong><br>
+                            {{ address.recipient_phone }}<br>
+                            {{ address.address }}, {{ address.city }}, {{ address.province }} {{ address.postal_code }}
+                        </div>
+
+                        <div class="ad-actions">
+                            <a href="?edit={{ address.id }}" class="btn bg bsm">Edit</a>
+
+                            {% if not address.is_default %}
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="set_default">
+                                <input type="hidden" name="address_id" value="{{ address.id }}">
+                                <button type="submit" class="btn bg bsm">Jadikan Utama</button>
+                            </form>
+                            {% endif %}
+
+                            <form method="post" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus alamat ini?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="address_id" value="{{ address.id }}">
+                                <button type="submit" class="btn bred bsm">Hapus</button>
+                            </form>
+                        </div>
+                    </article>
+                    {% empty %}
+                    <div class="ad-empty">Belum ada alamat. Tambahkan alamat pertama kamu lewat form di atas.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

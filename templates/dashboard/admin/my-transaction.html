@@ -1,0 +1,43 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}My Transactions - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <h2 class="font-bold text-xl">My Transactions</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-custom-stroke">
+          <th class="py-3 px-4 font-semibold text-custom-grey">No</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Invoice</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Customer</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Total</th>
+          <th class="py-3 px-4 font-semibold text-custom-grey">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr class="border-b border-custom-stroke">
+          <td class="py-3 px-4">{{ forloop.counter }}</td>
+          <td class="py-3 px-4 font-semibold">{{ order.order_number }}</td>
+          <td class="py-3 px-4">
+            {{ order.buyer.get_full_name|default:order.buyer.username }}
+          </td>
+          <td class="py-3 px-4 font-semibold text-custom-blue">
+            Rp {{ order.total }}
+          </td>
+          <td class="py-3 px-4">{{ order.get_status_display }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="py-3 px-4 text-custom-grey text-center">
+            No transactions found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

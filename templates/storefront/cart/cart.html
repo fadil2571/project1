@@ -1,0 +1,279 @@
+
+
+{% extends 'layouts/base/base.html' %}
+{% load static %}
+{% load currency %}
+
+{% block title %}Keranjang Belanja - KOPMAS Shop{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-cart">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Keranjang Belanja 🛒</div>
+    </div>
+  </div>
+
+  <div class="step-bar" style="margin-bottom:18px">
+    <a class="stp active" href="{% url 'landing_app:cart' %}">
+      <div class="stp-num">1</div>
+      <div class="stp-lbl"><strong>Keranjang</strong></div>
+    </a>
+    <a class="stp" href="{% url 'landing_app:checkout' %}">
+      <div class="stp-num">2</div>
+      <div class="stp-lbl"><strong>Checkout</strong></div>
+    </a>
+    <a class="stp" href="#" aria-disabled="true">
+      <div class="stp-num">3</div>
+      <div class="stp-lbl"><strong>Pembayaran</strong></div>
+    </a>
+  </div>
+  <div class="cart-layout">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      {% if items %}
+        {% for item in items %}
+          <div class="card citem" data-cart-item-id="{{ item.id }}" data-update-url="{% url 'landing_app:update_cart' item.id %}">
+            <div class="ci-img" style="width:86px;height:86px;border-radius:8px;overflow:hidden;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              {% if 'Mukenah' in item.product.name %}
+                <img src="{% static 'store/album/mukena.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+              {% elif 'Jamu' in item.product.name %}
+                <img src="{% static 'album/jamu_botol.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+              {% elif 'Tas Bambu' in item.product.name %}
+                <img src="{% static 'album/tas_bambu.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+              {% elif 'Yogurt' in item.product.name %}
+                <img src="{% static 'album/yogurt.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+              {% elif 'Abon Salmon' in item.product.name or 'Abon Rendang' in item.product.name %}
+                <img src="{% static 'album/abon_salmon.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+              {% elif 'Sabun Cuci Piring' in item.product.name %}
+                <img src="{% static 'album/sabun_cuci_piring.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+              {% elif 'Daster' in item.product.name %}
+                <img src="{% static 'album/daster_motif.jpg' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+              {% elif 'iPhone' in item.product.name %}
+                <img src="{% static 'album/produk1.png' %}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+              {% elif item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width:100%;height:100%;object-fit:cover;">
+              {% else %}
+                <img
+                  src="{% static 'album/produk1.png' %}"
+                  alt="{{ item.product.name }}"
+                  style="width:100%;height:100%;object-fit:cover;"
+                >
+              {% endif %}
+            </div>
+            <div class="ci-info">
+              <div class="ci-name">{{ item.product.name }}</div>
+              <div class="ci-var">{{ item.variant|default:"Varian standar" }}</div>
+              <div class="ci-pr">Rp {{ item.product.price|rupiah }}</div>
+            </div>
+            <div class="ci-qctrl">
+              <button class="cqbtn js-qty-btn" type="button" data-delta="-1" data-input-id="cq{{ item.id }}">−</button>
+              <input class="cqval" id="cq{{ item.id }}" value="{{ item.quantity }}" readonly>
+              <button class="cqbtn js-qty-btn" type="button" data-delta="1" data-input-id="cq{{ item.id }}">+</button>
+            </div>
+            <div style="font-size:14px;color:var(--muted);min-width:150px;text-align:right">
+              Subtotal: <strong class="js-item-subtotal" style="color:var(--blue)">Rp {{ item.subtotal|rupiah }}</strong>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="card" style="padding:20px;color:var(--muted);text-align:center">Keranjang masih kosong. Yuk pilih produk dulu.</div>
+      {% endif %}
+    </div>
+    
+    <div class="card sum-card">
+      <h3>Ringkasan Pesanan</h3>
+      <div class="sr"><span>Total Item ({{ total_items }})</span><span id="cartSummarySubtotal">Rp {{ total_price|rupiah }}</span></div>
+      <div class="sr"><span>Estimasi Ongkir</span><span>Rp 20.000</span></div>
+      <div class="sr tot"><span>Total</span><span class="amt" id="cartGrandTotal">Rp {{ total_price|add:20000|rupiah }}</span></div>
+      <a class="btn bp" href="{% url 'landing_app:checkout' %}" style="width:100%;padding:13px;font-size:16px;margin-top:14px;justify-content:center">Checkout Sekarang</a>
+      <a class="btn bg" href="{% url 'landing_app:product_list' %}" style="width:100%;padding:13px;font-size:16px;margin-top:10px;justify-content:center">Lanjut Belanja</a>
+    </div>
+  </div>
+
+  <!-- Trusted Partners -->
+  <div class="lp-partners" style="margin-top:40px">
+    <h2 class="lp-partners-title">T R U S T E D &nbsp;&nbsp; P A R T N E R S</h2>
+    <div class="lp-partners-grid">
+      <div class="lp-partner-item">
+        <img src="{% static 'album/logo_sleman.png' %}" alt="Pemerintah Daerah Kabupaten Sleman">
+      </div>
+      <div class="lp-partner-item">
+        <img src="{% static 'album/logo_forkom.png' %}" alt="Forkom UMKM Kabupaten Sleman">
+      </div>
+      <div class="lp-partner-item">
+        <img src="{% static 'album/RST.png' %}" alt="RST">
+      </div>
+      <div class="lp-partner-item">
+        <img src="{% static 'album/kopmas_forkom.png' %}" alt="Kopmas Forkom UMKM Sleman">
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <div class="lp-footer-grid">
+        <div class="lp-footer-brand">
+          <img src="{% static 'logokopmas.png' %}" alt="KOPMAS" class="lp-footer-logo">
+          <p class="lp-footer-tagline">Emporing UMKM</p>
+          <p class="lp-footer-subtitle">Growing Sleman</p>
+          <p class="lp-footer-desc">
+            "Platform online resmi Koperasi Pemasaran UMKM Kabupaten Sleman untuk
+            memasarkan produk unggulan UMKM lokal secara mudah, aman, dan
+            terpercaya."
+          </p>
+          <div class="lp-footer-social" aria-label="Media sosial">
+            <a href="#" class="lp-footer-social-link" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
+              </svg>
+            </a>
+            <a href="#" class="lp-footer-social-link" aria-label="Website">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">LAYANAN</h4>
+          <ul class="lp-footer-links">
+            <li> > Kategori Produk</li>
+            <li> > Belanja Sekarang</li>
+            <li> > Promo &amp; Diskon</li>
+            <li> > Wishlist</li>
+            <li> > Konsultasi UMKM</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">USEFUL LINKS</h4>
+          <ul class="lp-footer-links">
+            <li> > Tentang Kami</li>
+            <li> > Cara Berjualan</li>
+            <li> > Kebijakan Privasi</li>
+            <li> > Syarat &amp; Ketentuan</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">HUBUNGI KAMI</h4>
+          <div class="lp-footer-contact-box">
+            <div class="lp-footer-contact-addr">
+              <span class="lp-footer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </span>
+              <div>
+                <strong>LOKASI</strong>
+                <p>JL. Cangkringan Indah 1 No.17<br>KarangSari, Wedomartani<br>Kec. Ngemplak<br>Kabupaten Sleman</p>
+              </div>
+            </div>
+            <div class="lp-footer-contact-wa">
+              <span class="lp-footer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.5-4.3A8.5 8.5 0 1 1 21 11.5z"></path>
+                </svg>
+              </span>
+              <div>
+                <strong>OFFICIAL WHATSAPP</strong>
+                <div class="lp-footer-wa-num">081234567890</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="lp-footer-bottom">Copyright © 2026 - Kompashop.Com All Rights Reserved<br>Support by OpenCash.ID</p>
+    </div>
+  </footer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const shippingCost = 20000;
+
+    function getCookie(name) {
+      const cookies = document.cookie ? document.cookie.split('; ') : [];
+      for (let i = 0; i < cookies.length; i += 1) {
+        const parts = cookies[i].split('=');
+        const key = decodeURIComponent(parts[0]);
+        if (key === name) {
+          return decodeURIComponent(parts.slice(1).join('='));
+        }
+      }
+      return '';
+    }
+
+    function formatRupiah(value) {
+      const amount = Number(value) || 0;
+      return 'Rp ' + amount.toLocaleString('id-ID');
+    }
+
+    function updateSummary(cartTotal) {
+      const headerSubtotal = document.getElementById('cartHeaderSubtotal');
+      const summarySubtotal = document.getElementById('cartSummarySubtotal');
+      const grandTotal = document.getElementById('cartGrandTotal');
+      if (headerSubtotal) headerSubtotal.textContent = formatRupiah(cartTotal);
+      if (summarySubtotal) summarySubtotal.textContent = formatRupiah(cartTotal);
+      if (grandTotal) grandTotal.textContent = formatRupiah(cartTotal + shippingCost);
+    }
+
+    async function syncCartItem(row, nextQty) {
+      const cartItemId = row.dataset.cartItemId;
+      const updateUrl = row.dataset.updateUrl;
+      const formData = new FormData();
+      formData.append('cart_item_id', cartItemId);
+      formData.append('quantity', String(nextQty));
+
+      const response = await fetch(updateUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Gagal memperbarui keranjang');
+      }
+
+      const subtotalEl = row.querySelector('.js-item-subtotal');
+      if (subtotalEl) subtotalEl.textContent = formatRupiah(data.item_total);
+      updateSummary(data.cart_total);
+    }
+
+    document.querySelectorAll('.js-qty-btn').forEach((btn) => {
+      btn.addEventListener('click', async function () {
+        const inputId = this.dataset.inputId;
+        const delta = Number(this.dataset.delta || 0);
+        const input = document.getElementById(inputId);
+        const row = this.closest('[data-cart-item-id]');
+        if (!input || !row) return;
+
+        const current = Number(input.value || 1);
+        const next = Math.max(1, current + delta);
+        if (next === current) return;
+
+        input.value = String(next);
+        try {
+          await syncCartItem(row, next);
+        } catch (error) {
+          input.value = String(current);
+          toast(error.message || 'Gagal update jumlah produk', 'error');
+        }
+      });
+    });
+  })();
+</script>
+{% endblock %}

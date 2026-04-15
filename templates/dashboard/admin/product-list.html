@@ -1,0 +1,427 @@
+{% load static humanize %}
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Product List - Kopmas Shop</title>
+  <link rel="stylesheet" href="{% static 'dashboard/assets/css/main.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Lexend Deca', ui-sans-serif, system-ui; margin: 0; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .transition-300 { transition: all 300ms ease; }
+    .bg-custom-background { background-color: #f3f5f9; }
+    .bg-custom-blue { background-color: #1053d5; }
+    .bg-custom-blue-10 { background-color: rgba(16, 83, 213, 0.1); }
+    .bg-custom-black { background-color: #292d32; }
+    .bg-custom-icon-background { background-color: #f3f3f3; }
+    .bg-custom-stroke { background-color: #e8e8e8; }
+    .text-custom-blue { color: #1053d5; }
+    .text-custom-grey { color: #6a7686; }
+    .text-custom-black { color: #292d32; }
+    .border-custom-stroke { border-color: #e8e8e8; }
+    .ring-custom-blue { --tw-ring-color: #1053d5; }
+    .sidebar-item.active { background-color: rgba(16, 83, 213, 0.1); }
+    .sidebar-item.active .sidebar-label { color: #1053d5; }
+    .sidebar-item.active .icon-default { opacity: 0; }
+    .sidebar-item.active .icon-active { opacity: 1; }
+    .sidebar-item.active .active-bar { display: flex; }
+    .branch-line { position: absolute; top: 10px; bottom: 40px; left: calc(100% - 22px); width: 1px; background-color: #e5e7eb; border-radius: 999px; transform: none !important; }
+    .branch-line:last-child { height: auto !important; }
+    .curve-branch { position: absolute; left: -22px; top: 0; width: 22px; height: 28px; border-left: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; border-bottom-left-radius: 14px; background: transparent; z-index: 1; transform: none; }
+    .btn-outline-import {
+      border: 1.5px solid #e8e8e8;
+      color: #292d32;
+      background-color: #ffffff;
+      cursor: pointer;
+      transition: all 300ms ease;
+    }
+    .btn-outline-import:hover {
+      border-color: #1053d5;
+      color: #1053d5;
+      background-color: rgba(16, 83, 213, 0.08);
+      box-shadow: 0 0 0 3px rgba(16, 83, 213, 0.12);
+    }
+  
+      :root {
+        /* Ubah nilai ini untuk atur padding kanan-kiri secara manual */
+        --page-side-padding-mobile-min: 20px;
+        --page-side-padding-fluid: 5vw;
+        --page-side-padding-desktop: 160px;
+      }
+
+      body .px-55 {
+        padding-left: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+        padding-right: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+      }
+
+      @media (min-width: 1280px) {
+        body .px-55 {
+          padding-left: var(--page-side-padding-desktop) !important;
+          padding-right: var(--page-side-padding-desktop) !important;
+        }
+      }
+    </style>
+  <script src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js" async></script>
+</head>
+<body class="bg-custom-background text-custom-black">
+  <div id="admin-app" data-page-title="Product List" data-role="seller" data-product-access-ready="{% if seller_product_access_ready %}true{% else %}false{% endif %}">
+
+    <div class="flex w-full gap-5">
+      <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
+        <div class="flex flex-col gap-6">
+          <div class="flex size-14 items-center justify-center rounded-full bg-custom-blue-10">
+            <img src="{% static 'dashboard/assets/images/icons/shopping-cart-blue.svg' %}" class="flex size-6 shrink-0" alt="icon">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <p class="font-bold text-4xl">{{ total_products|intcomma }}</p>
+            <p class="font-medium text-lg text-custom-grey">Total Products</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
+        <div class="flex flex-col gap-6">
+          <div class="flex size-14 items-center justify-center rounded-full bg-custom-blue-10">
+            <img src="{% static 'dashboard/assets/images/icons/presention-chart-blue.svg' %}" class="flex size-6 shrink-0" alt="icon">
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <p class="font-bold text-4xl">{{ total_sold|intcomma }}</p>
+            <p class="font-medium text-lg text-custom-grey">Total Sold</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
+      <div class="header flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div class="flex flex-col gap-2">
+          <p class="font-bold text-xl">All Products</p>
+          <div class="flex items-center gap-1">
+            <img src="{% static 'dashboard/assets/images/icons/shopping-cart-grey.svg' %}" class="flex size-6 shrink-0" alt="icon">
+            <p class="font-semibold text-custom-grey">{{ total_products|intcomma }} Total Products</p>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {% if can_manage_products %}
+          <button id="btn-import-product-api" type="button" class="btn-outline-import flex h-14 items-center justify-center rounded-full px-6 gap-2">
+            <img src="{% static 'dashboard/assets/images/icons/receive-square-blue-fill.svg' %}" class="flex size-6 shrink-0" alt="icon">
+            <span class="font-semibold text-lg leading-none">Import Produk dari API</span>
+          </button>
+          <a href="{% url 'panel_admin:product_create' %}" class="flex h-14 items-center justify-center rounded-full py-4 px-6 bg-custom-blue gap-1.5">
+            <span class="font-semibold text-lg text-white leading-none">Add New</span>
+            <img src="{% static 'dashboard/assets/images/icons/add-circle-white.svg' %}" class="flex size-6 shrink-0" alt="icon">
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      <div id="Filter" class="flex items-center justify-between">
+        <form method="get" action="{% url 'panel_admin:product_manage' %}">
+          <label class="flex items-center w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
+            <img src="{% static 'dashboard/assets/images/icons/box-search-grey.svg' %}" class="flex size-6 shrink-0" alt="icon">
+            <input type="text" name="search" value="{{ search_query }}" class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none" placeholder="Search product">
+          </label>
+        </form>
+        <div class="flex items-center gap-4">
+          <p class="font-medium text-custom-grey">Show</p>
+          <label class="flex items-center h-14 rounded-2xl border border-custom-stroke py-4 px-5 pl-3 bg-white focus-within:border-custom-black transition-300">
+            <select class="text-custom-black font-medium appearance-none focus:outline-none p-2">
+              <option value="10" class="font-medium">10 Entries</option>
+              <option value="20" class="font-medium">20 Entries</option>
+              <option value="40" class="font-medium">40 Entries</option>
+            </select>
+            <img src="{% static 'dashboard/assets/images/icons/arrow-down-black.svg' %}" class="flex size-6 shrink-0 -ml-1" alt="icon">
+          </label>
+        </div>
+      </div>
+      <div id="List-Categories" class="flex flex-col gap-6">
+        <div id="List" class="flex flex-col gap-5">
+          {% for product in products %}
+          <div class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
+            <div class="flex items-center gap-5 justify-between pr-[30px]">
+              <div class="flex w-full items-center gap-3.5 overflow-hidden">
+                <div class="flex size-[92px] shrink-0 rounded-2xl bg-custom-background overflow-hidden items-center justify-center">
+                  {% if product.main_image %}
+                  <img src="{{ product.main_image.url }}" class="size-full object-cover" alt="{{ product.name }}">
+                  {% else %}
+                  <img src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}" class="size-full object-contain" alt="icon">
+                  {% endif %}
+                </div>
+                <div class="flex flex-col flex-1 gap-1.5 overflow-hidden">
+                  <p class="font-bold text-lg truncate">{{ product.name }}</p>
+                  <p class="font-semibold leading-none text-custom-grey flex items-center gap-1.5"><span class="font-bold text-custom-blue">{{ product.category.name|default:'-' }}</span></p>
+                  {% if is_admin_observer %}
+                  <p class="font-medium text-sm text-custom-grey truncate">
+                    Toko: <span class="font-semibold text-custom-black">{{ product.seller.store_name|default:product.seller.username }}</span>
+                  </p>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="flex items-center gap-2.5 w-full">
+                <div class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                  <img src="{% static 'dashboard/assets/images/icons/status-up-black.svg' %}" class="flex size-6 shrink-0" alt="icon">
+                </div>
+                <div class="flex flex-col gap-1"><p class="font-bold text-lg leading-none">{{ product.sales_count|intcomma }}</p><p class="font-semibold text-custom-grey">Total Sold</p></div>
+              </div>
+              <div class="flex items-center gap-2.5 w-full">
+                <div class="flex flex-col gap-1"><p class="font-bold text-lg leading-none">Rp {{ product.final_price|intcomma }}</p><p class="font-semibold text-custom-grey">Harga</p></div>
+              </div>
+            </div>
+            <hr class="border-custom-stroke">
+            <div class="flex items-center justify-between">
+              <div></div>
+              <div class="flex items-center justify-end gap-3.5">
+                {% if can_manage_products %}
+                <form method="post" action="{% url 'panel_admin:product_delete' product.pk %}">
+                  {% csrf_token %}
+                  <button class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-[rgba(255,19,61,0.1)]"><img src="{% static 'dashboard/assets/images/icons/trash-red.svg' %}" class="flex size-6 shrink-0" alt="icon"><span class="font-semibold" style="color:#ff133d">Delete</span></button>
+                </form>
+                <a href="{% url 'panel_admin:product_update' product.pk %}" class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black"><img src="{% static 'dashboard/assets/images/icons/edit-white.svg' %}" class="flex size-6 shrink-0" alt="icon"><span class="font-semibold text-white">Edit</span></a>
+                {% endif %}
+                <a href="{% url 'landing_app:product_detail' product.slug %}" class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue"><img src="{% static 'dashboard/assets/images/icons/eye-white.svg' %}" class="flex size-6 shrink-0" alt="icon"><span class="font-semibold text-white">Details</span></a>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="card rounded-[20px] border border-custom-stroke py-8 px-5 bg-white text-center text-custom-grey font-medium">
+            Belum ada produk.
+          </div>
+          {% endfor %}
+        </div>
+        {% if is_paginated %}
+        <nav id="Pagination">
+          <ul class="flex items-center gap-3">
+            <li class="group">
+              {% if page_obj.has_previous %}
+              <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue-10 text-custom-blue font-semibold"><img src="{% static 'dashboard/assets/images/icons/arrow-right-no-tail-blue.svg' %}" class="size-6 rotate-180" alt="icon"></a>
+              {% else %}
+              <button disabled class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue-10 text-custom-blue font-semibold"><img src="{% static 'dashboard/assets/images/icons/arrow-right-no-tail-blue.svg' %}" class="size-6 opacity-20 rotate-180" alt="icon"></button>
+              {% endif %}
+            </li>
+            <li class="group"><button class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue text-white font-semibold">{{ page_obj.number }}</button></li>
+            <li class="group">
+              {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue-10 text-custom-blue font-semibold"><img src="{% static 'dashboard/assets/images/icons/arrow-right-no-tail-blue.svg' %}" class="size-6" alt="icon"></a>
+              {% else %}
+              <button disabled class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue-10 text-custom-blue font-semibold"><img src="{% static 'dashboard/assets/images/icons/arrow-right-no-tail-blue.svg' %}" class="size-6 opacity-20" alt="icon"></button>
+              {% endif %}
+            </li>
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+  <script>
+    window.__DJANGO_MESSAGES__ = [
+      {% for message in messages %}
+      { level: "{{ message.tags|default:'info'|escapejs }}", text: "{{ message|escapejs }}" },
+      {% endfor %}
+    ];
+  </script>
+  <script>
+    (function () {
+      var IMPORT_BUTTON_ID = 'btn-import-product-api';
+      var TEST_SUPPLIER_IDENTIFIER = '{{ store_supplier_id|default:""|escapejs }}';
+      var IMPORT_PREVIEW_URL = "{% url 'panel_admin:product_import_api_preview' %}";
+      var IMPORT_SAVE_URL = "{% url 'panel_admin:product_import_api' %}";
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function formatRupiah(value) {
+        var number = Number(value || 0);
+        if (!Number.isFinite(number)) return 'Rp 0';
+        return 'Rp ' + number.toLocaleString('id-ID');
+      }
+
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i += 1) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      function showImportToast(icon, title) {
+        if (typeof Swal === 'undefined') {
+          window.alert(title);
+          return;
+        }
+
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: icon,
+          title: title,
+          showConfirmButton: false,
+          timer: 2800,
+          timerProgressBar: true,
+        });
+      }
+
+      async function showImportPreview(products, supplierId) {
+        var items = Array.isArray(products) ? products : [];
+        var rowsHtml = items.map(function (item, index) {
+          return '' +
+            '<tr>' +
+              '<td style="padding:8px 10px; border-bottom:1px solid #eef2f7; font-weight:700;">' + (index + 1) + '</td>' +
+              '<td style="padding:8px 10px; border-bottom:1px solid #eef2f7;">' + escapeHtml(item.namaProduct || '-') + '</td>' +
+              '<td style="padding:8px 10px; border-bottom:1px solid #eef2f7; white-space:nowrap;">' + Number(item.beratGram || item.weight || 0).toLocaleString('id-ID') + ' gr</td>' +
+              '<td style="padding:8px 10px; border-bottom:1px solid #eef2f7; white-space:nowrap;">' + formatRupiah(item.harga) + '</td>' +
+              '<td style="padding:8px 10px; border-bottom:1px solid #eef2f7; color:#6a7686;">' + escapeHtml(item.deskripsi || '-') + '</td>' +
+            '</tr>';
+        }).join('');
+
+        if (typeof Swal === 'undefined') {
+          return window.confirm('Preview import supplier ' + supplierId + ': total ' + items.length + ' produk. Simpan ke database sekarang?');
+        }
+
+        var result = await Swal.fire({
+          title: 'Preview Import Produk',
+          width: 980,
+          html: '' +
+            '<div style="text-align:left; margin-bottom:10px; font-size:13px; color:#6a7686;">' +
+              'Supplier: <b>' + escapeHtml(supplierId) + '</b><br>' +
+              'Total produk: <b>' + items.length + '</b>' +
+            '</div>' +
+            '<div style="max-height:360px; overflow:auto; border:1px solid #e8e8e8; border-radius:12px;">' +
+              '<table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">' +
+                '<thead style="position:sticky; top:0; background:#f8fafc;">' +
+                  '<tr>' +
+                    '<th style="padding:10px; border-bottom:1px solid #e8e8e8;">#</th>' +
+                    '<th style="padding:10px; border-bottom:1px solid #e8e8e8;">Nama Produk</th>' +
+                    '<th style="padding:10px; border-bottom:1px solid #e8e8e8;">Berat</th>' +
+                    '<th style="padding:10px; border-bottom:1px solid #e8e8e8;">Harga</th>' +
+                    '<th style="padding:10px; border-bottom:1px solid #e8e8e8;">Deskripsi</th>' +
+                  '</tr>' +
+                '</thead>' +
+                '<tbody>' + rowsHtml + '</tbody>' +
+              '</table>' +
+            '</div>',
+          showCancelButton: true,
+          cancelButtonText: 'Batal',
+          confirmButtonText: 'Konfirmasi & Simpan',
+          confirmButtonColor: '#1053d5',
+        });
+
+        return !!(result && result.isConfirmed);
+      }
+
+      async function saveImportedProductsToDatabase(supplierId, products) {
+        var response = await fetch(IMPORT_SAVE_URL, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken') || '',
+          },
+          body: JSON.stringify({
+            idSupplier: supplierId,
+            products: products,
+          }),
+        });
+
+        var payload = await response.json();
+        if (!response.ok || !payload.success) {
+          throw new Error(payload && payload.message ? payload.message : 'Gagal menyimpan produk hasil import.');
+        }
+
+        return payload;
+      }
+
+      async function handleImportClick(button) {
+        if (!button || button.dataset.loading === '1') return;
+
+        var label = button.querySelector('span');
+        var oldLabel = label ? label.textContent : '';
+
+        button.dataset.loading = '1';
+        button.disabled = true;
+        if (label) label.textContent = 'Importing...';
+
+        try {
+          var response = await fetch(IMPORT_PREVIEW_URL, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken') || '',
+            },
+            body: JSON.stringify({
+              idSupplier: TEST_SUPPLIER_IDENTIFIER,
+            }),
+          });
+
+          var payload = await response.json();
+          var supplierId = payload && payload.data ? (payload.data.idSupplier || TEST_SUPPLIER_IDENTIFIER) : TEST_SUPPLIER_IDENTIFIER;
+          var products = payload && payload.data && Array.isArray(payload.data.products) ? payload.data.products : [];
+
+          if (!response.ok || !payload.success || !products.length) {
+            var errorMessage = payload && payload.message ? payload.message : 'Gagal mengambil data produk dari API.';
+            throw new Error(errorMessage);
+          }
+
+          var confirmed = await showImportPreview(products, supplierId);
+          if (!confirmed) {
+            showImportToast('info', 'Import dibatalkan. Data belum disimpan ke database.');
+            return;
+          }
+
+          var saveResult = await saveImportedProductsToDatabase(supplierId, products);
+          var resultData = saveResult && saveResult.data ? saveResult.data : {};
+          var savedCount = Number(resultData.createdCount || 0);
+          var skippedCount = Number(resultData.skippedCount || 0);
+
+          showImportToast('success', 'Import selesai. Tersimpan: ' + savedCount + ', dilewati: ' + skippedCount + '.');
+          window.setTimeout(function () {
+            window.location.reload();
+          }, 600);
+        } catch (error) {
+          showImportToast('error', error && error.message ? error.message : 'Terjadi kesalahan saat import produk dari API.');
+        } finally {
+          button.dataset.loading = '0';
+          button.disabled = false;
+          if (label) label.textContent = oldLabel || 'Import Produk dari API';
+        }
+      }
+
+      document.addEventListener('click', function (event) {
+        var button = event.target && event.target.closest('#' + IMPORT_BUTTON_ID);
+        if (!button) return;
+
+        event.preventDefault();
+        handleImportClick(button);
+      });
+    })();
+  </script>
+  <script src="{% static 'dashboard/assets/js/admin-layout.js' %}?v=20260401c" defer></script>
+</body>
+</html>
+
+

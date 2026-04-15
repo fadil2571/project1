@@ -1,0 +1,26 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}Create Store - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <h2 class="font-bold text-xl">Create New Store</h2>
+  <form method="post" class="flex flex-col gap-4" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-custom-grey">Store Name</label>
+      <input
+        name="store_name"
+        class="h-14 w-full rounded-2xl border border-custom-stroke px-5 font-medium focus:outline-none focus:ring-2 ring-custom-blue transition-300"
+        placeholder="Enter store name"
+      />
+    </div>
+    <button
+      type="submit"
+      class="flex h-14 w-fit items-center rounded-full bg-custom-blue px-8 font-semibold text-white hover:ring-2 ring-custom-blue transition-300"
+    >
+      Save Store
+    </button>
+  </form>
+</div>
+{% endblock %}
+

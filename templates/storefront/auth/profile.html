@@ -1,0 +1,309 @@
+{% extends 'layouts/base/base.html' %}
+
+{% block title %}Profil Saya - Kopmas Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pf-wrap {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 18px;
+    }
+
+    .pf-card {
+        background: #fff;
+        border: 1.5px solid var(--surface3);
+        border-radius: var(--rlg);
+        box-shadow: var(--sh-sm);
+    }
+
+    .pf-side {
+        padding: 20px;
+        height: fit-content;
+    }
+
+    .pf-ava {
+        width: 88px;
+        height: 88px;
+        border-radius: 999px;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto 12px;
+        border: 2px solid var(--surface3);
+    }
+
+    .pf-ava-fallback {
+        width: 88px;
+        height: 88px;
+        border-radius: 999px;
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        background: linear-gradient(135deg, var(--blue), var(--orange));
+        color: #fff;
+    }
+
+    .pf-name {
+        text-align: center;
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--ink);
+    }
+
+    .pf-role {
+        text-align: center;
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 4px;
+    }
+
+    .pf-menu {
+        margin-top: 16px;
+        border-top: 1px solid var(--surface3);
+        padding-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pf-menu a {
+        display: block;
+        text-decoration: none;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--surface3);
+        color: var(--ink3);
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .pf-menu a.active {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+    }
+
+    .pf-menu a.logout {
+        color: var(--red);
+        border-color: rgba(239, 68, 68, .25);
+        background: var(--red-l);
+    }
+
+    .pf-main {
+        padding: 22px;
+    }
+
+    .pf-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--ink);
+        margin-bottom: 14px;
+    }
+
+    .pf-msg {
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .pf-msg.success {
+        background: var(--green-l);
+        color: #047857;
+        border: 1px solid #A7F3D0;
+    }
+
+    .pf-msg.error {
+        background: var(--red-l);
+        color: #B91C1C;
+        border: 1px solid #FECACA;
+    }
+
+    .pf-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .pf-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+
+    .pf-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .pf-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+    }
+
+    .pf-input {
+        width: 100%;
+        border: 1.5px solid var(--surface3);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        outline: none;
+        background: #fff;
+        color: var(--ink);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .pf-input:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(26, 78, 216, .08);
+    }
+
+    .pf-input[disabled] {
+        background: var(--surface2);
+        color: var(--muted);
+    }
+
+    .pf-divider {
+        border: 0;
+        border-top: 1px solid var(--surface3);
+        margin: 16px 0;
+    }
+
+    .pf-section {
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--ink);
+        margin-bottom: 12px;
+    }
+
+    @media (max-width: 992px) {
+        .pf-wrap {
+            grid-template-columns: 1fr;
+        }
+
+        .pf-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-profile">
+    <div class="ph">
+        <div>
+            <div class="ph-title">Profil Saya</div>
+            <div class="ph-sub">Kelola informasi akun dan keamanan</div>
+        </div>
+    </div>
+
+    <div class="pf-wrap">
+        <aside class="pf-card pf-side">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="pf-ava">
+            {% else %}
+            <div class="pf-ava-fallback">👤</div>
+            {% endif %}
+
+            <div class="pf-name">{{ user.get_full_name|default:user.username }}</div>
+            <div class="pf-role">{{ user.get_role_display }}</div>
+
+            <div class="pf-menu">
+                <a href="{% url 'landing_app:profile' %}" class="active">Profil</a>
+                <a href="{% url 'landing_app:order_history' %}">Pesanan Saya</a>
+                <a href="{% url 'landing_app:addresses' %}">Alamat</a>
+                <a href="{% url 'landing_app:logout' %}" class="logout">Logout</a>
+            </div>
+        </aside>
+
+        <section class="pf-card pf-main">
+            <div class="pf-title">Informasi Profil</div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="pf-msg {% if message.tags == 'success' %}success{% else %}error{% endif %}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="pf-grid">
+                    <div class="pf-field">
+                        <label class="pf-label">Username</label>
+                        <input type="text" class="pf-input" value="{{ user.username }}" disabled>
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label">Email</label>
+                        <input type="email" name="email" class="pf-input" value="{{ user.email }}">
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label">Nama Depan</label>
+                        <input type="text" name="first_name" class="pf-input" value="{{ user.first_name }}">
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label">Nama Belakang</label>
+                        <input type="text" name="last_name" class="pf-input" value="{{ user.last_name }}">
+                    </div>
+
+                    <div class="pf-field full">
+                        <label class="pf-label">Nomor Telepon</label>
+                        <input type="tel" name="phone" class="pf-input" value="{{ user.phone|default:'' }}">
+                    </div>
+
+                    <div class="pf-field full">
+                        <label class="pf-label">Foto Profil</label>
+                        <input type="file" name="avatar" class="pf-input" accept="image/*">
+                    </div>
+                </div>
+
+                {% if user.is_seller_user %}
+                <hr class="pf-divider">
+                <div class="pf-section">Informasi Toko</div>
+
+                <div class="pf-grid">
+                    <div class="pf-field full">
+                        <label class="pf-label">Nama Toko</label>
+                        <input type="text" name="store_name" class="pf-input" value="{{ user.store_name|default:'' }}">
+                    </div>
+
+                    <div class="pf-field full">
+                        <label class="pf-label">Deskripsi Toko</label>
+                        <textarea name="store_description" class="pf-input" rows="3">{{ user.store_description|default:'' }}</textarea>
+                    </div>
+                </div>
+                {% endif %}
+
+                <hr class="pf-divider">
+                <div class="pf-section">Ubah Password</div>
+
+                <div class="pf-grid">
+                    <div class="pf-field full">
+                        <label class="pf-label">Password Saat Ini</label>
+                        <input type="password" name="current_password" class="pf-input">
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label">Password Baru</label>
+                        <input type="password" name="new_password" class="pf-input">
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label">Konfirmasi Password Baru</label>
+                        <input type="password" name="confirm_password" class="pf-input">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn bp" style="margin-top:6px;">Simpan Perubahan</button>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

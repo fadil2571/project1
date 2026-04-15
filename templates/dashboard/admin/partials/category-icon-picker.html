@@ -1,0 +1,70 @@
+<div class="js-icon-picker flex flex-col gap-3">
+  <div class="rounded-2xl border border-custom-stroke bg-slate-50 p-3">
+    <p class="mb-2 text-sm font-semibold text-custom-grey">Preview Icon</p>
+    <div class="js-icon-preview-card"></div>
+  </div>
+
+  <p class="text-sm font-semibold text-custom-grey">Icon Pack</p>
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+    {% for icon_value, icon_label in icon_options %}
+    <label class="cursor-pointer">
+      <input
+        type="radio"
+        name="icon_key"
+        value="{{ icon_value }}"
+        class="sr-only icon-pack-input"
+        {% if selected_icon %}
+          {% if selected_icon == icon_value %}checked{% endif %}
+        {% elif forloop.first %}
+          checked
+        {% endif %}
+      />
+      <span class="icon-pack-card" title="{{ icon_label }}">
+        <span class="icon-pack-badge mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl {% if icon_value == 'food' %}bg-amber-50 text-amber-600{% elif icon_value == 'drink' %}bg-sky-50 text-sky-600{% elif icon_value == 'craft' %}bg-violet-50 text-violet-600{% elif icon_value == 'fashion' %}bg-pink-50 text-pink-600{% elif icon_value == 'agriculture' %}bg-green-50 text-green-600{% elif icon_value == 'service' %}bg-indigo-50 text-indigo-600{% elif icon_value == 'electronics' %}bg-cyan-50 text-cyan-600{% elif icon_value == 'beauty' %}bg-rose-50 text-rose-600{% elif icon_value == 'books' %}bg-orange-50 text-orange-600{% elif icon_value == 'toys' %}bg-fuchsia-50 text-fuchsia-600{% elif icon_value == 'sports' %}bg-lime-50 text-lime-700{% elif icon_value == 'health' %}bg-red-50 text-red-600{% elif icon_value == 'pet' %}bg-yellow-50 text-yellow-700{% elif icon_value == 'automotive' %}bg-slate-100 text-slate-700{% elif icon_value == 'home' %}bg-teal-50 text-teal-600{% elif icon_value == 'office' %}bg-zinc-100 text-zinc-700{% elif icon_value == 'travel' %}bg-blue-50 text-blue-600{% elif icon_value == 'music' %}bg-purple-50 text-purple-600{% elif icon_value == 'gift' %}bg-emerald-50 text-emerald-600{% elif icon_value == 'baby' %}bg-pink-50 text-pink-500{% else %}bg-amber-50 text-amber-600{% endif %}">
+          {% include 'dashboard/admin/partials/category-icon-svg.html' with icon_key=icon_value icon_size='h-5 w-5' %}
+        </span>
+        <span class="sr-only">{{ icon_label }}</span>
+      </span>
+    </label>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+(function () {
+  const pickers = document.querySelectorAll('.js-icon-picker');
+
+  pickers.forEach((picker) => {
+    if (picker.dataset.iconPickerInit === '1') {
+      return;
+    }
+    picker.dataset.iconPickerInit = '1';
+
+    const previewCard = picker.querySelector('.js-icon-preview-card');
+    const radioInputs = picker.querySelectorAll('.icon-pack-input');
+
+    const syncPreview = () => {
+      const selectedInput = picker.querySelector('.icon-pack-input:checked');
+      if (!selectedInput || !previewCard) {
+        return;
+      }
+
+      const sourceCard = selectedInput.nextElementSibling;
+      if (!sourceCard) {
+        return;
+      }
+
+      const clonedCard = sourceCard.cloneNode(true);
+      clonedCard.classList.add('max-w-[180px]', 'cursor-default');
+      previewCard.innerHTML = '';
+      previewCard.appendChild(clonedCard);
+    };
+
+    radioInputs.forEach((input) => {
+      input.addEventListener('change', syncPreview);
+    });
+
+    syncPreview();
+  });
+})();
+</script>

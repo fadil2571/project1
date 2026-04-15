@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@source "../../../../templates/**/*.html";
+@source "../js/**/*.js";
+
+/*
+  Safelist — class dinamis dari admin-layout.js (string concatenation tidak terdeteksi Tailwind):
+  sidebar-item active rotate-90 hidden -translate-x-full lg:ml-0 lg:ml-[280px]
+  opacity-0 opacity-100 transition-300
+*/
+
+@theme {
+  --color-custom-blue: #1053d5;
+  --color-custom-blue-10: rgba(16, 83, 213, 0.1);
+  --color-custom-black: #292d32;
+  --color-custom-grey: #6a7686;
+  --color-custom-background: #f3f5f9;
+  --color-custom-stroke: #e8e8e8;
+  --color-custom-icon-background: #f3f3f3;
+  --color-custom-red: #ff133d;
+}
+
+@layer components {
+  .branch-line {
+    position: absolute;
+    top: 10px;
+    bottom: 40px;
+    left: calc(100% - 22px);
+    width: 1px;
+    background-color: #e5e7eb;
+    border-radius: 999px;
+    transform: none !important;
+  }
+
+  .branch-line:last-child {
+    height: auto !important;
+  }
+
+  .curve-branch {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 22px;
+    height: 28px;
+    border-left: 2px solid #e5e7eb;
+    border-bottom: 2px solid #e5e7eb;
+    border-bottom-left-radius: 14px;
+    background: transparent;
+    z-index: 1;
+    transform: none;
+  }
+
+  .sidebar-item.active .icon-active {
+    opacity: 1 !important;
+  }
+
+  .sidebar-item.active .icon-default {
+    opacity: 0 !important;
+  }
+
+  .sidebar-item.active .sidebar-label {
+    color: #1053d5 !important;
+  }
+
+  .sidebar-item.active .active-bar {
+    display: block !important;
+  }
+}

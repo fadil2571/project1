@@ -1,0 +1,479 @@
+{% extends 'layouts/base/base.html' %}
+
+{% load static %}
+
+{% block title %}Register - KOPMAS Shop{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-register" style="padding:0">
+  <div class="auth-layout auth-layout-register">
+    <div class="auth-vis auth-vis-register" style="--auth-bg:url('{% static 'store/album/rpt.jpeg' %}')">
+    </div>
+    <div class="auth-panel auth-panel-register">
+      <div class="af-in register-card" data-register-role="buyer">
+        <div class="af-logo">
+          <img src="{% static 'store/album/logokopmas.png' %}" alt="KopmasShop" class="af-logo-img">
+        </div>
+        <div class="af-title register-title">Hey🙌🏻, Welcome Back!</div>
+        <div class="af-subtitle register-subtitle">Create Account to continue!</div>
+        <div class="register-role-label">Apakah Anda ?</div>
+
+        <div class="register-role" role="tablist" aria-label="Pilih tipe akun">
+          <button class="register-role-btn active" data-role="buyer" type="button" role="tab" aria-selected="true" onclick="setRegisterRole('buyer', this)">
+            <span class="register-role-ico" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12.5729 0.0791701C12.7507 -0.00974263 12.9566 -0.0244009 13.1452 0.0384175C13.3339 0.101236 13.4898 0.23639 13.5789 0.41417L15.3919 4.04017C15.8192 4.06084 16.2092 4.09617 16.5619 4.14617C17.6179 4.29717 18.4919 4.62317 19.1129 5.39117C19.7339 6.15917 19.8699 7.08217 19.7969 8.14617C19.7269 9.17717 19.4469 10.4782 19.0989 12.1032L18.6479 14.2102C18.4129 15.3072 18.2219 16.1962 17.9819 16.8902C17.7319 17.6152 17.4019 18.2102 16.8399 18.6652C16.2779 19.1202 15.6259 19.3172 14.8659 19.4102C14.1359 19.4992 13.2259 19.4992 12.1059 19.4992H7.70986C6.58786 19.4992 5.67886 19.4992 4.94886 19.4102C4.18886 19.3172 3.53686 19.1202 2.97486 18.6652C2.41286 18.2102 2.08286 17.6152 1.83286 16.8912C1.59286 16.1962 1.40286 15.3072 1.16686 14.2112L0.715861 12.1042C0.367861 10.4782 0.088861 9.17717 0.017861 8.14617C-0.055139 7.08217 0.080861 6.16017 0.701861 5.39117C1.32186 4.62317 2.19586 4.29717 3.25186 4.14617C3.60519 4.09684 3.99519 4.0615 4.42186 4.04017L6.23786 0.41417C6.32763 0.237801 6.48348 0.104062 6.67143 0.042098C6.85938 -0.019866 7.0642 -0.00503224 7.24127 0.0833668C7.41833 0.171766 7.55328 0.326564 7.6167 0.514028C7.68012 0.701493 7.66688 0.906426 7.57986 1.08417L6.11986 4.00117C6.48386 3.99917 6.86686 3.9985 7.26886 3.99917H12.5469C12.9489 3.99917 13.3319 3.99984 13.6959 4.00117L12.2369 1.08417C12.1479 0.906331 12.1333 0.700464 12.1961 0.511822C12.2589 0.323179 12.3941 0.1672 12.5719 0.0781702M3.63986 5.60717L3.23686 6.41317C3.19196 6.50138 3.16497 6.59761 3.15743 6.69631C3.1499 6.795 3.16198 6.89421 3.19297 6.98822C3.22396 7.08222 3.27325 7.16916 3.338 7.24402C3.40276 7.31889 3.48169 7.38019 3.57025 7.42441C3.65881 7.46862 3.75524 7.49487 3.85399 7.50163C3.95274 7.5084 4.05185 7.49555 4.14562 7.46383C4.23938 7.43211 4.32593 7.38214 4.40029 7.31681C4.47465 7.25148 4.53534 7.17207 4.57886 7.08317L5.36586 5.50917C5.93586 5.49917 6.58586 5.49817 7.32986 5.49817H12.4859C13.2299 5.49817 13.8799 5.49817 14.4499 5.50817L15.2369 7.08317C15.3266 7.25954 15.4825 7.39328 15.6704 7.45524C15.8584 7.51721 16.0632 7.50237 16.2403 7.41397C16.4173 7.32557 16.5523 7.17078 16.6157 6.98331C16.6791 6.79585 16.6659 6.59091 16.5789 6.41317L16.1759 5.60717L16.3499 5.63017C17.2339 5.75717 17.6669 5.98817 17.9469 6.33317C18.2269 6.67917 18.3609 7.15217 18.2999 8.04317C18.2379 8.95317 17.9839 10.1492 17.6199 11.8482L17.1899 13.8482C16.9429 15.0032 16.7699 15.8022 16.5639 16.4002C16.3639 16.9802 16.1599 17.2862 15.8969 17.4982C15.6349 17.7102 15.2919 17.8462 14.6849 17.9202C14.0559 17.9972 13.2379 17.9982 12.0569 17.9982H7.75786C6.57786 17.9982 5.75986 17.9972 5.13086 17.9202C4.52286 17.8462 4.18086 17.7102 3.91886 17.4982C3.65586 17.2862 3.45086 16.9792 3.25186 16.4002C3.04486 15.8022 2.87186 15.0032 2.62486 13.8482L2.19586 11.8482C1.83186 10.1482 1.57786 8.95417 1.51586 8.04317C1.45486 7.15217 1.58986 6.67917 1.86886 6.33317C2.14886 5.98817 2.58186 5.75717 3.46586 5.63017L3.63986 5.60717Z" fill="black"/>
+              </svg>
+            </span>
+            <span>Buyer</span>
+          </button>
+          <button class="register-role-btn" data-role="seller" type="button" role="tab" aria-selected="false" onclick="setRegisterRole('seller', this)">
+            <span class="register-role-ico" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.25 12C7.25 11.8011 7.32902 11.6103 7.46967 11.4697C7.61032 11.329 7.80109 11.25 8 11.25H16C16.1989 11.25 16.3897 11.329 16.5303 11.4697C16.671 11.6103 16.75 11.8011 16.75 12C16.75 12.1989 16.671 12.3897 16.5303 12.5303C16.3897 12.671 16.1989 12.75 16 12.75H8C7.80109 12.75 7.61032 12.671 7.46967 12.5303C7.32902 12.3897 7.25 12.1989 7.25 12ZM10 14.25C9.80109 14.25 9.61032 14.329 9.46967 14.4697C9.32902 14.6103 9.25 14.8011 9.25 15C9.25 15.1989 9.32902 15.3897 9.46967 15.5303C9.61032 15.671 9.80109 15.75 10 15.75H14C14.1989 15.75 14.3897 15.671 14.5303 15.5303C14.671 15.3897 14.75 15.1989 14.75 15C14.75 14.8011 14.671 14.6103 14.5303 14.4697C14.3897 14.329 14.1989 14.25 14 14.25H10Z" fill="#A6A6A6"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M14.6647 2.33002C14.8425 2.24111 15.0484 2.22645 15.237 2.28927C15.4256 2.35209 15.5816 2.48724 15.6707 2.66502L17.4837 6.29102C17.911 6.31169 18.301 6.34702 18.6537 6.39702C19.7097 6.54802 20.5837 6.87402 21.2047 7.64202C21.8257 8.41003 21.9617 9.33302 21.8887 10.397C21.8187 11.428 21.5387 12.729 21.1907 14.354L20.7397 16.461C20.5047 17.558 20.3137 18.447 20.0737 19.141C19.8237 19.866 19.4937 20.461 18.9317 20.916C18.3697 21.371 17.7177 21.568 16.9577 21.661C16.2277 21.75 15.3177 21.75 14.1977 21.75H9.80166C8.67966 21.75 7.77066 21.75 7.04066 21.661C6.28066 21.568 5.62866 21.371 5.06666 20.916C4.50466 20.461 4.17466 19.866 3.92466 19.142C3.68466 18.447 3.49466 17.558 3.25866 16.462L2.80766 14.355C2.45966 12.729 2.18066 11.428 2.10966 10.397C2.03666 9.33302 2.17266 8.41103 2.79366 7.64202C3.41366 6.87402 4.28766 6.54802 5.34366 6.39702C5.69699 6.34769 6.08699 6.31236 6.51366 6.29102L8.32966 2.66502C8.41943 2.48866 8.57527 2.35492 8.76323 2.29295C8.95118 2.23099 9.156 2.24582 9.33306 2.33422C9.51013 2.42262 9.64507 2.57742 9.7085 2.76488C9.77192 2.95235 9.75868 3.15728 9.67166 3.33502L8.21166 6.25202C8.57566 6.25002 8.95866 6.24936 9.36066 6.25002H14.6387C15.0407 6.25002 15.4237 6.25069 15.7877 6.25202L14.3287 3.33502C14.2397 3.15719 14.2251 2.95132 14.2879 2.76268C14.3507 2.57403 14.4859 2.41805 14.6637 2.32902M5.73166 7.85802L5.32866 8.66402C5.28376 8.75224 5.25676 8.84846 5.24923 8.94716C5.2417 9.04585 5.25377 9.14506 5.28476 9.23907C5.31576 9.33308 5.36505 9.42001 5.4298 9.49488C5.49455 9.56974 5.57348 9.63105 5.66204 9.67526C5.7506 9.71948 5.84704 9.74572 5.94579 9.75249C6.04454 9.75925 6.14365 9.74641 6.23741 9.71468C6.33117 9.68296 6.41773 9.63299 6.49209 9.56766C6.56644 9.50233 6.62713 9.42292 6.67066 9.33402L7.45766 7.76003C8.02766 7.75002 8.67766 7.74902 9.42166 7.74902H14.5777C15.3217 7.74902 15.9717 7.74902 16.5417 7.75902L17.3287 9.33402C17.4184 9.51039 17.5743 9.64413 17.7622 9.7061C17.9502 9.76806 18.155 9.75323 18.3321 9.66483C18.5091 9.57643 18.6441 9.42163 18.7075 9.23417C18.7709 9.0467 18.7577 8.84177 18.6707 8.66402L18.2677 7.85802L18.4417 7.88102C19.3257 8.00802 19.7587 8.23902 20.0387 8.58402C20.3187 8.93002 20.4527 9.40302 20.3917 10.294C20.3297 11.204 20.0757 12.4 19.7117 14.099L19.2817 16.099C19.0347 17.254 18.8617 18.053 18.6557 18.651C18.4557 19.231 18.2517 19.537 17.9887 19.749C17.7267 19.961 17.3837 20.097 16.7767 20.171C16.1477 20.248 15.3297 20.249 14.1487 20.249H9.84966C8.66966 20.249 7.85166 20.248 7.22266 20.171C6.61466 20.097 6.27266 19.961 6.01066 19.749C5.74766 19.537 5.54266 19.23 5.34366 18.651C5.13666 18.053 4.96366 17.254 4.71666 16.099L4.28766 14.099C3.92366 12.399 3.66966 11.205 3.60766 10.294C3.54666 9.40302 3.68166 8.93002 3.96066 8.58402C4.24066 8.23902 4.67366 8.00802 5.55766 7.88102L5.73166 7.85802Z" fill="#A6A6A6"/>
+              </svg>
+            </span>
+            <span>Seller</span>
+          </button>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="account_type" id="registerAccountType" value="{{ role|default:'buyer' }}">
+
+          <div class="register-form register-form-buyer">
+            <div class="fg">
+              <label class="fl">Complete Name</label>
+              <div class="fi-wrap">
+                <span class="fi-icon" aria-hidden="true">
+                  <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.4993 1.19794C5.80972 1.19794 1.19727 5.8104 1.19727 11.5C1.19727 17.1896 5.80972 21.8021 11.4993 21.8021C17.189 21.8021 21.8014 17.1896 21.8014 11.5C21.8014 5.8104 17.189 1.19794 11.4993 1.19794ZM2.63477 11.5C2.63485 10.0716 2.98013 8.66433 3.6412 7.39807C4.30227 6.13181 5.25956 5.04406 6.43154 4.22743C7.60353 3.41081 8.9555 2.8895 10.3723 2.7079C11.7892 2.52629 13.2289 2.68977 14.569 3.18441C15.9091 3.67905 17.1097 4.49021 18.0688 5.5488C19.0279 6.6074 19.7169 7.88209 20.0772 9.26432C20.4376 10.6466 20.4586 12.0954 20.1384 13.4875C19.8182 14.8796 19.1664 16.1737 18.2383 17.2596C18.0301 16.5277 17.6451 15.8583 17.1171 15.3104C16.3677 14.5312 15.4304 14.0779 14.6178 13.8249C14.0178 13.6381 13.4524 13.8537 13.0806 14.1057C12.7356 14.3376 12.1798 14.6146 11.4993 14.6146C10.8189 14.6146 10.2631 14.3367 9.9181 14.1057C9.54627 13.8546 8.98085 13.6381 8.38093 13.8249C7.56731 14.0779 6.63102 14.5312 5.8816 15.3104C5.35375 15.858 4.9687 16.5271 4.76035 17.2586C3.38491 15.6557 2.63063 13.6122 2.63477 11.5ZM6.00139 18.4537C6.07422 17.4848 6.44222 16.8015 6.91852 16.3061C7.44847 15.7541 8.14518 15.4043 8.80835 15.1973C8.84094 15.1896 8.87497 15.1906 8.90706 15.2001C8.98108 15.2203 9.0511 15.2531 9.11406 15.2969C9.59418 15.6209 10.4308 16.0521 11.4993 16.0521C12.5679 16.0521 13.4045 15.6209 13.8846 15.2969C13.9477 15.2534 14.0177 15.221 14.0916 15.2011C14.1236 15.1912 14.1577 15.1899 14.1903 15.1973C14.8535 15.4043 15.5502 15.7541 16.0802 16.3061C16.5565 16.8015 16.9235 17.4848 16.9973 18.4537C15.4338 19.6947 13.4955 20.3684 11.4993 20.3646C9.50322 20.3684 7.56488 19.6947 6.00139 18.4537ZM9.3431 9.58335C9.3431 8.38544 10.2727 7.4271 11.4993 7.4271C12.726 7.4271 13.6556 8.38544 13.6556 9.58335C13.6556 10.7813 12.726 11.7396 11.4993 11.7396C10.2727 11.7396 9.3431 10.7813 9.3431 9.58335ZM11.4993 5.9896C11.0263 5.98577 10.5573 6.07611 10.1196 6.25536C9.68182 6.43461 9.28412 6.69917 8.94965 7.03365C8.61517 7.36813 8.3506 7.76582 8.17135 8.20357C7.99211 8.64131 7.90177 9.11035 7.9056 9.58335C7.90177 10.0564 7.99211 10.5254 8.17135 10.9631C8.3506 11.4009 8.61517 11.7986 8.94965 12.1331C9.28412 12.4675 9.68182 12.7321 10.1196 12.9113C10.5573 13.0906 11.0263 13.1809 11.4993 13.1771C11.9724 13.1809 12.4414 13.0906 12.8791 12.9113C13.3169 12.7321 13.7146 12.4675 14.0491 12.1331C14.3835 11.7986 14.6481 11.4009 14.8273 10.9631C15.0066 10.5254 15.0969 10.0564 15.0931 9.58335C15.0969 9.11035 15.0066 8.64131 14.8273 8.20357C14.6481 7.76582 14.3835 7.36813 14.0491 7.03365C13.7146 6.69917 13.3169 6.43461 12.8791 6.25536C12.4414 6.07611 11.9724 5.98577 11.4993 5.9896Z" fill="#6B7280"/>
+                  </svg>
+                </span>
+                <input class="fi fi-has-icon" type="text" name="name" placeholder="Enter your Full Name" id="rname" required>
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl">Email Address</label>
+              <div class="fi-wrap">
+                <span class="fi-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 7H20V17H4V7Z" stroke-width="1.8" stroke-linejoin="round"/>
+                    <path d="M4 8L12 13L20 8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <input class="fi fi-has-icon" type="email" name="email" placeholder="Enter your Email" id="remail" required>
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl">Password</label>
+              <div class="pw fi-wrap">
+                <span class="fi-icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.61247 17.337L13.3585 13.59L14.3855 13.773C15.4333 13.9609 16.5138 13.8094 17.4697 13.3406C18.4255 12.8719 19.2067 12.1102 19.6997 11.1666C20.1926 10.2231 20.3715 9.14676 20.2103 8.09445C20.0491 7.04213 19.5563 6.06873 18.8035 5.31595C18.0507 4.56317 17.0773 4.07031 16.025 3.90913C14.9727 3.74794 13.8964 3.92684 12.9528 4.41978C12.0092 4.91272 11.2476 5.69397 10.7788 6.64979C10.31 7.60561 10.1586 8.68611 10.3465 9.73399L10.5305 10.762L3.53647 17.756L3.71347 20.407L6.36447 20.584L8.19747 18.751L7.49047 18.044C7.30296 17.8563 7.19767 17.6019 7.19777 17.3366C7.19786 17.0714 7.30333 16.817 7.49097 16.6295C7.67861 16.442 7.93305 16.3367 8.19832 16.3368C8.46359 16.3369 8.71796 16.4423 8.90547 16.63L9.61247 17.337ZM10.3195 3.90199C11.1706 3.05085 12.2269 2.43357 13.3862 2.10977C14.5455 1.78597 15.7688 1.7666 16.9378 2.05351C18.1068 2.34043 19.182 2.92395 20.0597 3.74771C20.9374 4.57146 21.5878 5.60762 21.9482 6.75611C22.3085 7.9046 22.3666 9.12661 22.1169 10.3041C21.8671 11.4816 21.318 12.5748 20.5224 13.4782C19.7269 14.3815 18.7118 15.0644 17.5753 15.461C16.4388 15.8575 15.2193 15.9543 14.0345 15.742L7.13747 22.64L2.70747 22.345C2.46553 22.329 2.23764 22.2257 2.06619 22.0543C1.89475 21.8828 1.79143 21.6549 1.77547 21.413L1.48047 16.983L8.37847 10.085C8.17872 8.97433 8.25085 7.83182 8.58868 6.75509C8.92652 5.67837 9.52002 4.69945 10.3185 3.90199H10.3195ZM14.5615 9.55799C14.1865 9.18284 13.9758 8.67408 13.9759 8.14363C13.976 7.61319 14.1868 7.1045 14.562 6.72949C14.9371 6.35447 15.4459 6.14384 15.9763 6.14394C16.5068 6.14403 17.0155 6.35484 17.3905 6.72999C17.7655 7.10514 17.9761 7.61389 17.976 8.14434C17.9759 8.67479 17.7651 9.18347 17.39 9.55849C17.0148 9.9335 16.5061 10.1441 15.9756 10.144C15.4452 10.1439 14.9365 9.93314 14.5615 9.55799Z" fill="#6B7280"/>
+                  </svg>
+                </span>
+                <input class="fi fi-has-icon" type="password" name="password" placeholder="Enter your password" id="rpass" required>
+                <button class="pw-eye" type="button" onclick="eye('rpass')" aria-label="Lihat password">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 12C3.8 8.8 7.2 6.5 12 6.5C16.8 6.5 20.2 8.8 22 12C20.2 15.2 16.8 17.5 12 17.5C7.2 17.5 3.8 15.2 2 12Z" stroke-width="1.8" stroke-linejoin="round"/>
+                    <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl">Konfirmasi Password</label>
+              <div class="pw fi-wrap">
+                <span class="fi-icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.61247 17.337L13.3585 13.59L14.3855 13.773C15.4333 13.9609 16.5138 13.8094 17.4697 13.3406C18.4255 12.8719 19.2067 12.1102 19.6997 11.1666C20.1926 10.2231 20.3715 9.14676 20.2103 8.09445C20.0491 7.04213 19.5563 6.06873 18.8035 5.31595C18.0507 4.56317 17.0773 4.07031 16.025 3.90913C14.9727 3.74794 13.8964 3.92684 12.9528 4.41978C12.0092 4.91272 11.2476 5.69397 10.7788 6.64979C10.31 7.60561 10.1586 8.68611 10.3465 9.73399L10.5305 10.762L3.53647 17.756L3.71347 20.407L6.36447 20.584L8.19747 18.751L7.49047 18.044C7.30296 17.8563 7.19767 17.6019 7.19777 17.3366C7.19786 17.0714 7.30333 16.817 7.49097 16.6295C7.67861 16.442 7.93305 16.3367 8.19832 16.3368C8.46359 16.3369 8.71796 16.4423 8.90547 16.63L9.61247 17.337ZM10.3195 3.90199C11.1706 3.05085 12.2269 2.43357 13.3862 2.10977C14.5455 1.78597 15.7688 1.7666 16.9378 2.05351C18.1068 2.34043 19.182 2.92395 20.0597 3.74771C20.9374 4.57146 21.5878 5.60762 21.9482 6.75611C22.3085 7.9046 22.3666 9.12661 22.1169 10.3041C21.8671 11.4816 21.318 12.5748 20.5224 13.4782C19.7269 14.3815 18.7118 15.0644 17.5753 15.461C16.4388 15.8575 15.2193 15.9543 14.0345 15.742L7.13747 22.64L2.70747 22.345C2.46553 22.329 2.23764 22.2257 2.06619 22.0543C1.89475 21.8828 1.79143 21.6549 1.77547 21.413L1.48047 16.983L8.37847 10.085C8.17872 8.97433 8.25085 7.83182 8.58868 6.75509C8.92652 5.67837 9.52002 4.69945 10.3185 3.90199H10.3195ZM14.5615 9.55799C14.1865 9.18284 13.9758 8.67408 13.9759 8.14363C13.976 7.61319 14.1868 7.1045 14.562 6.72949C14.9371 6.35447 15.4459 6.14384 15.9763 6.14394C16.5068 6.14403 17.0155 6.35484 17.3905 6.72999C17.7655 7.10514 17.9761 7.61389 17.976 8.14434C17.9759 8.67479 17.7651 9.18347 17.39 9.55849C17.0148 9.9335 16.5061 10.1441 15.9756 10.144C15.4452 10.1439 14.9365 9.93314 14.5615 9.55799Z" fill="#6B7280"/>
+                  </svg>
+                </span>
+                <input class="fi fi-has-icon" type="password" name="confirm_password" placeholder="Enter your password" id="rpass2" required>
+                <button class="pw-eye" type="button" onclick="eye('rpass2')" aria-label="Lihat konfirmasi password">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 12C3.8 8.8 7.2 6.5 12 6.5C16.8 6.5 20.2 8.8 22 12C20.2 15.2 16.8 17.5 12 17.5C7.2 17.5 3.8 15.2 2 12Z" stroke-width="1.8" stroke-linejoin="round"/>
+                    <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <button class="btn bp auth-submit register-submit" type="submit">Create Account</button>
+          </div>
+
+          <div class="register-form register-form-seller">
+            <input type="hidden" name="id_supplier" id="sellerSupplierId" value="{{ form_data.id_supplier|default:'' }}">
+            <input type="hidden" name="nama_supplier" id="sellerSupplierName" value="{{ form_data.nama_supplier|default:'' }}">
+            <input type="hidden" name="store_name" id="sellerStoreName" value="{{ form_data.store_name|default:'' }}">
+            <input type="hidden" name="full_name" id="sellerFullName" value="{{ form_data.full_name|default:form_data.nama_supplier|default:'' }}">
+            <input type="hidden" name="phone" id="sellerPhone" value="{{ form_data.phone|default:form_data.no_hp|default:'' }}">
+            <input type="hidden" name="no_hp" id="sellerNoHpHidden" value="{{ form_data.no_hp|default:'' }}">
+
+            <div class="fg">
+              <label class="fl">Nomor HP Supplier</label>
+              <div class="fi-wrap">
+                <span class="fi-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.97 18.33C21.97 18.69 21.89 19.06 21.72 19.42C21.55 19.78 21.33 20.12 21.04 20.44C20.55 20.98 20.01 21.37 19.4 21.62C18.8 21.87 18.15 22 17.45 22C16.43 22 15.34 21.76 14.19 21.27C13.04 20.78 11.89 20.12 10.75 19.29C9.6 18.45 8.51 17.52 7.47 16.49C6.44 15.45 5.51 14.36 4.68 13.22C3.86 12.08 3.2 10.94 2.72 9.81C2.24 8.67 2 7.58 2 6.54C2 5.86 2.12 5.21 2.36 4.61C2.6 4 2.98 3.44 3.51 2.94C4.15 2.31 4.85 2 5.59 2C5.87 2 6.15 2.06 6.4 2.18C6.66 2.3 6.89 2.48 7.07 2.74L9.39 6.01C9.57 6.26 9.7 6.49 9.79 6.71C9.88 6.92 9.93 7.13 9.93 7.32C9.93 7.56 9.86 7.8 9.72 8.03C9.59 8.26 9.4 8.5 9.16 8.74L8.4 9.53C8.29 9.64 8.24 9.77 8.24 9.93C8.24 10.01 8.25 10.08 8.27 10.16C8.3 10.24 8.33 10.3 8.35 10.36C8.53 10.69 8.84 11.12 9.28 11.64C9.73 12.16 10.21 12.69 10.73 13.22C11.27 13.75 11.79 14.24 12.32 14.69C12.84 15.13 13.27 15.43 13.61 15.61C13.66 15.63 13.72 15.66 13.79 15.69C13.87 15.72 13.95 15.73 14.04 15.73C14.21 15.73 14.34 15.67 14.45 15.56L15.21 14.81C15.46 14.56 15.7 14.37 15.93 14.25C16.16 14.11 16.39 14.04 16.64 14.04C16.83 14.04 17.03 14.08 17.25 14.17C17.47 14.26 17.7 14.39 17.95 14.56L21.26 16.91C21.52 17.09 21.7 17.3 21.81 17.55C21.91 17.8 21.97 18.05 21.97 18.33Z" stroke="#6A7686" stroke-width="1.5" stroke-miterlimit="10"/>
+                  </svg>
+                </span>
+                <input class="fi fi-has-icon" type="text" id="sellerNoHp" placeholder="contoh: 08156626372" autocomplete="tel-national" value="{{ form_data.no_hp|default:'' }}">
+              </div>
+              <small id="sellerNoHpError" style="color:#dc2626;display:none"></small>
+            </div>
+
+            <div class="fg" id="supplierPickerWrap" style="display:none;">
+              <label class="fl">Pilih Supplier</label>
+              <div class="fi-wrap">
+                <span class="fi-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 7H20V17H4V7Z" stroke-width="1.8" stroke-linejoin="round"/>
+                    <path d="M4 8L12 13L20 8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <select class="fi fi-has-icon" id="supplierSelect">
+                  <option value="">Pilih nama supplier...</option>
+                </select>
+              </div>
+              <small id="supplierSelectError" style="color:#dc2626;display:none"></small>
+            </div>
+
+            <div class="fg" id="sellerVerifiedBanner" style="display:none;background:#ecfdf3;border:1px solid #a7f3d0;border-radius:8px;padding:10px 12px;">
+              <strong style="color:#047857;display:block;margin-bottom:4px;">Keanggotaan Terverifikasi</strong>
+              <span id="verifiedName" style="color:#065f46"></span>
+            </div>
+
+            <div id="sellerCredentialSection" style="display:none;">
+              <div class="fg">
+                <label class="fl">Email Address</label>
+                <div class="fi-wrap">
+                  <span class="fi-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 7H20V17H4V7Z" stroke-width="1.8" stroke-linejoin="round"/>
+                      <path d="M4 8L12 13L20 8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  <input class="fi fi-has-icon" type="email" name="email" id="sellerEmail" placeholder="Masukkan email aktif" value="{{ form_data.email|default:'' }}" required>
+                </div>
+              </div>
+
+              <div class="fg">
+                <label class="fl">Password</label>
+                <div class="pw fi-wrap">
+                  <span class="fi-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9.61247 17.337L13.3585 13.59L14.3855 13.773C15.4333 13.9609 16.5138 13.8094 17.4697 13.3406C18.4255 12.8719 19.2067 12.1102 19.6997 11.1666C20.1926 10.2231 20.3715 9.14676 20.2103 8.09445C20.0491 7.04213 19.5563 6.06873 18.8035 5.31595C18.0507 4.56317 17.0773 4.07031 16.025 3.90913C14.9727 3.74794 13.8964 3.92684 12.9528 4.41978C12.0092 4.91272 11.2476 5.69397 10.7788 6.64979C10.31 7.60561 10.1586 8.68611 10.3465 9.73399L10.5305 10.762L3.53647 17.756L3.71347 20.407L6.36447 20.584L8.19747 18.751L7.49047 18.044C7.30296 17.8563 7.19767 17.6019 7.19777 17.3366C7.19786 17.0714 7.30333 16.817 7.49097 16.6295C7.67861 16.442 7.93305 16.3367 8.19832 16.3368C8.46359 16.3369 8.71796 16.4423 8.90547 16.63L9.61247 17.337Z" fill="#6B7280"/>
+                    </svg>
+                  </span>
+                  <input class="fi fi-has-icon" type="password" name="password" id="sellerPassword" placeholder="Enter your password" required>
+                  <button class="pw-eye" type="button" onclick="eye('sellerPassword')" aria-label="Lihat password">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M2 12C3.8 8.8 7.2 6.5 12 6.5C16.8 6.5 20.2 8.8 22 12C20.2 15.2 16.8 17.5 12 17.5C7.2 17.5 3.8 15.2 2 12Z" stroke-width="1.8" stroke-linejoin="round"/>
+                      <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="fg">
+                <label class="fl">Konfirmasi Password</label>
+                <div class="pw fi-wrap">
+                  <span class="fi-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9.61247 17.337L13.3585 13.59L14.3855 13.773C15.4333 13.9609 16.5138 13.8094 17.4697 13.3406C18.4255 12.8719 19.2067 12.1102 19.6997 11.1666C20.1926 10.2231 20.3715 9.14676 20.2103 8.09445C20.0491 7.04213 19.5563 6.06873 18.8035 5.31595C18.0507 4.56317 17.0773 4.07031 16.025 3.90913C14.9727 3.74794 13.8964 3.92684 12.9528 4.41978C12.0092 4.91272 11.2476 5.69397 10.7788 6.64979C10.31 7.60561 10.1586 8.68611 10.3465 9.73399L10.5305 10.762L3.53647 17.756L3.71347 20.407L6.36447 20.584L8.19747 18.751L7.49047 18.044C7.30296 17.8563 7.19767 17.6019 7.19777 17.3366C7.19786 17.0714 7.30333 16.817 7.49097 16.6295C7.67861 16.442 7.93305 16.3367 8.19832 16.3368C8.46359 16.3369 8.71796 16.4423 8.90547 16.63L9.61247 17.337Z" fill="#6B7280"/>
+                    </svg>
+                  </span>
+                  <input class="fi fi-has-icon" type="password" name="confirm_password" id="sellerConfirmPassword" placeholder="Ulangi Password" required>
+                  <button class="pw-eye" type="button" onclick="eye('sellerConfirmPassword')" aria-label="Lihat konfirmasi password">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M2 12C3.8 8.8 7.2 6.5 12 6.5C16.8 6.5 20.2 8.8 22 12C20.2 15.2 16.8 17.5 12 17.5C7.2 17.5 3.8 15.2 2 12Z" stroke-width="1.8" stroke-linejoin="round"/>
+                      <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <button class="btn bp auth-submit register-submit" id="btnCreateSeller" type="submit" disabled style="width:100%;">Create Account</button>
+            </div>
+
+            <div class="seller-actions" style="display:flex;gap:12px;flex-wrap:wrap">
+              <button class="btn bp auth-submit register-submit" id="btnCheckKeanggotaan" type="button" style="width:100%;">Check Keanggotaan</button>
+              <button class="btn bg auth-submit register-reset" id="btnResetSeller" type="button" style="display:none;">Reset</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="af-sw register-switch">Already have account? <a href="{% url 'landing_app:login' %}">Sign In</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const checkUrl = "{% url 'landing_app:check_supplier' %}";
+    const roleInput = document.getElementById('registerAccountType');
+    const checkBtn = document.getElementById('btnCheckKeanggotaan');
+    const resetBtn = document.getElementById('btnResetSeller');
+    const createBtn = document.getElementById('btnCreateSeller');
+    const credentialSection = document.getElementById('sellerCredentialSection');
+    const noHpInput = document.getElementById('sellerNoHp');
+    const noHpHidden = document.getElementById('sellerNoHpHidden');
+    const noHpError = document.getElementById('sellerNoHpError');
+    const pickerWrap = document.getElementById('supplierPickerWrap');
+    const supplierSelect = document.getElementById('supplierSelect');
+    const supplierSelectError = document.getElementById('supplierSelectError');
+    const verifiedBanner = document.getElementById('sellerVerifiedBanner');
+    const verifiedName = document.getElementById('verifiedName');
+    const supplierIdInput = document.getElementById('sellerSupplierId');
+    const supplierNameInput = document.getElementById('sellerSupplierName');
+    const storeNameInput = document.getElementById('sellerStoreName');
+    const fullNameInput = document.getElementById('sellerFullName');
+    const phoneInput = document.getElementById('sellerPhone');
+    const emailInput = document.getElementById('sellerEmail');
+    const passwordInput = document.getElementById('sellerPassword');
+    const confirmInput = document.getElementById('sellerConfirmPassword');
+
+    let suppliers = [];
+    let selectedSupplier = null;
+
+    function setCheckButtonVisibility(visible) {
+      if (!checkBtn) return;
+      checkBtn.style.display = visible ? 'block' : 'none';
+    }
+
+    function getCsrfToken() {
+      const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+      return csrfInput ? csrfInput.value : '';
+    }
+
+    function setError(el, msg) {
+      if (!el) return;
+      el.textContent = msg || '';
+      el.style.display = msg ? 'block' : 'none';
+    }
+
+    function resetSupplierSelection() {
+      suppliers = [];
+      selectedSupplier = null;
+      if (supplierSelect) {
+        supplierSelect.innerHTML = '<option value="">Pilih nama supplier...</option>';
+        supplierSelect.value = '';
+      }
+      if (pickerWrap) pickerWrap.style.display = 'none';
+      if (verifiedBanner) verifiedBanner.style.display = 'none';
+      if (verifiedName) verifiedName.textContent = '';
+      if (supplierIdInput) supplierIdInput.value = '';
+      if (supplierNameInput) supplierNameInput.value = '';
+      if (storeNameInput) storeNameInput.value = '';
+      if (fullNameInput) fullNameInput.value = '';
+      if (phoneInput) phoneInput.value = '';
+      if (credentialSection) credentialSection.style.display = 'none';
+      [emailInput, passwordInput, confirmInput].forEach((el) => {
+        if (el) {
+          el.value = '';
+          el.disabled = true;
+        }
+      });
+      setCheckButtonVisibility(true);
+      setError(supplierSelectError, '');
+      updateCreateButton();
+    }
+
+    function applySupplier(supplier) {
+      selectedSupplier = supplier || null;
+      if (!selectedSupplier) {
+        resetSupplierSelection();
+        return;
+      }
+
+      if (supplierIdInput) supplierIdInput.value = selectedSupplier.id_supplier || '';
+      if (supplierNameInput) supplierNameInput.value = selectedSupplier.nama_supplier || '';
+      if (storeNameInput) storeNameInput.value = selectedSupplier.nama_supplier || '';
+      if (fullNameInput) fullNameInput.value = selectedSupplier.nama_supplier || '';
+
+      const phoneValue = (noHpInput && noHpInput.value ? noHpInput.value : (selectedSupplier.no_hp || '')).trim();
+      if (noHpHidden) noHpHidden.value = phoneValue;
+      if (phoneInput) phoneInput.value = phoneValue;
+
+      if (verifiedName) {
+        verifiedName.textContent = `${selectedSupplier.nama_supplier || 'Supplier'} (${phoneValue})`;
+      }
+      if (verifiedBanner) verifiedBanner.style.display = 'block';
+      if (credentialSection) credentialSection.style.display = 'block';
+      setCheckButtonVisibility(false);
+      [emailInput, passwordInput, confirmInput].forEach((el) => {
+        if (el) el.disabled = false;
+      });
+      setError(supplierSelectError, '');
+      updateCreateButton();
+    }
+
+    function updateCreateButton() {
+      if (!createBtn) return;
+      const verified = !!(supplierIdInput && supplierIdInput.value);
+      const complete = !!(
+        emailInput && emailInput.value.trim() &&
+        passwordInput && passwordInput.value &&
+        confirmInput && confirmInput.value &&
+        passwordInput.value === confirmInput.value &&
+        passwordInput.value.length >= 8
+      );
+
+      createBtn.disabled = !(verified && complete);
+    }
+
+    async function checkKeanggotaan() {
+      if (!noHpInput || !checkBtn) return;
+
+      const phone = noHpInput.value.trim();
+      setError(noHpError, '');
+      setError(supplierSelectError, '');
+      resetSupplierSelection();
+
+      if (!phone) {
+        setError(noHpError, 'Nomor HP supplier wajib diisi.');
+        return;
+      }
+
+      const originalText = checkBtn.textContent;
+      checkBtn.disabled = true;
+      checkBtn.textContent = 'Checking...';
+
+      try {
+        const response = await fetch(checkUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+          },
+          body: JSON.stringify({ no_hp: phone }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.verified) {
+          setError(noHpError, result.message || 'Data supplier tidak ditemukan.');
+          return;
+        }
+
+        suppliers = Array.isArray(result.suppliers) ? result.suppliers : [];
+        if (!suppliers.length) {
+          setError(noHpError, result.message || 'Data supplier tidak ditemukan.');
+          return;
+        }
+
+        if (suppliers.length > 1 && supplierSelect && pickerWrap) {
+          pickerWrap.style.display = 'block';
+          supplierSelect.innerHTML = '<option value="">Pilih nama supplier...</option>';
+          suppliers.forEach((supplier, idx) => {
+            const option = document.createElement('option');
+            option.value = String(idx);
+            option.textContent = supplier.nama_supplier || 'Supplier Tanpa Nama';
+            supplierSelect.appendChild(option);
+          });
+          setError(supplierSelectError, 'Pilih satu supplier untuk melanjutkan.');
+          return;
+        }
+
+        applySupplier(suppliers[0]);
+      } catch (err) {
+        setError(noHpError, 'Gagal menghubungi server supplier. Coba lagi.');
+      } finally {
+        checkBtn.disabled = false;
+        checkBtn.textContent = originalText;
+      }
+    }
+
+    function resetSellerFormState() {
+      if (noHpInput) noHpInput.value = '';
+      if (noHpHidden) noHpHidden.value = '';
+      if (emailInput) emailInput.value = '';
+      if (passwordInput) passwordInput.value = '';
+      if (confirmInput) confirmInput.value = '';
+      setError(noHpError, '');
+      resetSupplierSelection();
+      updateCreateButton();
+    }
+
+    function handleSupplierChange() {
+      if (!supplierSelect) return;
+      const idx = Number(supplierSelect.value);
+      if (!supplierSelect.value || Number.isNaN(idx) || !suppliers[idx]) {
+        setError(supplierSelectError, 'Pilih supplier terlebih dahulu.');
+        selectedSupplier = null;
+        if (supplierIdInput) supplierIdInput.value = '';
+        if (supplierNameInput) supplierNameInput.value = '';
+        if (storeNameInput) storeNameInput.value = '';
+        if (fullNameInput) fullNameInput.value = '';
+        if (verifiedBanner) verifiedBanner.style.display = 'none';
+        if (credentialSection) credentialSection.style.display = 'none';
+        setCheckButtonVisibility(true);
+        [emailInput, passwordInput, confirmInput].forEach((el) => {
+          if (el) {
+            el.value = '';
+            el.disabled = true;
+          }
+        });
+        updateCreateButton();
+        return;
+      }
+      applySupplier(suppliers[idx]);
+    }
+
+    if (checkBtn) checkBtn.addEventListener('click', checkKeanggotaan);
+    if (resetBtn) resetBtn.addEventListener('click', resetSellerFormState);
+    if (supplierSelect) supplierSelect.addEventListener('change', handleSupplierChange);
+
+    [emailInput, passwordInput, confirmInput, noHpInput].forEach((el) => {
+      if (el) {
+        el.addEventListener('input', () => {
+          if (el === noHpInput) {
+            if (noHpHidden) noHpHidden.value = noHpInput.value.trim();
+            if (phoneInput) phoneInput.value = noHpInput.value.trim();
+            resetSupplierSelection();
+          }
+          updateCreateButton();
+        });
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const role = (roleInput && roleInput.value ? roleInput.value : 'buyer').toLowerCase();
+      const roleButton = document.querySelector(`.register-role-btn[data-role="${role}"]`) || document.querySelector('.register-role-btn[data-role="buyer"]');
+      if (typeof setRegisterRole === 'function' && roleButton) {
+        setRegisterRole(role, roleButton);
+      }
+
+      const existingSupplierId = supplierIdInput ? supplierIdInput.value.trim() : '';
+      const existingSupplierName = supplierNameInput ? supplierNameInput.value.trim() : '';
+      const existingNoHp = noHpInput ? noHpInput.value.trim() : '';
+
+      if (role === 'seller' && existingSupplierId && existingSupplierName && existingNoHp) {
+        suppliers = [
+          {
+            id_supplier: existingSupplierId,
+            nama_supplier: existingSupplierName,
+            no_hp: existingNoHp,
+          },
+        ];
+
+        if (pickerWrap) pickerWrap.style.display = 'block';
+        if (supplierSelect) {
+          supplierSelect.innerHTML = `<option value="0">${existingSupplierName}</option>`;
+          supplierSelect.value = '0';
+        }
+        applySupplier(suppliers[0]);
+      } else {
+        resetSupplierSelection();
+      }
+
+      updateCreateButton();
+    });
+  })();
+</script>
+{% endblock %}

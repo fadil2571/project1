@@ -1,0 +1,29 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}Transaction Detail - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <h2 class="font-bold text-xl">Transaction Detail</h2>
+  <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Invoice</p>
+      <p class="font-bold text-lg">{{ order.order_number }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Customer</p>
+      <p class="font-bold text-lg">
+        {{ order.buyer.get_full_name|default:order.buyer.username }}
+      </p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Grand Total</p>
+      <p class="font-bold text-lg text-custom-blue">Rp {{ order.total }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Status</p>
+      <p class="font-bold text-lg">{{ order.get_status_display }}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,700 @@
+{% extends 'store/base.html' %}
+{% load static currency %}
+
+{% block title %}Metode Pembayaran - KOPMAS Shop{% endblock %}
+
+{% block page_css %}
+<style>
+  #pg-payment {
+    padding-top: 8px;
+    color: #111827;
+  }
+
+  #pg-payment .payment-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  #pg-payment .payment-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  #pg-payment .payment-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  #pg-payment .back-cart {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    background: #eaf0ff;
+    color: #1f57d6;
+    border: 1px solid #c9d8ff;
+    white-space: nowrap;
+  }
+
+  #pg-payment .step-bar {
+    margin-bottom: 16px;
+  }
+
+  #pg-payment .main-stack,
+  #pg-payment .summary-card,
+  #pg-payment .panel {
+    background: #fff;
+    border: 1px solid #d7dbe3;
+    border-radius: 8px;
+  }
+
+  #pg-payment .main-stack {
+    padding: 0;
+    border: none;
+    background: transparent;
+    display: grid;
+    gap: 12px;
+  }
+
+  #pg-payment .panel {
+    padding: 12px;
+    background: #ffffff;
+  }
+
+  #pg-payment .payment-confirm-panel {
+    background: #f4f4f4;
+  }
+
+  #pg-payment .panel h4,
+  #pg-payment .summary-card h3 {
+    margin: 0 0 10px;
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  #pg-payment .payment-panel-title {
+    margin-bottom: 0;
+  }
+
+  #pg-payment .payment-method-sub {
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #2065FC;
+  }
+
+  #pg-payment .payment-inner {
+    border: 1px solid #b4c4ee;
+    background: #e9edf4;
+    border-radius: 4px;
+    padding: 10px 12px;
+  }
+
+  #pg-payment .payment-label {
+    margin: 0;
+    font-size: 12px;
+    color: #4b5563;
+    line-height: 1.4;
+  }
+
+  #pg-payment .qris-wrap {
+    text-align: center;
+  }
+
+  #pg-payment .qris-wrap img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    border: 1px solid #cfd8eb;
+    border-radius: 6px;
+    background: #fff;
+    padding: 6px;
+  }
+
+  #pg-payment .payment-bank,
+  #pg-payment .payment-va {
+    margin: 2px 0 0;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  #pg-payment .payment-va {
+    color: #1f57d6;
+    margin-top: 4px;
+    word-break: break-all;
+  }
+
+  #pg-payment .copy-btn {
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    background: #1f57d6;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 11px;
+    cursor: pointer;
+  }
+
+  #pg-payment .copy-btn:hover {
+    background: #1847af;
+  }
+
+  #pg-payment .address-text {
+    margin: 0;
+    color: #5d6472;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  #pg-payment .upload-note {
+    margin: 0 0 8px;
+    color: #5d6472;
+    font-size: 12px;
+  }
+
+  #pg-payment .confirm-fields {
+    display: grid;
+    gap: 8px;
+  }
+
+  #pg-payment .confirm-fields input[type="file"],
+  #pg-payment .confirm-fields input[type="text"] {
+    width: 100%;
+    border: 1px solid #ced4df;
+    background: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+    padding: 8px 9px;
+  }
+
+  #pg-payment .confirm-fields input[type="text"]::placeholder {
+    color: #9ca3af;
+  }
+
+  #pg-payment .confirm-btn {
+    border: none;
+    border-radius: 6px;
+    background: #1f57d6;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    width: fit-content;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  #pg-payment .confirm-btn:hover {
+    background: #1847af;
+  }
+
+  #pg-payment .pay-summary {
+    display: grid;
+    gap: 6px;
+  }
+
+  #pg-payment .pay-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    color: #3f4755;
+  }
+
+  #pg-payment .pay-row.total {
+    margin-top: 4px;
+    padding-top: 7px;
+    border-top: 1px solid #d5dbe4;
+    font-size: 18px;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  #pg-payment .left-actions {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  #pg-payment .pay-primary,
+  #pg-payment .pay-secondary {
+    width: 100%;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+  }
+
+  #pg-payment .pay-primary {
+    background: #1f57d6;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  #pg-payment .pay-secondary {
+    background: #fff;
+    color: #111827;
+    border: 1px solid #d0d5df;
+  }
+
+  #pg-payment .summary-card {
+    padding: 10px;
+    background: #ffffff;
+    border-color: #ffffff;
+  }
+
+  #pg-payment .summary-product {
+    background: #fff;
+    border-radius: 6px;
+    padding: 0;
+  }
+
+  #pg-payment .summary-empty-box {
+    border: 1px solid #d6dbe5;
+    border-radius: 6px;
+    padding: 8px;
+  }
+
+  #pg-payment .summary-item {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+  }
+
+  #pg-payment .summary-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 18px;
+  }
+
+  #pg-payment .summary-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #pg-payment .summary-name {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  #pg-payment .summary-qty {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+  }
+
+  #pg-payment .summary-lines {
+    margin-top: 8px;
+    padding-top: 8px;
+    display: grid;
+    gap: 2px;
+  }
+
+  #pg-payment .summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+    color: #374151;
+  }
+
+  #pg-payment .summary-row.final {
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 2px solid #000000;
+    font-size: 13px;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  #pg-payment .summary-actions {
+    margin-top: 10px;
+    display: grid;
+    gap: 8px;
+  }
+
+  #pg-payment .summary-secondary,
+  #pg-payment .summary-primary {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+  }
+
+  #pg-payment .summary-secondary {
+    background: #1f57d6;
+    color: #fff;
+  }
+
+  #pg-payment .summary-primary {
+    background: #d6b213;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  #pg-payment .lp-partners {
+    margin-top: 48px !important;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+  }
+
+  #pg-payment .lp-footer {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: 0;
+  }
+
+  @media (max-width: 1024px) {
+    #pg-payment .payment-layout {
+      grid-template-columns: 1fr;
+    }
+
+    #pg-payment .summary-card {
+      max-width: 420px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    #pg-payment .payment-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    #pg-payment .payment-title {
+      font-size: 20px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-payment">
+  {% with active_payment_method=order.payment_method|default:selected_payment_method|default:'bank_transfer_bca' %}
+  <div class="payment-head">
+    <h2 class="payment-title">Konfirmasi Pesanan Anda 🚀</h2>
+    <a class="back-cart" href="{% url 'cart' %}">← Kembali ke Keranjang</a>
+  </div>
+
+  <div class="step-bar">
+    <a class="stp done" href="{% url 'cart' %}">
+      <div class="stp-num">✓</div>
+      <div class="stp-lbl"><strong>Keranjang</strong></div>
+    </a>
+    <a class="stp done" href="{% url 'checkout' %}">
+      <div class="stp-num">✓</div>
+      <div class="stp-lbl"><strong>Checkout</strong></div>
+    </a>
+    <a class="stp active" href="{% url 'payment' %}">
+      <div class="stp-num">3</div>
+      <div class="stp-lbl"><strong>Pembayaran</strong></div>
+    </a>
+  </div>
+
+  <div class="payment-layout">
+    <div class="main-stack">
+      <section class="panel">
+        <h4 class="payment-panel-title">Metode Pembayaran Terpilih</h4>
+        <p class="payment-method-sub">{% if active_payment_method == 'qris' %}QRIS{% else %}Transfer Bank (BCA){% endif %}</p>
+        <div class="payment-inner">
+          {% if active_payment_method == 'qris' %}
+            <p class="payment-label">Scan kode QR di bawah menggunakan aplikasi e-wallet atau mobile banking.</p>
+            <div class="qris-wrap" style="margin-top:8px">
+              <img src="{% static 'album/qris.svg' %}" alt="QRIS Payment Code">
+            </div>
+          {% else %}
+            <p class="payment-label">Transfer ke Virtual Account</p>
+            <p class="payment-bank">Bank: BCA</p>
+            <p class="payment-label">Nomor VA:</p>
+            <p class="payment-va" data-va-number>{{ va_number|default:'8808123456789012' }}</p>
+            <button class="copy-btn" type="button" data-copy-va>Salin Nomor VA</button>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="panel">
+        <h4>Alamat Pengiriman</h4>
+        {% if order and order.address %}
+          <p class="address-text">{{ order.address.street }}, {{ order.address.city }} {{ order.address.postal_code }} · {{ order.address.phone }}</p>
+        {% elif checkout_address %}
+          <p class="address-text">{{ checkout_address.street }}, {{ checkout_address.city }} {{ checkout_address.postal_code }} · {{ checkout_address.phone }}</p>
+        {% else %}
+          <p class="address-text">-</p>
+          <p class="address-text">-</p>
+          <p class="address-text">-</p>
+        {% endif %}
+      </section>
+
+      <section class="panel payment-confirm-panel">
+        <h4>Konfirmasi Pembayaran</h4>
+        <p class="upload-note">Batas waktu pembayaran: 23:59:00</p>
+        <div class="confirm-fields">
+          <input type="file" name="payment_proof" aria-label="Bukti pembayaran">
+          <input type="text" name="payment_note" placeholder="Catatan (opsional)">
+          <button class="confirm-btn" type="button">Upload Bukti &amp; Konfirmasi</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h4>Ringkasan Pembayaran</h4>
+        <div class="pay-summary">
+          <div class="pay-row"><span>Subtotal</span><span>Rp {{ subtotal|default:0|rupiah }}</span></div>
+          <div class="pay-row"><span>Ongkir</span><span>Rp {{ shipping_cost|default:0|rupiah }}</span></div>
+          <div class="pay-row"><span>PPN</span><span>Rp {{ ppn|default:0|rupiah }}</span></div>
+          <div class="pay-row total"><span>Total Bayar</span><span>Rp {{ grand_total|default:0|rupiah }}</span></div>
+        </div>
+        <div class="left-actions">
+          <form method="post" style="margin: 0;">
+            {% csrf_token %}
+            <input type="hidden" name="payment_method" value="{{ active_payment_method }}">
+            <button class="pay-primary" type="submit">Saya Sudah Bayar</button>
+          </form>
+          <a class="pay-secondary" href="{% url 'checkout' %}">Ubah Checkout</a>
+        </div>
+      </section>
+    </div>
+
+    <aside class="summary-card">
+      <h3>Ringkasan Pesanan</h3>
+      <div class="summary-product">
+        {% if order_items %}
+          {% for item in order_items %}
+          <div class="summary-item">
+            <div class="summary-thumb">
+              {% firstof item.product_name item.product.name as display_name %}
+              {% if item.product and item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ display_name }}">
+              {% elif 'Mukenah' in display_name %}
+                <img src="{% static 'album/mukena.jpg' %}" alt="{{ display_name }}">
+              {% elif 'Jamu' in display_name %}
+                <img src="{% static 'album/jamu_botol.jpg' %}" alt="{{ display_name }}">
+              {% elif 'Tas Bambu' in display_name %}
+                <img src="{% static 'album/tas_bambu.jpg' %}" alt="{{ display_name }}">
+              {% elif 'Yogurt' in display_name %}
+                <img src="{% static 'album/yogurt.jpg' %}" alt="{{ display_name }}">
+              {% elif 'Abon Salmon' in display_name or 'Abon Rendang' in display_name %}
+                <img src="{% static 'album/abon_salmon.jpg' %}" alt="{{ display_name }}">
+              {% elif 'Sabun Cuci Piring' in display_name %}
+                <img src="{% static 'album/sabun_cuci_piring.jpg' %}" alt="{{ display_name }}">
+              {% elif 'Daster' in display_name %}
+                <img src="{% static 'album/daster_motif.jpg' %}" alt="{{ display_name }}">
+              {% elif 'iPhone' in display_name %}
+                <img src="{% static 'album/produk1.png' %}" alt="{{ display_name }}">
+              {% elif item.product and item.product.emoji %}
+                {{ item.product.emoji }}
+              {% else %}
+                📦
+              {% endif %}
+            </div>
+            <div>
+              <div class="summary-name">{{ display_name }}</div>
+              <div class="summary-qty">{{ item.quantity }} Item</div>
+            </div>
+          </div>
+          {% if not forloop.last %}<hr style="margin:8px 0;border:0;border-top:1px solid #eef2f7;">{% endif %}
+          {% endfor %}
+        {% else %}
+          <div class="summary-empty-box">
+            <div class="summary-item">
+              <div class="summary-thumb">📦</div>
+              <div>
+                <div class="summary-name">Belum ada item</div>
+                <div class="summary-qty">0 Item</div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="summary-lines">
+          <div class="summary-row"><span>Subtotal</span><span>Rp {{ subtotal|default:0|rupiah }}</span></div>
+          <div class="summary-row"><span>Ongkir</span><span>Rp {{ shipping_cost|default:0|rupiah }}</span></div>
+          <div class="summary-row"><span>PPN</span><span>Rp {{ ppn|default:0|rupiah }}</span></div>
+          <div class="summary-row"><span>Metode Pembayaran</span><span>{% if active_payment_method == 'qris' %}QRIS{% else %}Transfer Bank{% endif %}</span></div>
+          <div class="summary-row final"><span>Grand Total</span><span>Rp {{ grand_total|default:0|rupiah }}</span></div>
+        </div>
+      </div>
+
+      <div class="summary-actions">
+        <a class="summary-secondary" href="{% url 'cart' %}">Edit Keranjang</a>
+        <form method="post" style="margin: 0;">
+          {% csrf_token %}
+          <input type="hidden" name="payment_method" value="{{ active_payment_method }}">
+          <button class="summary-primary" type="submit">Pay Now</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+  {% endwith %}
+
+  <!-- Trusted Partners -->
+  <div class="lp-partners">
+    <h2 class="lp-partners-title">T R U S T E D &nbsp;&nbsp; P A R T N E R S</h2>
+    <div class="lp-partners-grid">
+      <div class="lp-partner-item">
+        <img src="{% static 'album/logo_sleman.png' %}" alt="Pemerintah Daerah Kabupaten Sleman">
+      </div>
+      <div class="lp-partner-item">
+        <img src="{% static 'album/logo_forkom.png' %}" alt="Forkom UMKM Kabupaten Sleman">
+      </div>
+      <div class="lp-partner-item">
+        <img src="{% static 'album/RST.png' %}" alt="RST">
+      </div>
+      <div class="lp-partner-item">
+        <img src="{% static 'album/kopmas_forkom.png' %}" alt="Kopmas Forkom UMKM Sleman">
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <div class="lp-footer-grid">
+        <div class="lp-footer-brand">
+          <img src="{% static 'logokopmas.png' %}" alt="KOPMAS" class="lp-footer-logo">
+          <p class="lp-footer-tagline">Emporing UMKM</p>
+          <p class="lp-footer-subtitle">Growing Sleman</p>
+          <p class="lp-footer-desc">
+            "Platform online resmi Koperasi Pemasaran UMKM Kabupaten Sleman untuk
+            memasarkan produk unggulan UMKM lokal secara mudah, aman, dan
+            terpercaya."
+          </p>
+          <div class="lp-footer-social" aria-label="Media sosial">
+            <a href="#" class="lp-footer-social-link" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
+              </svg>
+            </a>
+            <a href="#" class="lp-footer-social-link" aria-label="Website">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">LAYANAN</h4>
+          <ul class="lp-footer-links">
+            <li> > Web Development</li>
+            <li> > AI &amp; Automation</li>
+            <li> > Mobile Applications</li>
+            <li> > Testing</li>
+            <li> > Konsultasi UMKM</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">USEFUL LINKS</h4>
+          <ul class="lp-footer-links">
+            <li> > Tentang Kami</li>
+            <li> > Portofolio Proyek</li>
+            <li> > Cara Berjualan</li>
+            <li> > Syarat &amp; Ketentuan</li>
+            <li> > Kebijakan Privasi</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">HUBUNGI KAMI</h4>
+          <div class="lp-footer-contact-box">
+            <div class="lp-footer-contact-addr">
+              <span class="lp-footer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </span>
+              <div>
+                <strong>LOKASI</strong>
+                <p>JL. Cangkringan Indah 1 No.17<br>KarangSari, Wedomartani<br>Kec. Ngemplak<br>Kabupaten Sleman<br>Daerah Istimewa Yogyakarta 55584</p>
+              </div>
+            </div>
+
+            <div class="lp-footer-contact-wa">
+              <span class="lp-footer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.5-4.3A8.5 8.5 0 1 1 21 11.5z"></path>
+                </svg>
+              </span>
+              <div>
+                <strong>OFFICIAL WHATSAPP</strong>
+                <div class="lp-footer-wa-num">081234567890</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lp-footer-bottom">
+      Copyright © 2026 - Kompashop.Com All Rights Reserved
+      <div class="lp-footer-report">Support by OpenCash.ID</div>
+    </div>
+  </footer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var copyButton = document.querySelector('[data-copy-va]');
+    var vaElement = document.querySelector('[data-va-number]');
+
+    if (!copyButton || !vaElement) {
+      return;
+    }
+
+    copyButton.addEventListener('click', function () {
+      var value = vaElement.textContent.trim();
+      if (!value) {
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value);
+      }
+
+      copyButton.textContent = 'Nomor VA Tersalin';
+      window.setTimeout(function () {
+        copyButton.textContent = 'Salin Nomor VA';
+      }, 1400);
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,453 @@
+{% load static %}
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Manage Orders - Kopmas Shop</title>
+  <link rel="stylesheet" href="{% static 'dashboard/assets/css/main.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Lexend Deca', ui-sans-serif, system-ui; margin: 0; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .transition-300 { transition: all 300ms ease; }
+    .bg-custom-background { background-color: #f3f5f9; }
+    .bg-custom-blue { background-color: #1053d5; }
+    .bg-custom-blue-10 { background-color: rgba(16, 83, 213, 0.1); }
+    .bg-custom-black { background-color: #292d32; }
+    .bg-custom-icon-background { background-color: #f3f3f3; }
+    .bg-custom-stroke { background-color: #e8e8e8; }
+    .text-custom-blue { color: #1053d5; }
+    .text-custom-grey { color: #6a7686; }
+    .text-custom-black { color: #292d32; }
+    .border-custom-stroke { border-color: #e8e8e8; }
+    .ring-custom-blue { --tw-ring-color: #1053d5; }
+    .sidebar-item.active { background-color: rgba(16, 83, 213, 0.1); }
+    .sidebar-item.active .sidebar-label { color: #1053d5; }
+    .sidebar-item.active .icon-default { opacity: 0; }
+    .sidebar-item.active .icon-active { opacity: 1; }
+    .sidebar-item.active .active-bar { display: flex; }
+    .branch-line { position: absolute; top: 10px; bottom: 40px; left: calc(100% - 22px); width: 1px; background-color: #e5e7eb; border-radius: 999px; transform: none !important; }
+    .branch-line:last-child { height: auto !important; }
+    .curve-branch { position: absolute; left: -22px; top: 0; width: 22px; height: 28px; border-left: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; border-bottom-left-radius: 14px; background: transparent; z-index: 1; transform: none; }
+    .tab-btn {
+      padding: 10px 20px; border-radius: 9999px; font-weight: 500; font-size: 0.875rem;
+      transition: all 300ms ease; white-space: nowrap;
+    }
+    .tab-btn.active {
+      background-color: #1053d5; color: white;
+    }
+    .tab-btn:not(.active) {
+      background-color: transparent; color: #6a7686;
+    }
+    .tab-btn:not(.active):hover {
+      background-color: rgba(16, 83, 213, 0.1); color: #1053d5;
+    }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600;
+    }
+    .status-pending { background-color: #fef3c7; color: #92400e; }
+    .status-processing { background-color: #dbeafe; color: #1e40af; }
+    .status-shipped { background-color: #e0e7ff; color: #3730a3; }
+    .status-completed { background-color: #d1fae5; color: #065f46; }
+    .status-cancelled { background-color: #fee2e2; color: #991b1b; }
+  
+      :root {
+        /* Ubah nilai ini untuk atur padding kanan-kiri secara manual */
+        --page-side-padding-mobile-min: 20px;
+        --page-side-padding-fluid: 5vw;
+        --page-side-padding-desktop: 160px;
+      }
+
+      body .px-55 {
+        padding-left: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+        padding-right: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+      }
+
+      @media (min-width: 1280px) {
+        body .px-55 {
+          padding-left: var(--page-side-padding-desktop) !important;
+          padding-right: var(--page-side-padding-desktop) !important;
+        }
+      }
+    </style>
+  <script src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js" async></script>
+</head>
+<body class="bg-custom-background text-custom-black">
+  <div id="admin-app" data-page-title="Manage Orders" data-role="seller" data-product-access-ready="{% if seller_product_access_ready %}true{% else %}false{% endif %}">
+
+    <div class="flex flex-col gap-5">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Total Orders -->
+        <div class="flex flex-col rounded-[20px] p-5 gap-4 bg-white">
+          <div class="flex items-center gap-4">
+            <div class="flex size-14 bg-custom-blue-10 items-center justify-center rounded-full">
+              <img src="/static/dashboard/assets/images/icons/note-text-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
+            </div>
+            <div>
+              <p class="font-bold text-3xl">156</p>
+              <p class="font-medium text-custom-grey">Total Orders</p>
+            </div>
+          </div>
+        </div>
+        <!-- Pending -->
+        <div class="flex flex-col rounded-[20px] p-5 gap-4 bg-white">
+          <div class="flex items-center gap-4">
+            <div class="flex size-14 bg-yellow-100 items-center justify-center rounded-full">
+              <img src="/static/dashboard/assets/images/icons/empty-wallet-time-grey.svg" class="flex size-6 shrink-0" alt="icon">
+            </div>
+            <div>
+              <p class="font-bold text-3xl text-yellow-700">12</p>
+              <p class="font-medium text-custom-grey">Pending</p>
+            </div>
+          </div>
+        </div>
+        <!-- Processing -->
+        <div class="flex flex-col rounded-[20px] p-5 gap-4 bg-white">
+          <div class="flex items-center gap-4">
+            <div class="flex size-14 bg-blue-100 items-center justify-center rounded-full">
+              <img src="/static/dashboard/assets/images/icons/car-delivery-moves-grey.svg" class="flex size-6 shrink-0" alt="icon">
+            </div>
+            <div>
+              <p class="font-bold text-3xl text-blue-700">8</p>
+              <p class="font-medium text-custom-grey">Processing</p>
+            </div>
+          </div>
+        </div>
+        <!-- Completed -->
+        <div class="flex flex-col rounded-[20px] p-5 gap-4 bg-white">
+          <div class="flex items-center gap-4">
+            <div class="flex size-14 bg-green-100 items-center justify-center rounded-full">
+              <img src="/static/dashboard/assets/images/icons/Checklist-green-fill.svg" class="flex size-6 shrink-0" alt="icon">
+            </div>
+            <div>
+              <p class="font-bold text-3xl text-green-700">128</p>
+              <p class="font-medium text-custom-grey">Completed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders List Card -->
+      <div class="flex flex-col rounded-[20px] p-5 gap-5 bg-white">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-bold text-xl">Daftar Pesanan</h2>
+            <p class="font-medium text-custom-grey text-sm mt-1">Kelola pesanan dari customer</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="flex items-center h-12 rounded-2xl border border-custom-stroke py-3 px-4 bg-white">
+              <img src="/static/dashboard/assets/images/icons/calendar-2-grey.svg" class="flex size-5 shrink-0 mr-2" alt="icon">
+              <select class="text-custom-black font-medium appearance-none focus:outline-none text-sm bg-transparent">
+                <option value="today">Hari Ini</option>
+                <option value="week">Minggu Ini</option>
+                <option value="month" selected>Bulan Ini</option>
+                <option value="year">Tahun Ini</option>
+              </select>
+              <img src="/static/dashboard/assets/images/icons/arrow-down-black.svg" class="flex size-5 shrink-0 ml-1" alt="icon">
+            </label>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2">
+          <button class="tab-btn active" onclick="filterOrders('all', this)">Semua <span class="ml-1 opacity-70">(156)</span></button>
+          <button class="tab-btn" onclick="filterOrders('pending', this)">Baru <span class="ml-1 opacity-70">(12)</span></button>
+          <button class="tab-btn" onclick="filterOrders('processing', this)">Diproses <span class="ml-1 opacity-70">(8)</span></button>
+          <button class="tab-btn" onclick="filterOrders('shipped', this)">Dikirim <span class="ml-1 opacity-70">(5)</span></button>
+          <button class="tab-btn" onclick="filterOrders('completed', this)">Selesai <span class="ml-1 opacity-70">(128)</span></button>
+          <button class="tab-btn" onclick="filterOrders('cancelled', this)">Dibatalkan <span class="ml-1 opacity-70">(3)</span></button>
+        </div>
+
+        <!-- Search -->
+        <div class="flex items-center gap-4">
+          <form class="flex-1 max-w-md" onsubmit="event.preventDefault(); searchOrders();">
+            <label class="flex items-center w-full h-12 rounded-2xl p-3 gap-2 bg-custom-background border border-custom-stroke focus-within:border-custom-blue transition-300">
+              <img src="/static/dashboard/assets/images/icons/search-normal-grey.svg" class="flex size-5 shrink-0" alt="icon">
+              <input type="text" id="search-input" class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none bg-transparent text-sm" placeholder="Cari nomor invoice atau nama customer...">
+            </label>
+          </form>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-custom-stroke">
+                <th class="py-4 px-3 font-semibold text-custom-grey text-sm">No Invoice</th>
+                <th class="py-4 px-3 font-semibold text-custom-grey text-sm">Customer</th>
+                <th class="py-4 px-3 font-semibold text-custom-grey text-sm">Tanggal</th>
+                <th class="py-4 px-3 font-semibold text-custom-grey text-sm">Total</th>
+                <th class="py-4 px-3 font-semibold text-custom-grey text-sm">Status</th>
+                <th class="py-4 px-3 font-semibold text-custom-grey text-sm text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="orders-table-body">
+              <!-- Order 1 -->
+              <tr class="border-b border-custom-stroke hover:bg-custom-background/50 transition-300" data-status="pending">
+                <td class="py-4 px-3">
+                  <span class="font-bold text-custom-blue">#INV-2024-00156</span>
+                </td>
+                <td class="py-4 px-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex size-10 rounded-full bg-custom-icon-background items-center justify-center">
+                      <img src="/static/dashboard/assets/images/icons/profile-black.svg" class="size-5" alt="icon">
+                    </div>
+                    <span class="font-medium">Budi Santoso</span>
+                  </div>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-medium text-custom-grey text-sm">12 Mar 2024</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-bold">Rp 2.500.000</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="status-badge status-pending">
+                    <span class="size-2 rounded-full bg-yellow-600"></span>
+                    Pending
+                  </span>
+                </td>
+                <td class="py-4 px-3 text-right">
+                  <a href="order-detail.html" class="inline-flex items-center justify-center h-10 px-4 rounded-xl bg-custom-blue-10 text-custom-blue font-semibold text-sm hover:ring-2 ring-custom-blue transition-300">
+                    Detail
+                  </a>
+                </td>
+              </tr>
+
+              <!-- Order 2 -->
+              <tr class="border-b border-custom-stroke hover:bg-custom-background/50 transition-300" data-status="processing">
+                <td class="py-4 px-3">
+                  <span class="font-bold text-custom-blue">#INV-2024-00155</span>
+                </td>
+                <td class="py-4 px-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex size-10 rounded-full bg-custom-icon-background items-center justify-center">
+                      <img src="/static/dashboard/assets/images/icons/profile-black.svg" class="size-5" alt="icon">
+                    </div>
+                    <span class="font-medium">Siti Aminah</span>
+                  </div>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-medium text-custom-grey text-sm">12 Mar 2024</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-bold">Rp 1.750.000</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="status-badge status-processing">
+                    <span class="size-2 rounded-full bg-blue-600"></span>
+                    Processing
+                  </span>
+                </td>
+                <td class="py-4 px-3 text-right">
+                  <a href="order-detail.html" class="inline-flex items-center justify-center h-10 px-4 rounded-xl bg-custom-blue-10 text-custom-blue font-semibold text-sm hover:ring-2 ring-custom-blue transition-300">
+                    Detail
+                  </a>
+                </td>
+              </tr>
+
+              <!-- Order 3 -->
+              <tr class="border-b border-custom-stroke hover:bg-custom-background/50 transition-300" data-status="shipped">
+                <td class="py-4 px-3">
+                  <span class="font-bold text-custom-blue">#INV-2024-00154</span>
+                </td>
+                <td class="py-4 px-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex size-10 rounded-full bg-custom-icon-background items-center justify-center">
+                      <img src="/static/dashboard/assets/images/icons/profile-black.svg" class="size-5" alt="icon">
+                    </div>
+                    <span class="font-medium">Ahmad Fauzi</span>
+                  </div>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-medium text-custom-grey text-sm">11 Mar 2024</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-bold">Rp 3.200.000</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="status-badge status-shipped">
+                    <span class="size-2 rounded-full bg-indigo-600"></span>
+                    Dikirim
+                  </span>
+                </td>
+                <td class="py-4 px-3 text-right">
+                  <a href="order-detail.html" class="inline-flex items-center justify-center h-10 px-4 rounded-xl bg-custom-blue-10 text-custom-blue font-semibold text-sm hover:ring-2 ring-custom-blue transition-300">
+                    Detail
+                  </a>
+                </td>
+              </tr>
+
+              <!-- Order 4 -->
+              <tr class="border-b border-custom-stroke hover:bg-custom-background/50 transition-300" data-status="completed">
+                <td class="py-4 px-3">
+                  <span class="font-bold text-custom-blue">#INV-2024-00153</span>
+                </td>
+                <td class="py-4 px-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex size-10 rounded-full bg-custom-icon-background items-center justify-center">
+                      <img src="/static/dashboard/assets/images/icons/profile-black.svg" class="size-5" alt="icon">
+                    </div>
+                    <span class="font-medium">Dewi Kartika</span>
+                  </div>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-medium text-custom-grey text-sm">10 Mar 2024</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-bold">Rp 850.000</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="status-badge status-completed">
+                    <span class="size-2 rounded-full bg-green-600"></span>
+                    Selesai
+                  </span>
+                </td>
+                <td class="py-4 px-3 text-right">
+                  <a href="order-detail.html" class="inline-flex items-center justify-center h-10 px-4 rounded-xl bg-custom-blue-10 text-custom-blue font-semibold text-sm hover:ring-2 ring-custom-blue transition-300">
+                    Detail
+                  </a>
+                </td>
+              </tr>
+
+              <!-- Order 5 -->
+              <tr class="border-b border-custom-stroke hover:bg-custom-background/50 transition-300" data-status="cancelled">
+                <td class="py-4 px-3">
+                  <span class="font-bold text-custom-blue">#INV-2024-00152</span>
+                </td>
+                <td class="py-4 px-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex size-10 rounded-full bg-custom-icon-background items-center justify-center">
+                      <img src="/static/dashboard/assets/images/icons/profile-black.svg" class="size-5" alt="icon">
+                    </div>
+                    <span class="font-medium">Rudi Hartono</span>
+                  </div>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-medium text-custom-grey text-sm">10 Mar 2024</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="font-bold">Rp 1.200.000</span>
+                </td>
+                <td class="py-4 px-3">
+                  <span class="status-badge status-cancelled">
+                    <span class="size-2 rounded-full bg-red-600"></span>
+                    Dibatalkan
+                  </span>
+                </td>
+                <td class="py-4 px-3 text-right">
+                  <a href="order-detail.html" class="inline-flex items-center justify-center h-10 px-4 rounded-xl bg-custom-blue-10 text-custom-blue font-semibold text-sm hover:ring-2 ring-custom-blue transition-300">
+                    Detail
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-12 text-center">
+          <div class="flex size-20 rounded-full bg-custom-icon-background items-center justify-center mb-4">
+            <img src="/static/dashboard/assets/images/icons/bag-cross-blue-transparent.svg" class="size-10" alt="icon">
+          </div>
+          <h3 class="font-bold text-lg">Tidak ada pesanan</h3>
+          <p class="font-medium text-custom-grey text-sm mt-1">Belum ada pesanan dengan status ini</p>
+        </div>
+
+        <!-- Pagination -->
+        <nav class="flex items-center justify-between pt-4">
+          <p class="font-medium text-custom-grey text-sm">Menampilkan 1-5 dari 156 pesanan</p>
+          <ul class="flex items-center gap-2">
+            <li>
+              <button disabled class="flex size-10 items-center justify-center rounded-full bg-custom-icon-background text-custom-grey">
+                <img src="/static/dashboard/assets/images/icons/arrow-right-no-tail-blue.svg" class="size-5 rotate-180 opacity-30" alt="icon">
+              </button>
+            </li>
+            <li><button class="flex size-10 items-center justify-center rounded-full bg-custom-blue text-white font-semibold text-sm">1</button></li>
+            <li><button class="flex size-10 items-center justify-center rounded-full bg-custom-icon-background text-custom-black font-semibold text-sm hover:bg-custom-blue-10 hover:text-custom-blue transition-300">2</button></li>
+            <li><button class="flex size-10 items-center justify-center rounded-full bg-custom-icon-background text-custom-black font-semibold text-sm hover:bg-custom-blue-10 hover:text-custom-blue transition-300">3</button></li>
+            <li><span class="px-2 text-custom-grey">...</span></li>
+            <li><button class="flex size-10 items-center justify-center rounded-full bg-custom-icon-background text-custom-black font-semibold text-sm hover:bg-custom-blue-10 hover:text-custom-blue transition-300">32</button></li>
+            <li>
+              <button class="flex size-10 items-center justify-center rounded-full bg-custom-blue-10 text-custom-blue hover:ring-2 ring-custom-blue transition-300">
+                <img src="/static/dashboard/assets/images/icons/arrow-right-no-tail-blue.svg" class="size-5" alt="icon">
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+  </div>
+  <script>
+    window.__DJANGO_MESSAGES__ = [
+      {% for message in messages %}
+      { level: "{{ message.tags|default:'info'|escapejs }}", text: "{{ message|escapejs }}" },
+      {% endfor %}
+    ];
+  </script>
+  <script src="{% static 'dashboard/assets/js/admin-layout.js' %}?v=20260401c" defer></script>
+  <script>
+    function filterOrders(status, btn) {
+      // Update active tab
+      document.querySelectorAll('.tab-btn').forEach(tab => tab.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Filter table rows
+      const rows = document.querySelectorAll('#orders-table-body tr');
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        if (status === 'all' || row.dataset.status === status) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // Show/hide empty state
+      const emptyState = document.getElementById('empty-state');
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+      } else {
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+      }
+    }
+
+    function searchOrders() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const rows = document.querySelectorAll('#orders-table-body tr');
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(query)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}KOPMAS Shop - E-Commerce Indonesia{% endblock %}</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Tailwind CDN - diperlukan untuk kelas grid, hover, dll di landing.html -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static 'store/css/style.css' %}">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  {% block extra_css %}{% endblock %}
+  {% block page_css %}{% endblock %}
+</head>
+
+<body>
+
+<div class="toast-wrap" id="tw"></div>
+
+<div class="app">
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="main">
+    <!-- TopNav -->
+    <div class="tnav">
+      <a href="{% url 'landing_app:home' %}">
+        <img src="{% static 'store/logokopmas.png' %}"
+             alt="KOPMAS Logo"
+             class="tnav-logo">
+      </a>
+      <form class="tnav-search" action="{% url 'landing_app:search' %}" method="get">
+        <span>🔍</span>
+        <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Cari produk UMKM lokal terbaik...">
+        <button class="btn bp bsm" style="padding:6px 16px;border-radius:6px;font-size:15px;margin:-1px -14px -1px 0">Cari</button>
+      </form>
+      <div class="tnav-r">
+        <a class="icobtn" href="{% url 'notif' %}" title="Notifikasi" aria-label="Notifikasi">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M15 18V18.75C15 19.5457 14.6839 20.3087 14.1213 20.8713C13.5587 21.4339 12.7956 21.75 12 21.75C11.2043 21.75 10.4413 21.4339 9.87867 20.8713C9.31606 20.3087 8.99999 19.5457 8.99999 18.75V18M20.0475 16.4733C18.8437 15 17.9939 14.25 17.9939 10.1883C17.9939 6.46875 16.0945 5.14359 14.5312 4.5C14.3236 4.41469 14.1281 4.21875 14.0648 4.00547C13.7906 3.07219 13.0219 2.25 12 2.25C10.9781 2.25 10.2089 3.07266 9.93749 4.00641C9.87421 4.22203 9.67874 4.41469 9.47108 4.5C7.90593 5.14453 6.00842 6.465 6.00842 10.1883C6.00608 14.25 5.15624 15 3.95249 16.4733C3.45374 17.0836 3.89061 18 4.76296 18H19.2417C20.1094 18 20.5434 17.0808 20.0475 16.4733Z" stroke="#999999" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </a>
+        <a class="icobtn" href="{% url 'landing_app:cart' %}" title="Keranjang" aria-label="Keranjang">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M3 20C3 21.1 3.9 22 5 22H19C20.1 22 21 21.1 21 20V7C21 6.84 20.95 6.69 20.89 6.56C20.83 6.43 19.17 3.11 19.17 3.11C19.0044 2.77679 18.7492 2.49637 18.433 2.30028C18.1167 2.10419 17.7521 2.0002 17.38 2H6.62C5.86 2 5.17 2.42 4.83 3.11L3.11 6.56C3.04 6.7 3 6.85 3 7.01V20.01V20ZM5 20V8H19V20H5ZM17.38 4L18.38 6H5.62L6.62 4H17.38Z" fill="#999999"></path>
+            <path d="M12 13C10.35 13 9 11.65 9 10H7C7 12.76 9.24 15 12 15C14.76 15 17 12.76 17 10H15C15 11.65 13.65 13 12 13Z" fill="#999999"></path>
+          </svg>
+        </a>
+        <div class="tdiv"></div>
+        {% if user.is_authenticated %}
+          <!-- USER DROPDOWN -->
+          <div class="relative">
+            <button type="button" class="user-menu-trigger" id="userMenuBtn" aria-haspopup="true" aria-expanded="false" aria-label="Buka menu akun">
+              <span class="user-avatar-shell">
+                <i class="fas fa-user user-avatar-icon"></i>
+                <span class="user-online-dot" aria-hidden="true"></span>
+              </span>
+            </button>
+
+            <div class="user-dropdown" id="userDropdown" role="menu" aria-label="Menu akun pengguna">
+              <div class="user-dropdown-header">
+                <div class="user-dropdown-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <p class="user-name">
+                  {{ user.first_name|default:user.username }}
+                </p>
+              </div>
+
+              <div class="user-dropdown-content">
+                <a href="{% url 'landing_app:profile' %}" class="user-dropdown-item" role="menuitem">
+                  <i class="fa-regular fa-user"></i>
+                  <span>Akun Saya</span>
+                </a>
+                <a href="{% url 'orders' %}" class="user-dropdown-item" role="menuitem">
+                  <i class="fa-solid fa-receipt"></i>
+                  <span>Pesanan Saya</span>
+                </a>
+                <a href="{% url 'landing_app:profile' %}" class="user-dropdown-item" role="menuitem">
+                  <i class="fa-solid fa-gear"></i>
+                  <span>Settings</span>
+                </a>
+
+                <div class="user-dropdown-divider"></div>
+
+                <form action="{% url 'landing_app:logout' %}" method="post" id="logoutForm" class="hidden">
+                  {% csrf_token %}
+                </form>
+                <a href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit()" class="user-dropdown-item user-dropdown-item--logout" role="menuitem">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Log Out</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <a class="btn bg bsm" href="{% url 'landing_app:login' %}">Masuk</a>
+          <a class="btn bp bsm" href="{% url 'landing_app:register' %}">Daftar</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Content Pages -->
+    <div class="content">
+      {% block content %}
+      {% endblock %}
+    </div>
+
+    <!-- BOTTOM MOBILE NAV -->
+    <div class="mobile-nav">
+      <button class="mobile-nav-btn active" onclick="window.location.href='{% url 'landing_app:home' %}'" title="Beranda">⊞</button>
+      <button class="mobile-nav-btn" onclick="window.location.href='{% url 'kategori' %}'" title="Kategori">🗂</button>
+      <button class="mobile-nav-btn" onclick="window.location.href='{% url 'orders' %}'" title="Pesanan">🏪</button>
+      <button class="mobile-nav-btn" onclick="window.location.href='{% url 'landing_app:profile' %}'" title="Profil">👤</button>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'store/js/script.js' %}"></script>
+{% if messages %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    {% for message in messages %}
+      toast('{{ message|escapejs }}', '{% if "error" in message.tags %}error{% elif "warning" in message.tags %}info{% elif "success" in message.tags %}success{% else %}info{% endif %}');
+    {% endfor %}
+  });
+</script>
+{% endif %}
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,170 @@
+{% load static %}
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Store Profile - Kopmas Shop</title>
+  <link rel="stylesheet" href="{% static 'dashboard/assets/css/main.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Lexend Deca', ui-sans-serif, system-ui; margin: 0; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .transition-300 { transition: all 300ms ease; }
+    .bg-custom-background { background-color: #f3f5f9; }
+    .bg-custom-blue { background-color: #1053d5; }
+    .bg-custom-blue-10 { background-color: rgba(16, 83, 213, 0.1); }
+    .bg-custom-black { background-color: #292d32; }
+    .bg-custom-icon-background { background-color: #f3f3f3; }
+    .bg-custom-stroke { background-color: #e8e8e8; }
+    .text-custom-blue { color: #1053d5; }
+    .text-custom-grey { color: #6a7686; }
+    .text-custom-black { color: #292d32; }
+    .border-custom-stroke { border-color: #e8e8e8; }
+    .ring-custom-blue { --tw-ring-color: #1053d5; }
+    .sidebar-item.active { background-color: rgba(16, 83, 213, 0.1); }
+    .sidebar-item.active .sidebar-label { color: #1053d5; }
+    .sidebar-item.active .icon-default { opacity: 0; }
+    .sidebar-item.active .icon-active { opacity: 1; }
+    .sidebar-item.active .active-bar { display: flex; }
+    .branch-line { position: absolute; top: 10px; bottom: 40px; left: calc(100% - 22px); width: 1px; background-color: #e5e7eb; border-radius: 999px; transform: none !important; }
+    .branch-line:last-child { height: auto !important; }
+    .curve-branch { position: absolute; left: -22px; top: 0; width: 22px; height: 28px; border-left: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; border-bottom-left-radius: 14px; background: transparent; z-index: 1; transform: none; }
+    .custom-input {
+      height: 56px; width: 100%; appearance: none; border-radius: 16px; border-width: 1.5px;
+      border-color: #e8e8e8; padding-left: 1.25rem; padding-right: 1.25rem;
+      font-weight: 500; transition: all 300ms ease; font-size: 0.9375rem;
+    }
+    .custom-input:focus { border-color: #1053d5; outline: none; }
+    .custom-textarea {
+      width: 100%; appearance: none; border-radius: 16px; border-width: 1.5px;
+      border-color: #e8e8e8; padding: 1rem 1.25rem;
+      font-weight: 500; transition: all 300ms ease; font-size: 0.9375rem; resize: vertical;
+    }
+    .custom-textarea:focus { border-color: #1053d5; outline: none; }
+    .form-label { font-weight: 600; color: #292d32; font-size: 0.9375rem; }
+  
+      :root {
+        /* Ubah nilai ini untuk atur padding kanan-kiri secara manual */
+        --page-side-padding-mobile-min: 20px;
+        --page-side-padding-fluid: 5vw;
+        --page-side-padding-desktop: 160px;
+      }
+
+      body .px-55 {
+        padding-left: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+        padding-right: clamp(
+          var(--page-side-padding-mobile-min),
+          var(--page-side-padding-fluid),
+          var(--page-side-padding-desktop)
+        ) !important;
+      }
+
+      @media (min-width: 1280px) {
+        body .px-55 {
+          padding-left: var(--page-side-padding-desktop) !important;
+          padding-right: var(--page-side-padding-desktop) !important;
+        }
+      }
+    </style>
+  <script src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js" async></script>
+</head>
+<body class="bg-custom-background text-custom-black">
+  <div id="admin-app" data-page-title="Store Profile" data-role="seller" data-product-access-ready="{% if seller_product_access_ready %}true{% else %}false{% endif %}">
+
+    <div class="flex flex-col gap-5">
+      <!-- Header Card -->
+      <div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+        <div class="flex items-center gap-4">
+          <div class="flex size-14 items-center justify-center rounded-full bg-custom-blue-10">
+            <img src="{% static 'dashboard/assets/images/icons/shop-blue-fill.svg' %}" class="flex size-6 shrink-0" alt="icon">
+          </div>
+          <div>
+            <h2 class="font-bold text-xl">Store Profile</h2>
+            <p class="font-medium text-custom-grey text-sm">Kelola informasi profil toko Anda</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <form method="post" action="{% url 'panel_admin:my_store' %}" class="flex flex-col gap-6 rounded-[20px] bg-white p-5">
+        {% csrf_token %}
+        <!-- Store Name -->
+        <div class="flex flex-col gap-2">
+          <label class="form-label">Nama Toko <span class="text-red-500">*</span></label>
+          <input type="text" class="custom-input" placeholder="Masukkan nama toko" value="{{ request.user.store_name|default:'' }}" name="store_name">
+        </div>
+
+        <!-- Store Description -->
+        <div class="flex flex-col gap-2">
+          <label class="form-label">Deskripsi Toko</label>
+          <textarea class="custom-textarea" rows="4" placeholder="Ceritakan tentang toko Anda..." name="store_description">{{ request.user.store_description|default:'' }}</textarea>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-2">
+            <label class="form-label">Nomor Telepon <span class="text-red-500">*</span></label>
+            <input type="tel" class="custom-input" placeholder="Contoh: 08123456789" value="{{ request.user.phone|default:'' }}" name="phone">
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="form-label">Email Toko <span class="text-red-500">*</span></label>
+            <input type="email" class="custom-input" placeholder="Contoh: toko@email.com" value="{{ request.user.email|default:'' }}" name="email">
+          </div>
+        </div>
+
+        <!-- Operating Hours -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-2">
+            <label class="form-label">Jam Buka</label>
+            <input type="time" class="custom-input" value="08:00">
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="form-label">Jam Tutup</label>
+            <input type="time" class="custom-input" value="21:00">
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="flex items-center gap-3 p-4 rounded-2xl bg-custom-blue-10">
+          <div class="flex size-10 items-center justify-center rounded-full bg-green-100">
+            <img src="{% static 'dashboard/assets/images/icons/Checklist-green-fill.svg' %}" class="size-5" alt="icon">
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Status Toko</p>
+            <p class="font-bold text-custom-blue">Aktif</p>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-center justify-end gap-4 pt-4">
+          <button type="reset" class="flex h-14 items-center rounded-full px-8 font-semibold text-custom-grey border border-custom-stroke hover:bg-custom-background transition-300">
+            Reset
+          </button>
+          <button type="submit" class="flex h-14 items-center rounded-full bg-custom-blue px-8 font-semibold text-white hover:ring-2 ring-custom-blue transition-300">
+            Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+  <script>
+    window.__DJANGO_MESSAGES__ = [
+      {% for message in messages %}
+      { level: "{{ message.tags|default:'info'|escapejs }}", text: "{{ message|escapejs }}" },
+      {% endfor %}
+    ];
+  </script>
+  <script src="{% static 'dashboard/assets/js/admin-layout.js' %}?v=20260401c" defer></script>
+</body>
+</html>
+
+

@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "dev:css": "./tailwindcss.exe -i ./static/dashboard/assets/src/tailwind.css -o ./static/dashboard/assets/css/main.css --watch",
+    "build:css": "./tailwindcss.exe -i ./static/dashboard/assets/src/tailwind.css -o ./static/dashboard/assets/css/main.css --minify",
+    "test:puppeteer": "node tests/puppeteer-smoke.js"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.39.1",
+    "sweetalert2": "^11.26.24"
+  }
+}

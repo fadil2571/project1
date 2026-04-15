@@ -1,0 +1,414 @@
+{% load static %}
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Payment Method - Kopmas Shop</title>
+  <link rel="stylesheet" href="{% static 'dashboard/assets/css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'dashboard/assets/vendor/cropperjs/cropper.min.css' %}?v=1.6.2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Lexend Deca', ui-sans-serif, system-ui; margin: 0; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .transition-300 { transition: all 300ms ease; }
+    .bg-custom-background { background-color: #f3f5f9; }
+    .bg-custom-blue { background-color: #1053d5; }
+    .bg-custom-blue-10 { background-color: rgba(16, 83, 213, 0.1); }
+    .text-custom-grey { color: #6a7686; }
+    .text-custom-black { color: #292d32; }
+    .border-custom-stroke { border-color: #e8e8e8; }
+    .custom-input {
+      height: 56px; width: 100%; appearance: none; border-radius: 16px; border-width: 1.5px;
+      border-color: #e8e8e8; padding-left: 1.25rem; padding-right: 1.25rem;
+      font-weight: 500; transition: all 300ms ease; font-size: 0.9375rem;
+      background-color: white;
+    }
+    .custom-input:focus { border-color: #1053d5; outline: none; }
+    .toggle-switch { position: relative; width: 52px; height: 28px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #e8e8e8; transition: .3s; border-radius: 28px;
+    }
+    .toggle-slider:before {
+      position: absolute; content: ""; height: 22px; width: 22px;
+      left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .toggle-switch input:checked + .toggle-slider { background-color: #1053d5; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(24px); }
+    .payment-card { border: 1.5px solid #e8e8e8; border-radius: 20px; }
+    .bank-badge {
+      width: 52px; height: 52px; border-radius: 12px; color: white;
+      font-weight: 700; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #0f4ab7, #0a2f75);
+    }
+    .mini-btn { height: 42px; border-radius: 9999px; padding: 0 1rem; font-weight: 600; font-size: .875rem; }
+  </style>
+</head>
+<body class="bg-custom-background text-custom-black">
+  <div id="admin-app" data-page-title="Payment Method" data-role="seller" data-product-access-ready="{% if seller_product_access_ready %}true{% else %}false{% endif %}">
+
+    <div class="flex flex-col gap-5">
+      {% if messages %}
+      <div class="flex flex-col gap-3">
+        {% for message in messages %}
+        <div class="rounded-2xl border border-custom-stroke bg-white p-4 text-sm font-semibold {% if message.tags == 'error' %}text-red-600{% else %}text-custom-black{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+        <div class="flex items-center gap-4">
+          <div class="flex size-14 items-center justify-center rounded-full bg-custom-blue-10">
+            <img src="{% static 'dashboard/assets/images/icons/wallet-2-blue-fill.svg' %}" class="flex size-6 shrink-0" alt="icon">
+          </div>
+          <div>
+            <h2 class="font-bold text-xl">Metode Pembayaran</h2>
+            <p class="font-medium text-custom-grey text-sm">Default selalu minimal 1 rekening bank. Anda bisa tambah, ubah, hapus, dan upload ikon bank sendiri.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="flex size-12 items-center justify-center rounded-xl bg-custom-blue-10">
+              <img src="{% static 'dashboard/assets/images/icons/bank-black.svg' %}" class="size-6" alt="icon">
+            </div>
+            <div>
+              <h3 class="font-bold text-lg">Transfer Bank</h3>
+              <p class="font-medium text-custom-grey text-sm">CRUD rekening transfer bank seller</p>
+            </div>
+          </div>
+
+          <form method="post" action="{% url 'panel_admin:store_payment_method' %}" class="flex items-center gap-3">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_settings">
+            <input type="hidden" name="bank_transfer_enabled" value="0">
+            <label class="toggle-switch">
+              <input type="checkbox" name="bank_transfer_enabled" value="1" {% if payment_settings.bank_transfer_enabled %}checked{% endif %}>
+              <span class="toggle-slider"></span>
+            </label>
+            <button type="submit" class="mini-btn bg-custom-blue text-white">Simpan</button>
+          </form>
+        </div>
+
+        <hr class="border-custom-stroke">
+
+        <div class="flex flex-col gap-4">
+          {% for bank in bank_accounts %}
+          <form method="post" action="{% url 'panel_admin:store_payment_method' %}" enctype="multipart/form-data" class="payment-card p-4 flex flex-col gap-4">
+            {% csrf_token %}
+            <input type="hidden" name="bank_id" value="{{ bank.id }}">
+
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                {% if bank.icon %}
+                <div class="flex h-[52px] w-[72px] items-center justify-center rounded-xl border border-custom-stroke bg-white p-1">
+                  <img src="{{ bank.icon.url }}" class="max-h-full max-w-full object-contain" alt="{{ bank.bank_name }}">
+                </div>
+                {% else %}
+                <div class="bank-badge">{{ bank.bank_code|default:bank.bank_name|slice:":3"|upper }}</div>
+                {% endif %}
+                <div>
+                  <p class="font-bold">{{ bank.bank_name }}</p>
+                  <p class="font-medium text-custom-grey text-sm">{{ bank.account_holder }}</p>
+                  {% if bank.is_default %}
+                  <p class="text-xs font-semibold text-blue-600 mt-1">Default</p>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <input type="hidden" name="is_active" value="0">
+                <label class="toggle-switch">
+                  <input type="checkbox" name="is_active" value="1" {% if bank.is_active %}checked{% endif %}>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-custom-grey">Nama Bank</label>
+                <input type="text" class="custom-input" name="bank_name" value="{{ bank.bank_name }}" required>
+              </div>
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-custom-grey">Kode Bank</label>
+                <input type="text" class="custom-input" name="bank_code" value="{{ bank.bank_code }}" placeholder="BCA / BNI / BRI">
+              </div>
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-custom-grey">Nomor Rekening</label>
+                <input type="text" class="custom-input" name="account_number" value="{{ bank.account_number }}" required>
+              </div>
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-custom-grey">Nama Pemilik Rekening</label>
+                <input type="text" class="custom-input" name="account_holder" value="{{ bank.account_holder }}" required>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-custom-grey">Icon Bank (opsional, upload sendiri)</label>
+              <input type="file" name="bank_icon" accept="image/*" class="custom-input py-3">
+            </div>
+
+            <div class="flex flex-wrap items-center justify-end gap-2">
+              <button type="submit" name="action" value="save_bank" class="mini-btn bg-custom-blue text-white">Simpan Perubahan</button>
+              {% if not bank.is_default %}
+              <button type="submit" name="action" value="set_default" class="mini-btn border border-custom-stroke text-custom-black">Jadikan Default</button>
+              {% endif %}
+              <button type="submit" name="action" value="delete_bank" class="mini-btn border border-red-200 text-red-600" onclick="return confirm('Hapus rekening ini?')">Hapus</button>
+            </div>
+          </form>
+          {% endfor %}
+
+          <form method="post" action="{% url 'panel_admin:store_payment_method' %}" enctype="multipart/form-data" class="payment-card p-4 flex flex-col gap-4 border-dashed">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_bank">
+            <p class="font-bold">Tambah Rekening Bank</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-custom-grey">Nama Bank</label>
+                <input type="text" class="custom-input" name="bank_name" placeholder="Contoh: Bank BCA" required>
+              </div>
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-custom-grey">Kode Bank</label>
+                <input type="text" class="custom-input" name="bank_code" placeholder="Contoh: BCA">
+              </div>
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-custom-grey">Nomor Rekening</label>
+                <input type="text" class="custom-input" name="account_number" required>
+              </div>
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium text-custom-grey">Nama Pemilik Rekening</label>
+                <input type="text" class="custom-input" name="account_holder" required>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-custom-grey">Icon Bank (upload sendiri)</label>
+              <input type="file" name="bank_icon" accept="image/*" class="custom-input py-3">
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="mini-btn bg-custom-blue text-white">Tambah Rekening</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <form method="post" action="{% url 'panel_admin:store_payment_method' %}" enctype="multipart/form-data" class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_settings">
+
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="flex size-12 items-center justify-center rounded-xl bg-custom-blue-10">
+              <img src="{% static 'dashboard/assets/images/icons/barcode-black.svg' %}" class="size-6" alt="icon">
+            </div>
+            <div>
+              <h3 class="font-bold text-lg">QRIS</h3>
+              <p class="font-medium text-custom-grey text-sm">Pengaturan pembayaran scan QRIS</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="hidden" name="qris_enabled" value="0">
+            <label class="toggle-switch">
+              <input type="checkbox" name="qris_enabled" value="1" {% if payment_settings.qris_enabled %}checked{% endif %}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="flex flex-col gap-3">
+            <label class="text-sm font-medium text-custom-grey">Upload QRIS</label>
+            <div class="relative flex w-full aspect-square max-w-[200px] rounded-2xl bg-custom-background border-2 border-dashed border-custom-stroke items-center justify-center overflow-hidden">
+              {% if payment_settings.qris_image %}
+              <img id="qris-preview" src="{{ payment_settings.qris_image.url }}" class="size-full object-cover" alt="qris">
+              {% else %}
+              <img id="qris-preview" src="{% static 'dashboard/assets/images/icons/gallery-grey.svg' %}" class="size-20 object-contain" alt="qris">
+              {% endif %}
+              <button type="button" onclick="document.getElementById('qris-input').click()" class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-300">
+                <span class="text-white font-semibold text-sm">Ganti QRIS</span>
+              </button>
+              <input type="file" id="qris-input" name="qris_image" accept="image/*" class="hidden" onchange="previewQRIS(event)">
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-custom-grey">Nama Merchant QRIS</label>
+              <input type="text" class="custom-input" name="qris_merchant_name" value="{{ payment_settings.qris_merchant_name|default:'' }}" placeholder="Nama merchant">
+            </div>
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-custom-grey">ID Merchant</label>
+              <input type="text" class="custom-input" name="qris_merchant_id" value="{{ payment_settings.qris_merchant_id|default:'' }}" placeholder="ID merchant (opsional)">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="submit" class="mini-btn bg-custom-blue text-white">Simpan Pengaturan QRIS</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="qris-crop-modal" class="fixed inset-0 z-9999 hidden">
+    <div class="absolute inset-0 bg-black/60" onclick="closeQrisCropModal(true)"></div>
+    <div class="relative z-10 flex min-h-full items-center justify-center p-4">
+      <div class="w-full max-w-3xl rounded-2xl bg-white p-4 md:p-6">
+        <div class="mb-3 flex items-center justify-between">
+          <h4 class="text-lg font-bold">Crop QRIS Menjadi Kotak</h4>
+          <button type="button" class="mini-btn border border-custom-stroke text-custom-black" onclick="closeQrisCropModal(true)">Tutup</button>
+        </div>
+        <p class="mb-4 text-sm text-custom-grey">Geser area crop sampai QRIS pas. File tidak akan diupload sebelum crop disimpan.</p>
+        <div class="max-h-[65vh] overflow-hidden rounded-xl bg-[#f3f5f9] p-2">
+          <img id="qris-crop-image" src="" alt="Crop QRIS" class="max-h-[60vh] w-full object-contain">
+        </div>
+        <div class="mt-4 flex justify-end gap-2">
+          <button type="button" class="mini-btn border border-custom-stroke text-custom-black" onclick="closeQrisCropModal(true)">Batal</button>
+          <button type="button" class="mini-btn bg-custom-blue text-white" onclick="applyQrisCrop()">Gunakan Hasil Crop</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.__DJANGO_MESSAGES__ = [
+      {% for message in messages %}
+      { level: "{{ message.tags|default:'info'|escapejs }}", text: "{{ message|escapejs }}" },
+      {% endfor %}
+    ];
+  </script>
+  <script src="{% static 'dashboard/assets/js/admin-layout.js' %}?v=20260401c" defer></script>
+  <script src="{% static 'dashboard/assets/vendor/cropperjs/cropper.min.js' %}?v=1.6.2"></script>
+  <script>
+    let qrisCropper = null;
+    let qrisSelectedName = 'qris-cropped.png';
+
+    function setQrisInputFromBlob(blob, originalName) {
+      const qrisInput = document.getElementById('qris-input');
+      const qrisPreview = document.getElementById('qris-preview');
+      if (!qrisInput || !qrisPreview || !blob) return;
+
+      const ext = (originalName && originalName.split('.').pop() || 'png').toLowerCase();
+      const normalizedExt = ext === 'jpg' ? 'jpeg' : ext;
+      const fileName = (originalName || 'qris')
+        .replace(/\.[^.]+$/, '')
+        .concat('-cropped.', normalizedExt === 'jpeg' ? 'jpg' : normalizedExt);
+      const croppedFile = new File([blob], fileName, { type: 'image/' + normalizedExt });
+
+      const dt = new DataTransfer();
+      dt.items.add(croppedFile);
+      qrisInput.files = dt.files;
+
+      qrisPreview.src = URL.createObjectURL(croppedFile);
+      qrisPreview.className = 'size-full object-cover';
+    }
+
+    function fallbackSquareCrop(file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          const side = Math.min(img.width, img.height);
+          const sx = Math.floor((img.width - side) / 2);
+          const sy = Math.floor((img.height - side) / 2);
+          const canvas = document.createElement('canvas');
+          canvas.width = 1024;
+          canvas.height = 1024;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, sx, sy, side, side, 0, 0, 1024, 1024);
+          canvas.toBlob(function (blob) {
+            setQrisInputFromBlob(blob, file.name);
+          }, 'image/png', 0.95);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function openQrisCropModal(file) {
+      const modal = document.getElementById('qris-crop-modal');
+      const cropImage = document.getElementById('qris-crop-image');
+      if (!modal || !cropImage || !file) return;
+
+      if (typeof window.Cropper === 'undefined') {
+        fallbackSquareCrop(file);
+        return;
+      }
+
+      qrisSelectedName = file.name || 'qris-cropped.png';
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        cropImage.src = e.target.result;
+        modal.classList.remove('hidden');
+
+        if (qrisCropper) {
+          qrisCropper.destroy();
+          qrisCropper = null;
+        }
+
+        qrisCropper = new Cropper(cropImage, {
+          aspectRatio: 1,
+          viewMode: 1,
+          autoCropArea: 1,
+          dragMode: 'move',
+          background: false,
+          responsive: true,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function closeQrisCropModal(resetInput) {
+      const modal = document.getElementById('qris-crop-modal');
+      const qrisInput = document.getElementById('qris-input');
+      if (qrisCropper) {
+        qrisCropper.destroy();
+        qrisCropper = null;
+      }
+      if (modal) modal.classList.add('hidden');
+      if (resetInput && qrisInput) qrisInput.value = '';
+    }
+
+    function applyQrisCrop() {
+      if (!qrisCropper) return;
+
+      const canvas = qrisCropper.getCroppedCanvas({
+        width: 1024,
+        height: 1024,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+      });
+
+      canvas.toBlob(function (blob) {
+        setQrisInputFromBlob(blob, qrisSelectedName);
+        closeQrisCropModal(false);
+      }, 'image/png', 0.95);
+    }
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeQrisCropModal(true);
+      }
+    });
+
+    window.closeQrisCropModal = closeQrisCropModal;
+    window.applyQrisCrop = applyQrisCrop;
+
+    function previewQRIS(event) {
+      const file = event && event.target && event.target.files && event.target.files[0];
+      if (!file) return;
+      openQrisCropModal(file);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+{% extends 'layouts/base/base.html' %}
+{% load humanize %}
+
+{% block title %}Semua Produk - Kopmas Shop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Filter</h5>
+                    
+                    <form method="get" action="{% url 'landing_app:product_list' %}">
+                        <!-- Search -->
+                        <div class="mb-3">
+                            <label class="form-label">Pencarian</label>
+                            <input type="text" name="search" class="form-control" value="{{ search_query }}" placeholder="Cari produk...">
+                        </div>
+                        
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <label class="form-label">Kategori</label>
+                            <select name="category" class="form-select">
+                                <option value="">Semua Kategori</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if current_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">Semua Status</option>
+                                {% for status, label in status_choices %}
+                                <option value="{{ status }}" {% if current_status == status %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Price Range -->
+                        <div class="mb-3">
+                            <label class="form-label">Rentang Harga</label>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" name="min_price" class="form-control" placeholder="Min" value="{{ min_price }}">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" name="max_price" class="form-control" placeholder="Max" value="{{ max_price }}">
+                            </div>
+                        </div>
+                        
+                        <!-- Sort -->
+                        <div class="mb-3">
+                            <label class="form-label">Urutkan</label>
+                            <select name="sort" class="form-select">
+                                <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Terbaru</option>
+                                <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Harga: Rendah ke Tinggi</option>
+                                <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Harga: Tinggi ke Rendah</option>
+                                <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Populer</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Terapkan Filter</button>
+                        <a href="{% url 'landing_app:product_list' %}" class="btn btn-outline-secondary w-100 mt-2">Reset</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Grid -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Semua Produk <span class="text-muted fs-6">({{ total_products }} produk)</span></h4>
+            </div>
+            
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-6 col-md-4">
+                    <div class="product-card card h-100 border-0 shadow-sm">
+                        <a href="{% url 'landing_app:product_detail' slug=product.slug %}" class="text-decoration-none">
+                            <div class="position-relative">
+                                {% if product.main_image %}
+                                <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                <img src="https://via.placeholder.com/300x200?text=No+Image" alt="{{ product.name }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                {% if product.discount_percentage > 0 %}
+                                <span class="badge bg-danger position-absolute top-0 start-0 m-2">-{{ product.discount_percentage }}%</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title text-dark text-truncate">{{ product.name }}</h6>
+                                <p class="text-muted small mb-2">{{ product.seller.store_name|default:product.seller.username }}</p>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="text-primary fw-bold">Rp {{ product.final_price|intcomma }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="card-footer bg-transparent border-0">
+                            <form action="{% url 'landing_app:add_to_cart' product.id %}" method="post" class="d-grid">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-cart-plus"></i> Tambah ke Keranjang
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-search display-1 text-muted"></i>
+                    <h5 class="mt-3">Tidak ada produk ditemukan</h5>
+                    <p class="text-muted">Coba ubah filter pencarian Anda</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

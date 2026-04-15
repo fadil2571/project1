@@ -1,0 +1,680 @@
+{% extends 'store/base.html' %}
+{% load static currency %}
+
+{% block title %}Riwayat Pemesanan / Detail - KOPMAS Shop{% endblock %}
+
+{% block page_css %}
+<style>
+  #pg-track {
+    padding-top: 10px;
+  }
+
+  #pg-track .track-title {
+    margin: 0 0 10px;
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #000;
+  }
+
+  #pg-track .track-card,
+  #pg-track .info-card,
+  #pg-track .summary-card,
+  #pg-track .timeline-card,
+  #pg-track .confirm-card {
+    background: #d9d9d9;
+    border-radius: 5px;
+  }
+
+  #pg-track .track-card {
+    border: 1px solid #bcbcbc;
+    background: #fff;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  #pg-track .track-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(153, 153, 153, 0.5);
+    padding: 9px 14px;
+  }
+
+  #pg-track .shop-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #003ea5;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  #pg-track .shop-badge {
+    background: #003ea5;
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 7px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  #pg-track .track-status {
+    color: #f97316;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  #pg-track .item-wrap {
+    padding: 8px 12px;
+    display: grid;
+    gap: 8px;
+  }
+
+  #pg-track .item-row {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 85px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    background: #fff;
+  }
+
+  #pg-track .item-thumb {
+    width: 85px;
+    height: 78px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: #f1f5f9;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  #pg-track .item-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #pg-track .item-name {
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: 600;
+    color: #bcbcbc;
+  }
+
+  #pg-track .item-variant {
+    font-size: 16px;
+    color: #6a798f;
+    margin-top: 3px;
+  }
+
+  #pg-track .item-qty {
+    font-size: 14px;
+    color: #6a798f;
+    margin-top: 3px;
+  }
+
+  #pg-track .item-price {
+    font-size: 18px;
+    color: #155dfc;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  #pg-track .section-box {
+    background: #d9d9d9;
+    border-radius: 5px;
+    margin-bottom: 12px;
+    padding: 12px 14px 10px;
+  }
+
+  #pg-track .section-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  #pg-track .section-title {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  #pg-track .section-line {
+    height: 2px;
+    background: #000;
+    flex: 1;
+  }
+
+  #pg-track .info-grid {
+    display: grid;
+    gap: 7px;
+  }
+
+  #pg-track .info-row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 14px;
+    align-items: start;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #000;
+  }
+
+  #pg-track .info-row span:first-child {
+    font-weight: 500;
+  }
+
+  #pg-track .info-row span:last-child {
+    text-align: right;
+    font-weight: 500;
+  }
+
+  #pg-track .summary-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #000;
+    padding: 4px 0;
+  }
+
+  #pg-track .summary-row.total {
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #000;
+    font-weight: 500;
+  }
+
+  #pg-track .summary-row strong {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+  }
+
+  #pg-track .summary-row span:last-child {
+    text-align: right;
+  }
+
+  #pg-track .timeline-wrap {
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    padding: 14px 14px 14px 14px;
+  }
+
+  #pg-track .timeline-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  #pg-track .courier-chip {
+    width: 44px;
+    height: 43px;
+    background: rgba(0, 26, 82, 0.3);
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  #pg-track .courier-name {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    color: #000;
+  }
+
+  #pg-track .courier-code {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    color: #000;
+    margin-top: 2px;
+  }
+
+  #pg-track .estimate-box {
+    text-align: right;
+    font-size: 15px;
+    color: #000;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+
+  #pg-track .timeline {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  #pg-track .timeline-col {
+    position: relative;
+    min-height: 250px;
+  }
+
+  #pg-track .tl-node {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    margin-left: 2px;
+  }
+
+  #pg-track .tl-node.done {
+    background: rgba(11, 158, 87, 0.3);
+    border: 1px solid #0b9e57;
+  }
+
+  #pg-track .tl-node.active {
+    background: rgba(21, 93, 252, 0.8);
+    border: 1px solid #003ea5;
+  }
+
+  #pg-track .tl-node.pending {
+    background: rgba(153, 153, 153, 0.2);
+    border: 1px solid #d9d9d9;
+  }
+
+  #pg-track .tl-line {
+    position: absolute;
+    left: 21px;
+    top: 40px;
+    bottom: 40px;
+    width: 1px;
+    background: #bcbcbc;
+  }
+
+  #pg-track .tl-line.done {
+    background: #0b9e57;
+  }
+
+  #pg-track .tl-line.active {
+    background: #bcbcbc;
+  }
+
+  #pg-track .timeline-step {
+    position: relative;
+    padding-left: 14px;
+    min-height: 84px;
+  }
+
+  #pg-track .timeline-step h5 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #000;
+  }
+
+  #pg-track .timeline-step p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #000;
+  }
+
+  #pg-track .timeline-step.pending h5,
+  #pg-track .timeline-step.pending p {
+    color: #a6a6a6;
+  }
+
+  #pg-track .confirm-card {
+    background: #d9d9d9;
+    border-radius: 5px;
+    margin: 12px 0 14px;
+    padding: 22px 24px;
+    text-align: center;
+  }
+
+  #pg-track .confirm-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 10px;
+    border-radius: 999px;
+    background: rgba(11, 158, 87, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+  }
+
+  #pg-track .confirm-title {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #000;
+  }
+
+  #pg-track .confirm-text {
+    margin: 0 auto;
+    max-width: 760px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #000;
+  }
+
+  #pg-track .action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 0 0 18px;
+  }
+
+  #pg-track .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 59px;
+    border-radius: 10px;
+    background: #d9d9d9;
+    border: none;
+    color: #000;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  #pg-track .lp-partners {
+    margin-top: 0;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+  }
+
+  #pg-track .lp-footer {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: 0;
+  }
+
+  @media (max-width: 1024px) {
+    #pg-track .info-row,
+    #pg-track .summary-row {
+      grid-template-columns: 1fr;
+    }
+
+    #pg-track .info-row span:last-child,
+    #pg-track .summary-row span:last-child,
+    #pg-track .estimate-box {
+      text-align: left;
+    }
+
+    #pg-track .action-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    #pg-track .track-title {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    #pg-track .track-head,
+    #pg-track .timeline-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    #pg-track .item-row {
+      grid-template-columns: 1fr;
+    }
+
+    #pg-track .item-thumb {
+      width: 100%;
+      height: 140px;
+    }
+
+    #pg-track .timeline {
+      grid-template-columns: 40px 1fr;
+    }
+
+    #pg-track .confirm-card {
+      padding: 18px 14px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-track">
+  <h1 class="track-title">Riwayat Pemesanan</h1>
+
+  <section class="track-card">
+    <div class="track-head">
+      <div class="shop-meta">
+        <span class="shop-badge">Star+</span>
+        <span>{{ order.seller.store_name|default:order.seller.email }}</span>
+      </div>
+      <div class="track-status">{{ order.get_status_display }}</div>
+    </div>
+
+    <div class="item-wrap">
+      {% for item in order_items %}
+      <div class="item-row">
+        <div class="item-thumb">
+          {% if 'Mukenah' in item.product_name %}
+            <img src="{% static 'album/mukena.jpg' %}" alt="{{ item.product_name }}">
+          {% elif 'Jamu' in item.product_name %}
+            <img src="{% static 'album/jamu_botol.jpg' %}" alt="{{ item.product_name }}">
+          {% elif 'Tas Bambu' in item.product_name %}
+            <img src="{% static 'album/tas_bambu.jpg' %}" alt="{{ item.product_name }}">
+          {% elif 'Yogurt' in item.product_name %}
+            <img src="{% static 'album/yogurt.jpg' %}" alt="{{ item.product_name }}">
+          {% elif 'Abon Salmon' in item.product_name or 'Abon Rendang' in item.product_name %}
+            <img src="{% static 'album/abon_salmon.jpg' %}" alt="{{ item.product_name }}">
+          {% elif 'Sabun Cuci Piring' in item.product_name %}
+            <img src="{% static 'album/sabun_cuci_piring.jpg' %}" alt="{{ item.product_name }}">
+          {% elif 'Daster' in item.product_name %}
+            <img src="{% static 'album/daster_motif.jpg' %}" alt="{{ item.product_name }}">
+          {% elif 'iPhone' in item.product_name %}
+            <img src="{% static 'album/produk1.png' %}" alt="{{ item.product_name }}">
+          {% elif item.product and item.product.image %}
+            <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}">
+          {% else %}
+            <img src="{% static 'album/produk1.png' %}" alt="{{ item.product_name }}">
+          {% endif %}
+        </div>
+        <div>
+          <div class="item-name">{{ item.product_name }}</div>
+          <div class="item-variant">{{ item.variant|default:'Natural Titanium' }}</div>
+          <div class="item-qty">{{ item.quantity }} barang</div>
+          <div class="item-price">Rp {{ item.product_price|rupiah }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section-box info-card">
+    <div class="section-head">
+      <div class="section-title">INFO PENGIRIMAN</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-row"><span>Kurir</span><span>{{ courier_name }}</span></div>
+      <div class="info-row"><span>No. Pesanan</span><span>{{ tracking_number }}</span></div>
+      <div class="info-row"><span>Alamat</span><span>{{ order.address.street }}, {{ order.address.city }} {{ order.address.postal_code }}</span></div>
+      <div class="info-row"><span>Estimasi Tiba</span><span>{{ estimated_text }}</span></div>
+    </div>
+  </section>
+
+  <section class="section-box summary-card">
+    <div class="section-head">
+      <div class="section-title">RINGKASAN PEMBAYARAN</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="summary-row"><span>Subtotal ({{ order_items|length }} produk)</span><span>Rp {{ order.subtotal|rupiah }}</span></div>
+    <div class="summary-row"><span>Ongkos Kirim</span><span>Rp {{ order.shipping_cost|rupiah }}</span></div>
+    <div class="summary-row"><span>PPN</span><span>Rp {{ ppn_amount|rupiah }}</span></div>
+    <div class="summary-row total"><strong>Total Pembayaran</strong><span>Rp {{ order.total|rupiah }}</span></div>
+    <div class="summary-row"><span>Metode</span><span>{% if order.payment_method == 'qris' %}QRIS{% else %}Transfer Bank{% endif %}</span></div>
+  </section>
+
+  <section class="timeline-wrap">
+    <div class="timeline-head">
+      <div>
+        <div class="courier-name">{{ courier_name }}</div>
+        <div class="courier-code">{{ tracking_number }}</div>
+      </div>
+      <div class="estimate-box">Estimasi Tiba<br>{{ estimated_text }}</div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-col">
+        <div class="tl-node done">✓</div>
+        <div class="tl-line {% if current_step == 'packed' or current_step == 'on_the_way' or current_step == 'done' %}done{% endif %}"></div>
+      </div>
+      <div class="timeline-step {% if current_step == 'packed' %}active{% endif %}">
+        <h5>Dikemas</h5>
+        <p>Pesanan dikonfirmasi &amp; diambil kurir</p>
+        <p>{{ shipped_at|date:'d M Y · H:i' }} WIB</p>
+      </div>
+
+      <div class="timeline-col">
+        <div class="tl-node active">→</div>
+        <div class="tl-line {% if current_step == 'on_the_way' or current_step == 'done' %}done{% endif %}"></div>
+      </div>
+      <div class="timeline-step {% if current_step == 'on_the_way' %}active{% endif %}">
+        <h5>Diantar</h5>
+        <p>Dalam perjalanan</p>
+        <p>Berangkat Sleman → Hub Nogotirto Kramatan</p>
+      </div>
+
+      <div class="timeline-col">
+        <div class="tl-node pending">⏰</div>
+      </div>
+      <div class="timeline-step pending">
+        <h5>Selesai</h5>
+        <p>Paket tiba di tujuan</p>
+        <p>{% if delivered_at %}{{ delivered_at|date:'d M Y · H:i' }} WIB{% else %}-{% endif %}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="confirm-card">
+    <div class="confirm-icon">📦</div>
+    <h3 class="confirm-title">Paket Sudah Sampai?</h3>
+    <p class="confirm-text">Konfirmasikan bahwa Anda telah menerima pesanan dengan baik dan sesuai kondisi yang diharapkan.</p>
+  </section>
+
+  <form method="post" class="action-row">
+    {% csrf_token %}
+    <a class="action-btn" href="{% url 'orders' %}">Kembali</a>
+    <input type="hidden" name="action" value="confirm_received">
+    <button class="action-btn" type="submit">Pesanan Diterima</button>
+  </form>
+
+  <div class="lp-partners">
+    <h2 class="lp-partners-title">T R U S T E D &nbsp;&nbsp; P A R T N E R S</h2>
+    <div class="lp-partners-grid">
+      <div class="lp-partner-item"><img src="{% static 'album/logo_sleman.png' %}" alt="Pemerintah Daerah Kabupaten Sleman"></div>
+      <div class="lp-partner-item"><img src="{% static 'album/logo_forkom.png' %}" alt="Forkom UMKM Kabupaten Sleman"></div>
+      <div class="lp-partner-item"><img src="{% static 'album/RST.png' %}" alt="RST"></div>
+      <div class="lp-partner-item"><img src="{% static 'album/kopmas_forkom.png' %}" alt="Kopmas Forkom UMKM Sleman"></div>
+    </div>
+  </div>
+
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <div class="lp-footer-grid">
+        <div class="lp-footer-brand">
+          <img src="{% static 'logokopmas.png' %}" alt="KOPMAS" class="lp-footer-logo">
+          <p class="lp-footer-tagline">Emporing UMKM</p>
+          <p class="lp-footer-subtitle">Growing Sleman</p>
+          <p class="lp-footer-desc">
+            "Platform online resmi Koperasi Pemasaran UMKM Kabupaten Sleman untuk
+            memasarkan produk unggulan UMKM lokal secara mudah, aman, dan
+            terpercaya."
+          </p>
+          <div class="lp-footer-social" aria-label="Media sosial">
+            <a href="#" class="lp-footer-social-link" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
+              </svg>
+            </a>
+            <a href="#" class="lp-footer-social-link" aria-label="Website">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">LAYANAN</h4>
+          <ul class="lp-footer-links">
+            <li> > Kategori Produk</li>
+            <li> > Belanja Sekarang</li>
+            <li> > Promo &amp; Diskon</li>
+            <li> > Wishlist</li>
+            <li> > Konsultasi UMKM</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">USEFUL LINKS</h4>
+          <ul class="lp-footer-links">
+            <li> > Tentang Kami</li>
+            <li> > Cara Berjualan</li>
+            <li> > Kebijakan Privasi</li>
+            <li> > Syarat &amp; Ketentuan</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">HUBUNGI KAMI</h4>
+          <div class="lp-footer-contact-box">
+            <div class="lp-footer-contact-addr">
+              <span class="lp-footer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </span>
+              <div>
+                <strong>LOKASI</strong>
+                <p>JL. Cangkringan Indah 1 No.17<br>KarangSari, Wedomartani<br>Kec. Ngemplak<br>Kabupaten Sleman</p>
+              </div>
+            </div>
+            <div class="lp-footer-contact-wa">
+              <span class="lp-footer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.5-4.3A8.5 8.5 0 1 1 21 11.5z"></path>
+                </svg>
+              </span>
+              <div>
+                <strong>OFFICIAL WHATSAPP</strong>
+                <div class="lp-footer-wa-num">081234567890</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lp-footer-bottom">
+      Copyright © 2026 - KopmasShop.Com All Rights Reserved
+      <div class="lp-footer-report">Support by OpenCash.ID</div>
+    </div>
+  </footer>
+</div>
+{% endblock %}

@@ -1,0 +1,1284 @@
+{% extends 'layouts/base/base.html' %}
+
+{% load static humanize %}
+
+{% block title %}{% if is_all_categories %}Semua Kategori{% else %}Semua {{ current_category }}{% endif %} - KOPMAS Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+  #pg-kategori {
+    --kat-border: #e8edf5;
+    --kat-text-main: #1f2937;
+    --kat-text-soft: #6b7280;
+    --kat-blue: #1d4ed8;
+    --kat-blue-soft: #edf3ff;
+  }
+
+  #pg-kategori .kat-shell {
+    background: linear-gradient(180deg, #f7fafe 0%, #f3f7ff 100%);
+    border: 1px solid var(--kat-border);
+    border-radius: 18px;
+    padding: 20px;
+  }
+
+  #pg-kategori .kat-shell.is-all {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-breadcrumb,
+  #pg-kategori .kat-shell.is-all .kat-toolbar,
+  #pg-kategori .kat-shell.is-all .kat-products-meta,
+  #pg-kategori .kat-shell.is-all .kat-pagination {
+    display: none;
+  }
+
+  #pg-kategori .kat-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #d9d9d9;
+    margin-bottom: 10px;
+  }
+
+  #pg-kategori .kat-breadcrumb .kat-bc-link,
+  #pg-kategori .kat-breadcrumb .kat-bc-sep,
+  #pg-kategori .kat-breadcrumb .kat-bc-mid {
+    color: #d9d9d9;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  #pg-kategori .kat-breadcrumb .kat-bc-link:hover {
+    color: #c4c4c4;
+  }
+
+  #pg-kategori .kat-breadcrumb .kat-bc-current {
+    color: #1a4ed8;
+    font-weight: 700;
+  }
+
+  #pg-kategori .kat-page-title {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.2;
+    color: #163a74;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  #pg-kategori .kat-page-sub {
+    margin: 8px 0 18px;
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-page-title {
+    font-size: 33px;
+    color: #111827;
+    letter-spacing: 0;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-page-sub {
+    margin: 3px 0 12px;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+
+  #pg-kategori .kat-category-strip {
+    overflow-x: hidden;
+    margin-bottom: 16px;
+    padding-bottom: 4px;
+  }
+
+  #pg-kategori .kat-category-table {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    border-spacing: 0;
+  }
+  #pg-kategori .kat-category-table tr,
+  #pg-kategori .kat-category-table tbody {
+    display: contents;
+  }
+  #pg-kategori .kat-category-cell {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 156px;
+    padding: 0;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #edf1f7;
+    border-radius: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  #pg-kategori .kat-category-cell:hover {
+    transform: translateY(-2px);
+    border-color: #dbe3f2;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
+  }
+
+  #pg-kategori .kat-category-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    padding: 12px 10px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  #pg-kategori .kat-category-icon-wrap {
+    margin: 0;
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  #pg-kategori .kat-category-btn:hover .kat-category-icon-wrap {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.16);
+  }
+
+  #pg-kategori .kat-category-icon-wrap svg {
+    width: 36px;
+    height: 36px;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  #pg-kategori .kat-c-1 { background: #eef2ff; color: #0d99ff; }
+  #pg-kategori .kat-c-2 { background: #e0f7f4; color: #22a896; }
+  #pg-kategori .kat-c-3 { background: #f0eaff; color: #6a22c8; }
+  #pg-kategori .kat-c-4 { background: #ffe8ee; color: #d42060; }
+  #pg-kategori .kat-c-5 { background: #e8f8ee; color: #1a9a4a; }
+  #pg-kategori .kat-c-6 { background: #e8eeff; color: #2255c6; }
+
+  #pg-kategori .kat-category-label {
+    display: block;
+    font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 19px;
+    color: #000000;
+  }
+
+  #pg-kategori .kat-toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  #pg-kategori .kat-search {
+    flex: 1 1 380px;
+    position: relative;
+  }
+
+  #pg-kategori .kat-search input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px 0 42px;
+    border: 1px solid #d7e2f2;
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--kat-text-main);
+    font-size: 14px;
+    outline: none;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  #pg-kategori .kat-search input:focus {
+    border-color: #7ca4ec;
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+  }
+
+  #pg-kategori .kat-search svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: #94a3b8;
+    pointer-events: none;
+  }
+
+  #pg-kategori .kat-filter {
+    display: flex;
+    gap: 10px;
+    flex: 0 1 260px;
+  }
+
+  #pg-kategori .kat-filter select {
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid #d7e2f2;
+    background: #ffffff;
+    color: #334155;
+    font-size: 14px;
+    padding: 0 12px;
+  }
+
+  #pg-kategori .kat-filter select {
+    flex: 1;
+    outline: none;
+  }
+
+  #pg-kategori .kat-products-wrap {
+    background: #ffffff;
+    border: 1px solid var(--kat-border);
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-products-wrap {
+    border-radius: 8px;
+    padding: 8px;
+  }
+
+  #pg-kategori .kat-products-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  #pg-kategori .kat-products-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+  }
+
+  #pg-kategori .kat-product-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e4ebf5;
+    border-radius: 14px;
+    background: #ffffff;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-card {
+    border-radius: 6px;
+    border-color: #e6ebf3;
+  }
+
+  #pg-kategori .kat-product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12);
+    border-color: #c6d8f8;
+  }
+
+  #pg-kategori .kat-product-image {
+    height: 130px;
+    background: #f3f6fb;
+    overflow: hidden;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-image {
+    height: 78px;
+  }
+
+  #pg-kategori .kat-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #pg-kategori .kat-product-body {
+    padding: 11px;
+    display: grid;
+    gap: 8px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-body {
+    padding: 6px;
+    gap: 4px;
+  }
+
+  #pg-kategori .kat-product-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    min-height: 36px;
+    color: #1e293b;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-name {
+    font-size: 9.5px;
+    min-height: 24px;
+    line-height: 1.25;
+  }
+
+  #pg-kategori .kat-product-price {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--kat-blue);
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-price {
+    font-size: 10px;
+  }
+
+  #pg-kategori .kat-product-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #pg-kategori .kat-product-rating {
+    font-size: 12px;
+    color: #f59e0b;
+    font-weight: 700;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-rating {
+    font-size: 9px;
+  }
+
+  #pg-kategori .kat-product-location {
+    margin: 4px 0 0;
+    font-size: 11px;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-location {
+    font-size: 8.5px;
+    margin-top: 2px;
+    max-width: 72px;
+  }
+
+  #pg-kategori .kat-product-cart {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid #bfdbfe;
+    background: var(--kat-blue-soft);
+    color: #1e40af;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-cart {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+  }
+
+  #pg-kategori .kat-product-cart svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-cart svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* Samakan ukuran kartu produk dengan landing (tidak diperkecil saat is_all) */
+  #pg-kategori .kat-shell.is-all .kat-products-wrap {
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-card {
+    border-radius: 14px;
+    border-color: #e4ebf5;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-image {
+    height: 130px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-body {
+    padding: 11px;
+    gap: 8px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-name {
+    font-size: 13px;
+    min-height: 36px;
+    line-height: 1.35;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-price {
+    font-size: 14px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-rating {
+    font-size: 12px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-location {
+    font-size: 11px;
+    margin-top: 4px;
+    max-width: 110px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-cart {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  #pg-kategori .kat-shell.is-all .kat-product-cart svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  #pg-kategori .kat-product-card:hover .kat-product-cart {
+    background: #dbeafe;
+    transform: translateY(-1px);
+  }
+
+  #pg-kategori .kat-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  #pg-kategori .kat-page-btn {
+    min-width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid #d4deee;
+    color: #334155;
+    background: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 12px;
+    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  #pg-kategori .kat-page-btn:hover {
+    border-color: #9bb8ea;
+    color: #1e40af;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  }
+
+  #pg-kategori .kat-page-btn.active {
+    background: #1d4ed8;
+    color: #ffffff;
+    border-color: #1d4ed8;
+  }
+
+  #pg-kategori .kat-page-btn.disabled {
+    pointer-events: none;
+    opacity: 0.45;
+  }
+
+  #pg-kategori .kat-empty {
+    grid-column: 1 / -1;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    text-align: center;
+    padding: 30px 20px;
+    color: #64748b;
+  }
+
+  #pg-kategori .lp-partners,
+  #pg-kategori .lp-footer {
+    width: calc(100% + 56px);
+    margin-left: -28px;
+    margin-right: -28px;
+    border-radius: 0;
+  }
+
+
+  #pg-kategori .lp-partners-title {
+    max-width: 1148px;
+    margin: 0 auto 16px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.3;
+    letter-spacing: 0.2em;
+    color: #F3F5F9;
+    font-weight: 700;
+  }
+
+  #pg-kategori .lp-partners-grid {
+    max-width: 1148px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  #pg-kategori .lp-partner-item {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #pg-kategori .lp-partner-item img {
+    width: 200px;
+    max-width: 100%;
+    max-height: 100px;
+    object-fit: contain;
+  }
+
+  #pg-kategori .lp-footer {
+    background: linear-gradient(276.84deg, #0e3ba4 28.49%, #05163e 93.98%);
+    color: #ffffff;
+    overflow: hidden;
+  }
+
+  #pg-kategori .lp-footer-inner {
+    max-width: 1269px;
+    margin: 0 auto;
+    padding: 41px 28px 26px;
+  }
+
+  #pg-kategori .lp-footer-grid {
+    display: grid;
+    grid-template-columns: 336px 166px 165px minmax(220px, 1fr);
+    gap: 40px;
+  }
+
+  #pg-kategori .lp-footer-logo {
+    width: 167px;
+    height: auto;
+    margin-bottom: 8px;
+  }
+
+  #pg-kategori .lp-footer-tagline {
+    margin: 0;
+    font-family: 'Epilogue', 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.12;
+    color: #ffffff;
+  }
+
+  #pg-kategori .lp-footer-subtitle {
+    margin: 0;
+    font-family: 'Epilogue', 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.35;
+    color: #94a3b8;
+  }
+
+  #pg-kategori .lp-footer-desc {
+    margin: 16px 0 0;
+    font-size: 16px;
+    line-height: 27px;
+    color: #cccccc;
+    font-style: italic;
+  }
+
+  #pg-kategori .lp-footer-social {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 10px;
+  }
+
+  #pg-kategori .lp-footer-social-link {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid #071e54;
+    background: rgba(217, 217, 217, 0.1);
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #pg-kategori .lp-footer-social-link svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  #pg-kategori .lp-footer-heading {
+    margin: 0 0 12px;
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  #pg-kategori .lp-footer-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+
+  #pg-kategori .lp-footer-links li {
+    font-size: 15px;
+    line-height: 1.4;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+  }
+
+  #pg-kategori .lp-footer-links li::before {
+    content: '›';
+    display: inline-block;
+    margin-right: 8px;
+    color: #2a407b;
+    font-weight: 700;
+  }
+
+  #pg-kategori .lp-footer-contact-box {
+    display: grid;
+    gap: px;
+  }
+
+  #pg-kategori .lp-footer-contact-addr,
+  #pg-kategori .lp-footer-contact-wa {
+    display: block;
+  }
+
+  #pg-kategori .lp-footer-icon {
+    display: none;
+  }
+
+  #pg-kategori .lp-footer-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  #pg-kategori .lp-footer-contact-box strong {
+    display: block;
+    font-size: 14px;
+    line-height: 24px;
+    color: #ffffff;
+    margin-bottom: 2px;
+  }
+
+  #pg-kategori .lp-footer-contact-box p,
+  #pg-kategori .lp-footer-wa-num {
+    margin: 0;
+    font-size: 14px;
+    line-height: 24px;
+    color: #cccccc;
+  }
+
+  #pg-kategori .lp-footer-bottom {
+    background: #153eb0;
+    text-align: center;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #ffffff;
+  }
+
+  #pg-kategori .lp-footer-report {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.3;
+    color: #ffffff;
+  }
+
+  /* ============================================================
+     RESPONSIVE — hanya bagian ini yang diperbarui
+  ============================================================ */
+
+  @media (max-width: 1320px) {
+    #pg-kategori .kat-products-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    #pg-kategori .kat-category-table {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 1024px) {
+    #pg-kategori .kat-shell {
+      padding: 16px;
+      border-radius: 16px;
+    }
+
+    #pg-kategori .kat-page-title {
+      font-size: 30px;
+    }
+
+    #pg-kategori .kat-products-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    #pg-kategori .kat-products-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    #pg-kategori .kat-category-table {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    /* Full-bleed footer/partners untuk tablet & mobile */
+    #pg-kategori .lp-partners,
+    #pg-kategori .lp-footer {
+      width: 100vw;
+      margin-left: calc(-50vw + 50%);
+      margin-right: calc(-50vw + 50%);
+      border-radius: 0;
+    }
+
+    #pg-kategori .lp-footer-bottom {
+      width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+      border-radius: 0;
+    }
+
+    /* Footer tablet: cegah kolom desktop kepotong */
+    #pg-kategori .lp-footer-inner {
+      padding: 30px 18px 22px;
+    }
+
+    #pg-kategori .lp-footer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px 20px;
+    }
+
+    #pg-kategori .lp-footer-tagline {
+      font-size: 21px;
+    }
+
+    #pg-kategori .lp-footer-subtitle {
+      font-size: 18px;
+    }
+
+    #pg-kategori .lp-footer-desc {
+      font-size: 14px;
+      line-height: 1.55;
+    }
+  }
+
+  /* ── TABLET (≤ 900px) ── */
+  @media (max-width: 900px) {
+    /* Produk: 3 kolom */
+    #pg-kategori .kat-products-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    /* Kategori: 3 kolom */
+    #pg-kategori .kat-category-table {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    #pg-kategori .kat-category-table .kat-category-cell {
+      height: 138px;
+    }
+
+    #pg-kategori .lp-footer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px 16px;
+    }
+
+    #pg-kategori .lp-footer-heading {
+      font-size: 18px;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+  }
+
+  /* ── TABLET kecil / landscape mobile (≤ 768px) ── */
+  @media (max-width: 768px) {
+    #pg-kategori .kat-shell {
+      padding: 14px;
+      border-radius: 14px;
+    }
+
+    #pg-kategori .kat-page-title {
+      font-size: 27px;
+    }
+
+    #pg-kategori .kat-toolbar {
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    #pg-kategori .kat-filter {
+      flex: 1 1 auto;
+    }
+
+    /* Produk: tetap 3 kolom di tablet */
+    #pg-kategori .kat-products-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    #pg-kategori .kat-product-image {
+      height: 115px;
+    }
+
+    #pg-kategori .kat-products-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    /* Partners grid: 2 kolom */
+    #pg-kategori .lp-partners-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      padding: 0 12px;
+    }
+
+    /* Footer inner padding lebih kecil */
+    #pg-kategori .lp-footer-inner {
+      padding: 24px 14px 18px;
+    }
+
+    /* Footer grid: 1 kolom */
+    #pg-kategori .lp-footer-grid {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    #pg-kategori .lp-footer-desc {
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+  }
+
+  /* ── MOBILE (≤ 480px) ── */
+  @media (max-width: 480px) {
+    #pg-kategori .kat-shell {
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    #pg-kategori .kat-category-icon-wrap {
+      width: 62px;
+      height: 62px;
+      margin-bottom: 0;
+    }
+
+    #pg-kategori .kat-category-label {
+      font-size: 13px;
+    }
+
+    /* Kategori: 2 kolom di mobile */
+    #pg-kategori .kat-category-table {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    #pg-kategori .kat-category-table .kat-category-cell {
+      height: 128px;
+    }
+
+    /* Produk: 2 kolom di mobile */
+    #pg-kategori .kat-products-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    #pg-kategori .kat-products-wrap {
+      padding: 10px;
+    }
+
+    #pg-kategori .kat-products-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    #pg-kategori .kat-page-title {
+      font-size: 24px;
+    }
+
+    #pg-kategori .kat-page-sub {
+      font-size: 12px;
+    }
+
+    #pg-kategori .kat-page-btn {
+      min-width: 34px;
+      height: 34px;
+      padding: 0 10px;
+    }
+
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-kategori">
+  <div class="kat-shell {% if is_all_categories %}is-all{% endif %}">
+    <div class="kat-breadcrumb" aria-label="Breadcrumb">
+      <a class="kat-bc-link" href="{% url 'home' %}">Beranda</a>
+      <span class="kat-bc-sep">&gt;</span>
+      <a class="kat-bc-mid" href="{% url 'kategori' %}">Kategori</a>
+      <span class="kat-bc-sep">&gt;</span>
+      <span class="kat-bc-current">{% if is_all_categories %}Semua Kategori{% else %}{{ current_category }}{% endif %}</span>
+    </div>
+
+    <h1 class="kat-page-title">{% if is_all_categories %}Semua Kategori{% else %}Semua {{ current_category }}{% endif %}</h1>
+    <p class="kat-page-sub">
+      {% if is_all_categories %}
+        Temukan aneka produk UMKM terbaik dari semua kategori dengan harga terjangkau dan kualitas terpercaya.
+      {% else %}
+        Temukan aneka produk {{ current_category|lower }} UMKM terbaik dengan harga terjangkau dan kualitas terpercaya.
+      {% endif %}
+    </p>
+
+    {% if is_all_categories %}
+    <div class="kat-category-strip">
+      <table class="kat-category-table">
+        <tbody>
+          <tr>
+            <td class="kat-category-cell">
+              <a href="{% url 'landing_app:category' slug='makanan' %}" class="kat-category-btn" aria-label="Kategori Makanan">
+                <span class="kat-category-icon-wrap kat-c-1">
+                  <svg viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M27.8438 12.375H0.84375C0.619974 12.375 0.405362 12.4639 0.247129 12.6221C0.0888947 12.7804 0 12.995 0 13.2188C0.00501768 15.8716 0.743134 18.4715 2.13283 20.7313C3.52253 22.991 5.50974 24.8227 7.875 26.0241V26.7188C7.875 27.2409 8.08242 27.7417 8.45163 28.1109C8.82085 28.4801 9.3216 28.6875 9.84375 28.6875H18.8438C19.3659 28.6875 19.8667 28.4801 20.2359 28.1109C20.6051 27.7417 20.8125 27.2409 20.8125 26.7188V26.0241C23.1778 24.8227 25.165 22.991 26.5547 20.7313C27.9444 18.4715 28.6825 15.8716 28.6875 13.2188C28.6875 12.995 28.5986 12.7804 28.4404 12.6221C28.2821 12.4639 28.0675 12.375 27.8438 12.375ZM19.6172 24.7275C19.4704 24.7948 19.346 24.9027 19.2588 25.0386C19.1716 25.1744 19.1251 25.3325 19.125 25.4939V26.7188C19.125 26.7934 19.0954 26.8649 19.0426 26.9176C18.9899 26.9704 18.9183 27 18.8438 27H9.84375C9.76916 27 9.69762 26.9704 9.64488 26.9176C9.59213 26.8649 9.5625 26.7934 9.5625 26.7188V25.4939C9.56238 25.3325 9.51595 25.1744 9.42871 25.0386C9.34146 24.9027 9.21708 24.7948 9.07031 24.7275C7.00049 23.773 5.22555 22.2792 3.93156 20.4028C2.63757 18.5264 1.87218 16.3365 1.71563 14.0625H26.9719C26.8153 16.3365 26.0499 18.5264 24.7559 20.4028C23.462 22.2792 21.687 23.773 19.6172 24.7275ZM8.06063 4.25251C8.77078 3.36939 9.10266 2.60298 8.97188 2.14314C8.87063 1.78736 8.46 1.64111 8.45578 1.6397C8.26918 1.57418 8.11152 1.44519 8.01034 1.27526C7.90916 1.10533 7.87089 0.905263 7.90221 0.709988C7.93353 0.514713 8.03245 0.336644 8.18169 0.206878C8.33093 0.0771114 8.52102 0.00389399 8.71875 1.14369e-05C8.80366 -0.000438195 8.88811 0.0123724 8.96906 0.0379803C9.09703 0.0773553 10.2206 0.459855 10.5834 1.64673C10.9012 2.68595 10.4948 3.91782 9.37687 5.31001C8.66672 6.19314 8.33484 6.95954 8.46562 7.41939C8.56687 7.77517 8.9775 7.92142 8.98172 7.92282C9.16832 7.98834 9.32598 8.11733 9.42716 8.28726C9.52833 8.45719 9.56661 8.65726 9.53529 8.85254C9.50397 9.04781 9.40505 9.22588 9.25581 9.35565C9.10657 9.48541 8.91648 9.55863 8.71875 9.56251C8.63384 9.56296 8.54939 9.55015 8.46844 9.52454C8.34047 9.48517 7.21687 9.10267 6.85406 7.91579C6.53625 6.87657 6.94266 5.6447 8.06063 4.25251ZM13.6856 4.25251C14.3958 3.36939 14.7277 2.60298 14.5969 2.14314C14.4956 1.78736 14.085 1.64111 14.0808 1.6397C13.8942 1.57418 13.7365 1.44519 13.6353 1.27526C13.5342 1.10533 13.4959 0.905263 13.5272 0.709988C13.5585 0.514713 13.6574 0.336644 13.8067 0.206878C13.9559 0.0771114 14.146 0.00389399 14.3438 1.14369e-05C14.4287 -0.000438195 14.5131 0.0123724 14.5941 0.0379803C14.722 0.0773553 15.8456 0.459855 16.2084 1.64673C16.5262 2.68595 16.1198 3.91782 15.0019 5.31001C14.2917 6.19314 13.9598 6.95954 14.0906 7.41939C14.1919 7.77517 14.6025 7.92142 14.6067 7.92282C14.7933 7.98834 14.951 8.11733 15.0522 8.28726C15.1533 8.45719 15.1916 8.65726 15.1603 8.85254C15.129 9.04781 15.0301 9.22588 14.8808 9.35565C14.7316 9.48541 14.5415 9.55863 14.3438 9.56251C14.2588 9.56296 14.1744 9.55015 14.0934 9.52454C13.9655 9.48517 12.8419 9.10267 12.4791 7.91579C12.1613 6.87657 12.5677 5.6447 13.6856 4.25251ZM19.3106 4.25251C20.0208 3.36939 20.3527 2.60298 20.2219 2.14314C20.1206 1.78736 19.71 1.64111 19.7058 1.6397C19.5192 1.57418 19.3615 1.44519 19.2603 1.27526C19.1592 1.10533 19.1209 0.905263 19.1522 0.709988C19.1835 0.514713 19.2824 0.336644 19.4317 0.206878C19.5809 0.0771114 19.771 0.00389399 19.9688 1.14369e-05C20.0537 -0.000438195 20.1381 0.0123724 20.2191 0.0379803C20.347 0.0773553 21.4706 0.459855 21.8334 1.64673C22.1512 2.68595 21.7448 3.91782 20.6269 5.31001C19.9167 6.19314 19.5848 6.95954 19.7156 7.41939C19.8169 7.77517 20.2275 7.92142 20.2317 7.92282C20.4183 7.98834 20.576 8.11733 20.6772 8.28726C20.7783 8.45719 20.8166 8.65726 20.7853 8.85254C20.754 9.04781 20.6551 9.22588 20.5058 9.35565C20.3566 9.48541 20.1665 9.55863 19.9688 9.56251C19.8838 9.56296 19.7994 9.55015 19.7184 9.52454C19.5905 9.48517 18.4669 9.10267 18.1041 7.91579C17.7863 6.87657 18.1927 5.6447 19.3106 4.25251Z" fill="#0D99FF"></path>
+                  </svg>
+                </span>
+                <span class="kat-category-label">Makanan</span>
+              </a>
+            </td>
+            <td class="kat-category-cell">
+              <a href="{% url 'landing_app:category' slug='minuman' %}" class="kat-category-btn" aria-label="Kategori Minuman">
+                <span class="kat-category-icon-wrap kat-c-2">
+                  <svg viewBox="0 0 15 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M3 27H6V18C4.4087 18 2.88258 17.3679 1.75736 16.2426C0.632141 15.1174 0 13.5913 0 12V3C0 2.20435 0.31607 1.44129 0.87868 0.87868C1.44129 0.31607 2.20435 0 3 0H12C12.7956 0 13.5587 0.31607 14.1213 0.87868C14.6839 1.44129 15 2.20435 15 3V12C15 13.5913 14.3679 15.1174 13.2426 16.2426C12.1174 17.3679 10.5913 18 9 18V27H12C12.3978 27 12.7794 27.158 13.0607 27.4393C13.342 27.7206 13.5 28.1022 13.5 28.5C13.5 28.8978 13.342 29.2794 13.0607 29.5607C12.7794 29.842 12.3978 30 12 30H3C2.60218 30 2.22064 29.842 1.93934 29.5607C1.65804 29.2794 1.5 28.8978 1.5 28.5C1.5 28.1022 1.65804 27.7206 1.93934 27.4393C2.22064 27.158 2.60218 27 3 27ZM3 3V12C3 12.7956 3.31607 13.5587 3.87868 14.1213C4.44129 14.6839 5.20435 15 6 15H9C9.79565 15 10.5587 14.6839 11.1213 14.1213C11.6839 13.5587 12 12.7956 12 12V3H3Z" fill="#22A896"></path>
+                  </svg>
+                </span>
+                <span class="kat-category-label">Minuman</span>
+              </a>
+            </td>
+            <td class="kat-category-cell">
+              <a href="{% url 'landing_app:category' slug='craft' %}" class="kat-category-btn" aria-label="Kategori Craft">
+                <span class="kat-category-icon-wrap kat-c-3">
+                  <svg viewBox="0 0 33 31" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M32 11.75H19.9062L16.25 0.5L12.5938 11.75H0.5L10.3438 18.5L6.54688 29.75L16.25 22.7188L25.9531 29.75L22.1562 18.5L32 11.75Z" stroke="#6A22C8" stroke-linejoin="round"></path>
+                  </svg>
+                </span>
+                <span class="kat-category-label">Craft</span>
+              </a>
+            </td>
+            <td class="kat-category-cell">
+              <a href="{% url 'landing_app:category' slug='fashion-aksesoris' %}" class="kat-category-btn" aria-label="Kategori Fashion dan Aksesoris">
+                <span class="kat-category-icon-wrap kat-c-4">
+                  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M28.1918 3.19L21.6218 1C21.6218 2.5913 20.9896 4.11742 19.8644 5.24264C18.7392 6.36786 17.2131 7 15.6218 7C14.0305 7 12.5043 6.36786 11.3791 5.24264C10.2539 4.11742 9.62176 2.5913 9.62176 1L3.05176 3.19C2.37284 3.41619 1.79713 3.87762 1.42855 4.49101C1.05996 5.1044 0.922781 5.82935 1.04176 6.535L1.91176 11.74C1.96888 12.0924 2.14978 12.4128 2.42198 12.6438C2.69417 12.8747 3.0398 13.001 3.39676 13H6.62176V28C6.62176 29.65 7.97176 31 9.62176 31H21.6218C22.4174 31 23.1805 30.6839 23.7431 30.1213C24.3057 29.5587 24.6218 28.7956 24.6218 28V13H27.8468C28.2037 13.001 28.5494 12.8747 28.8216 12.6438C29.0937 12.4128 29.2746 12.0924 29.3318 11.74L30.2018 6.535C30.3207 5.82935 30.1836 5.1044 29.815 4.49101C29.4464 3.87762 28.8707 3.41619 28.1918 3.19Z" stroke="#D42060" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                </span>
+                <span class="kat-category-label">Fashion &amp; Aksesoris</span>
+              </a>
+            </td>
+            <td class="kat-category-cell">
+              <a href="{% url 'landing_app:category' slug='pertanian' %}" class="kat-category-btn" aria-label="Kategori Pertanian">
+                <span class="kat-category-icon-wrap kat-c-5">
+                  <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M36 2.25C36 9.85078 30.6141 16.193 23.4563 17.6766C22.9008 13.5914 21.0656 9.91406 18.3586 7.06641C21.1781 2.8125 26.0086 0 31.5 0H33.75C34.9945 0 36 1.00547 36 2.25ZM0 6.75C0 5.50547 1.00547 4.5 2.25 4.5H4.5C13.1977 4.5 20.25 11.5523 20.25 20.25V33.75C20.25 34.9945 19.2445 36 18 36C16.7555 36 15.75 34.9945 15.75 33.75V22.5C7.05234 22.5 0 15.4477 0 6.75Z" fill="#1A9A4A"></path>
+                  </svg>
+                </span>
+                <span class="kat-category-label">Pertanian</span>
+              </a>
+            </td>
+            <td class="kat-category-cell">
+              <a href="{% url 'landing_app:category' slug='jasa' %}" class="kat-category-btn" aria-label="Kategori Jasa">
+                <span class="kat-category-icon-wrap kat-c-6">
+                  <svg viewBox="0 0 30 23" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M16.605 9.61506C17.5162 8.34195 18.0061 6.81563 18.0061 5.25006C18.0061 3.68448 17.5162 2.15816 16.605 0.885055C17.4582 0.303852 18.4677 -0.00474651 19.5 5.51947e-05C20.8924 5.51947e-05 22.2277 0.553179 23.2123 1.53774C24.1969 2.52231 24.75 3.85767 24.75 5.25006C24.75 6.64244 24.1969 7.9778 23.2123 8.96237C22.2277 9.94693 20.8924 10.5001 19.5 10.5001C18.4677 10.5049 17.4582 10.1963 16.605 9.61506ZM5.25 5.25006C5.25 4.2117 5.55791 3.19667 6.13478 2.33331C6.71166 1.46995 7.5316 0.797048 8.49091 0.399688C9.45022 0.00232784 10.5058 -0.10164 11.5242 0.100933C12.5426 0.303505 13.4781 0.803519 14.2123 1.53774C14.9465 2.27197 15.4466 3.20743 15.6491 4.22583C15.8517 5.24423 15.7477 6.29983 15.3504 7.25914C14.953 8.21845 14.2801 9.03839 13.4167 9.61527C12.5534 10.1921 11.5384 10.5001 10.5 10.5001C9.10761 10.5001 7.77226 9.94693 6.78769 8.96237C5.80312 7.9778 5.25 6.64244 5.25 5.25006ZM8.25 5.25006C8.25 5.69506 8.38196 6.13008 8.62919 6.50009C8.87643 6.8701 9.22783 7.15849 9.63896 7.32878C10.0501 7.49908 10.5025 7.54364 10.939 7.45682C11.3754 7.37001 11.7763 7.15571 12.091 6.84105C12.4057 6.52638 12.62 6.12547 12.7068 5.68901C12.7936 5.25255 12.749 4.80015 12.5787 4.38902C12.4084 3.97788 12.12 3.62648 11.75 3.37925C11.38 3.13202 10.945 3.00006 10.5 3.00006C9.90326 3.00006 9.33097 3.23711 8.90901 3.65906C8.48705 4.08102 8.25 4.65332 8.25 5.25006ZM21 19.5001V22.5001H0V19.5001C0 19.5001 0 13.5001 10.5 13.5001C21 13.5001 21 19.5001 21 19.5001ZM18 19.5001C17.79 18.3301 16.005 16.5001 10.5 16.5001C4.995 16.5001 3.105 18.4651 3 19.5001M20.925 13.5001C21.8444 14.2152 22.596 15.1228 23.1273 16.1594C23.6585 17.1959 23.9564 18.3361 24 19.5001V22.5001H30V19.5001C30 19.5001 30 14.0551 20.91 13.5001H20.925Z" fill="#2255C6"></path>
+                  </svg>
+                </span>
+                <span class="kat-category-label">Jasa</span>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <form method="get" class="kat-toolbar" id="foodFilterForm">
+      {% if not is_all_categories %}
+      <input type="hidden" name="category_name" value="{{ current_category }}">
+      {% endif %}
+
+      <label class="kat-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M21 21l-4.35-4.35"></path>
+        </svg>
+        <input
+          type="search"
+          name="q"
+          id="productSearch"
+          value="{{ search_query }}"
+          placeholder="{% if is_all_categories %}Cari produk, merek, atau lokasi...{% else %}Cari {{ current_category|lower }}, merek, atau lokasi...{% endif %}"
+          autocomplete="off"
+        >
+      </label>
+
+      <div class="kat-filter">
+        <select name="sort" id="sortSelect" aria-label="Filter urutan">
+          <option value="terbaru" {% if sort_by == 'terbaru' %}selected{% endif %}>Urutkan: Terbaru</option>
+          <option value="harga_asc" {% if sort_by == 'harga_asc' %}selected{% endif %}>Harga Terendah</option>
+          <option value="harga_desc" {% if sort_by == 'harga_desc' %}selected{% endif %}>Harga Tertinggi</option>
+          <option value="rating_desc" {% if sort_by == 'rating_desc' %}selected{% endif %}>Rating Tertinggi</option>
+          <option value="nama_asc" {% if sort_by == 'nama_asc' %}selected{% endif %}>Nama A-Z</option>
+        </select>
+      </div>
+    </form>
+
+    <div class="kat-products-wrap">
+      <div class="kat-products-meta">
+        <span>Total produk: {{ page_obj.paginator.count }}</span>
+        <span>Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}</span>
+      </div>
+
+      <div class="kat-products-grid">
+        {% for product in products %}
+        <a class="kat-product-card" href="{% url 'landing_app:product_detail' slug=product.slug %}" aria-label="Lihat produk {{ product.name }}">
+          <div class="kat-product-image">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+              {% if "Mukenah" in product.name %}
+                <img src="{% static 'album/mukena.jpg' %}" alt="{{ product.name }}">
+              {% elif "Jamu" in product.name %}
+                <img src="{% static 'album/jamu_botol.jpg' %}" alt="{{ product.name }}">
+              {% elif "Tas Bambu" in product.name %}
+                <img src="{% static 'album/tas_bambu.jpg' %}" alt="{{ product.name }}">
+              {% elif "Yogurt" in product.name %}
+                <img src="{% static 'album/yogurt.jpg' %}" alt="{{ product.name }}">
+              {% elif "Abon Salmon" in product.name %}
+                <img src="{% static 'album/abon_salmon.jpg' %}" alt="{{ product.name }}">
+              {% elif "Sabun Cuci Piring" in product.name %}
+                <img src="{% static 'album/sabun_cuci_piring.jpg' %}" alt="{{ product.name }}">
+              {% elif "Daster" in product.name %}
+                <img src="{% static 'album/daster_motif.jpg' %}" alt="{{ product.name }}">
+              {% else %}
+                <img src="{% static 'album/abon_salmon.jpg' %}" alt="{{ product.name }}">
+              {% endif %}
+            {% endif %}
+          </div>
+          <div class="kat-product-body">
+            <p class="kat-product-name">{{ product.name }}</p>
+            <p class="kat-product-price">Rp {{ product.price|intcomma }}</p>
+            <div class="kat-product-foot">
+              <div>
+                <div class="kat-product-rating">★ {{ product.rating }}</div>
+                <!-- lokasi dihilangkan karena tidak ada di model -->
+              </div>
+              <span class="kat-product-cart" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="20" r="1"></circle>
+                  <circle cx="18" cy="20" r="1"></circle>
+                  <path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H8"></path>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </a>
+        {% empty %}
+        <div class="kat-empty">
+          <h3>Produk tidak ditemukan</h3>
+          <p>Coba kata kunci lain atau ubah filter untuk melihat produk yang tersedia.</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="kat-pagination" aria-label="Navigasi halaman">
+        {% if page_obj.has_previous %}
+          <a class="kat-page-btn" href="?{% if not is_all_categories %}category_name={{ current_category|urlencode }}&{% endif %}q={{ search_query|urlencode }}&sort={{ sort_by }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% else %}
+          <span class="kat-page-btn disabled">Previous</span>
+        {% endif %}
+
+        {% for page_num in page_obj.paginator.page_range %}
+          {% if page_num == page_obj.number %}
+            <span class="kat-page-btn active">{{ page_num }}</span>
+          {% elif page_num >= page_obj.number|add:'-2' and page_num <= page_obj.number|add:'2' %}
+            <a class="kat-page-btn" href="?{% if not is_all_categories %}category_name={{ current_category|urlencode }}&{% endif %}q={{ search_query|urlencode }}&sort={{ sort_by }}&page={{ page_num }}">{{ page_num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <a class="kat-page-btn" href="?{% if not is_all_categories %}category_name={{ current_category|urlencode }}&{% endif %}q={{ search_query|urlencode }}&sort={{ sort_by }}&page={{ page_obj.next_page_number }}">Next</a>
+        {% else %}
+          <span class="kat-page-btn disabled">Next</span>
+        {% endif %}
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+
+<div class="lp-partners">
+  <h2 class="lp-partners-title">T R U S T E D &nbsp;&nbsp; P A R T N E R S</h2>
+  <div class="lp-partners-grid">
+    <div class="lp-partner-item">
+      <img src="{% static 'album/logo_sleman.png' %}" alt="Pemerintah Daerah Kabupaten Sleman">
+    </div>
+    <div class="lp-partner-item">
+      <img src="{% static 'album/logo_forkom.png' %}" alt="Forkom UMKM Kabupaten Sleman">
+    </div>
+    <div class="lp-partner-item">
+      <img src="{% static 'album/kopmas_forkom.png' %}" alt="Kopmas Forkom UMKM Sleman">
+    </div>
+    <div class="lp-partner-item">
+      <img src="{% static 'album/opencash.jpeg' %}" alt="OpenCash">
+    </div>
+  </div>
+</div>
+
+
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <div class="lp-footer-grid">
+        <div class="lp-footer-brand">
+          <img src="{% static 'logokopmas.png' %}" alt="KOPMAS" class="lp-footer-logo">
+          <p class="lp-footer-tagline">Emporing UMKM</p>
+          <p class="lp-footer-subtitle">Growing Sleman</p>
+          <p class="lp-footer-desc">
+            "Platform online resmi Koperasi Pemasaran UMKM Kabupaten Sleman untuk
+            memasarkan produk unggulan UMKM lokal secara mudah, aman, dan
+            terpercaya."
+          </p>
+          <div class="lp-footer-social" aria-label="Media sosial">
+            <a href="#" class="lp-footer-social-link" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+                <circle cx="12" cy="12" r="4"></circle>
+                <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor"></circle>
+              </svg>
+            </a>
+            <a href="#" class="lp-footer-social-link" aria-label="Website">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M3 12h18"></path>
+                <path d="M12 3c2.7 2.8 2.7 15.2 0 18"></path>
+                <path d="M12 3c-2.7 2.8-2.7 15.2 0 18"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h4 class="lp-footer-heading">LAYANAN</h4>
+          <ul class="lp-footer-links">
+            <li>Web Development</li>
+            <li>AI &amp; Automation</li>
+            <li>Mobile Applications</li>
+            <li>Testing</li>
+            <li>Konsultasi UMKM</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="lp-footer-heading">USEFUL LINKS</h4>
+          <ul class="lp-footer-links">
+            <li>Tentang Kami</li>
+            <li>Portofolio Proyek</li>
+            <li>Cara Berjualan</li>
+            <li>Syarat &amp; Ketentuan</li>
+            <li>Kebijakan Privasi</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="lp-footer-heading">HUBUNGI KAMI</h4>
+          <div class="lp-footer-contact-box">
+            <div class="lp-footer-contact-addr">
+              <span class="lp-footer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </span>
+              <div>
+                <strong>LOKASI</strong>
+                <p>JL. Cangkringan Indah 1 No.17<br>KarangSari, Wedomartani<br>Kec. Ngemplak, Kabupaten Sleman</p>
+              </div>
+            </div>
+            <div class="lp-footer-contact-wa">
+              <span class="lp-footer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.5-4.3A8.5 8.5 0 1 1 21 11.5z"></path>
+                </svg>
+              </span>
+              <div>
+                <strong>OFFICIAL WHATSAPP</strong>
+                <div class="lp-footer-wa-num">081234567890</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lp-footer-bottom">
+      Copyright © 2026 - Kompashop.Com All Rights Reserved
+      <div class="lp-footer-report">Support by OpenCash.ID</div>
+    </div>
+  </footer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const sortSelect = document.getElementById('sortSelect');
+    const form = document.getElementById('foodFilterForm');
+    const searchInput = document.getElementById('productSearch');
+
+    if (sortSelect && form) {
+      sortSelect.addEventListener('change', function () {
+        form.submit();
+      });
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && searchInput.value) {
+          searchInput.value = '';
+        }
+      });
+    }
+  })();
+</script>
+{% endblock %}

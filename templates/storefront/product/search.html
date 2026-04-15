@@ -1,0 +1,129 @@
+{% extends 'layouts/base/base.html' %}
+{% load humanize %}
+
+{% block title %}Hasil Pencarian: {{ query }} - Kopmas Shop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Search Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Hasil Pencarian</h2>
+            <p class="text-muted">
+                {% if query %}
+                Menampilkan {{ total_results }} hasil untuk "<strong>{{ query }}</strong>"
+                {% else %}
+                Masukkan kata kunci untuk mencari produk
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    {% if query %}
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        <input type="hidden" name="q" value="{{ query }}">
+                        <div class="col-md-4">
+                            <label class="form-label">Kategori</label>
+                            <select name="category" class="form-select">
+                                <option value="">Semua Kategori</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Urutkan</label>
+                            <select name="sort" class="form-select">
+                                <option value="relevance" {% if current_sort == 'relevance' %}selected{% endif %}>Relevansi</option>
+                                <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Terbaru</option>
+                                <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Harga: Rendah ke Tinggi</option>
+                                <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Harga: Tinggi ke Rendah</option>
+                                <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Populer</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary">Terapkan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results -->
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="product-card card h-100 border-0 shadow-sm">
+                <a href="{% url 'landing_app:product_detail' slug=product.slug %}" class="text-decoration-none">
+                    <div class="position-relative">
+                        {% if product.main_image %}
+                        <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <img src="https://via.placeholder.com/300x200?text=No+Image" alt="{{ product.name }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                        {% if product.discount_percentage > 0 %}
+                        <span class="badge bg-danger position-absolute top-0 start-0 m-2">-{{ product.discount_percentage }}%</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-title text-dark text-truncate">{{ product.name }}</h6>
+                        <p class="text-muted small mb-2">{{ product.category.name }}</p>
+                        <div>
+                            <span class="text-primary fw-bold">Rp {{ product.final_price|intcomma }}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-search display-1 text-muted"></i>
+            <h5 class="mt-3">Tidak Ada Hasil</h5>
+            <p class="text-muted">Coba kata kunci lain atau periksa ejaan Anda</p>
+            <a href="{% url 'landing_app:product_list' %}" class="btn btn-primary mt-3">Lihat Semua Produk</a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}&sort={{ current_sort }}&category={{ current_category }}">Previous</a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item"><a class="page-link" href="?q={{ query }}&page={{ num }}&sort={{ current_sort }}&category={{ current_category }}">{{ num }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}&sort={{ current_sort }}&category={{ current_category }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <!-- Empty Search -->
+    <div class="row">
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-search display-1 text-muted"></i>
+            <h5 class="mt-3">Cari Produk</h5>
+            <p class="text-muted">Masukkan kata kunci di kolom pencarian</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

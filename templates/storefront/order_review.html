@@ -1,0 +1,638 @@
+{% extends 'store/base.html' %}
+{% load static currency %}
+
+{% block title %}Riwayat Pemesanan / Detail / Review - KOPMAS Shop{% endblock %}
+
+{% block page_css %}
+<style>
+  #pg-review {
+    position: relative;
+    padding-top: 10px;
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  #pg-review .review-title {
+    margin: 0 0 14px;
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #000;
+  }
+
+  #pg-review .order-card,
+  #pg-review .rating-panel,
+  #pg-review .review-panel,
+  #pg-review .photo-panel,
+  #pg-review .action-row {
+    width: 100%;
+  }
+
+  #pg-review .order-card {
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+  }
+
+  #pg-review .order-items {
+    display: grid;
+    gap: 12px;
+  }
+
+  #pg-review .order-item {
+    display: grid;
+    grid-template-columns: 85px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fff;
+  }
+
+  #pg-review .item-thumb {
+    width: 85px;
+    height: 78px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f1f5f9;
+    flex-shrink: 0;
+  }
+
+  #pg-review .item-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #pg-review .item-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #bcbcbc;
+    line-height: 1.25;
+  }
+
+  #pg-review .item-variant {
+    margin: 2px 0 0;
+    font-size: 16px;
+    color: #6a798f;
+    line-height: 1.35;
+  }
+
+  #pg-review .item-qty {
+    margin: 2px 0 0;
+    font-size: 14px;
+    color: #6a798f;
+    line-height: 1.35;
+  }
+
+  #pg-review .item-price {
+    margin: 6px 0 0;
+    font-size: 18px;
+    color: #155dfc;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  #pg-review .rating-panel {
+    background: #d9d9d9;
+    padding: 18px 12px 20px;
+    margin-bottom: 14px;
+  }
+
+  #pg-review .rating-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  #pg-review .rating-line {
+    height: 1px;
+    background: #000;
+    flex: 1;
+  }
+
+  #pg-review .rating-label {
+    font-size: 16px;
+    line-height: 1.3;
+    letter-spacing: 0.15em;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  #pg-review .rating-stars {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin-bottom: 8px;
+    direction: rtl;
+  }
+
+  #pg-review .rating-stars input {
+    display: none;
+  }
+
+  #pg-review .rating-stars label {
+    cursor: pointer;
+    font-size: 30px;
+    line-height: 1;
+    color: #cbd5e1;
+    transition: color 0.15s ease;
+  }
+
+  #pg-review .rating-stars input:checked ~ label,
+  #pg-review .rating-stars label:hover,
+  #pg-review .rating-stars label:hover ~ label {
+    color: #0d99ff;
+  }
+
+  #pg-review .rating-caption {
+    text-align: center;
+    font-size: 16px;
+    letter-spacing: 0.15em;
+    color: #000;
+    margin: 0;
+  }
+
+  #pg-review .review-label,
+  #pg-review .photo-label {
+    display: block;
+    margin: 0 0 10px;
+    font-size: 16px;
+    line-height: 1.3;
+    letter-spacing: 0.15em;
+    color: #000;
+  }
+
+  #pg-review .review-panel {
+    background: #d9d9d9;
+    padding: 10px 0 0;
+    margin-bottom: 14px;
+  }
+
+  #pg-review .review-textarea {
+    width: 100%;
+    min-height: 163px;
+    border: none;
+    outline: none;
+    resize: vertical;
+    padding: 14px 18px 28px;
+    background: #d9d9d9;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    color: #000;
+    box-sizing: border-box;
+  }
+
+  #pg-review .review-counter {
+    text-align: right;
+    padding: 0 14px 10px;
+    font-size: 16px;
+    letter-spacing: 0.15em;
+    color: #000;
+  }
+
+  #pg-review .photo-panel {
+    margin-bottom: 18px;
+  }
+
+  #pg-review .photo-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  #pg-review .photo-box {
+    width: 65px;
+    height: 57px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: #000;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  #pg-review .photo-box.add {
+    border: 1px dashed #000;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  #pg-review .photo-box.camera {
+    background: rgba(226, 232, 240, 0.8);
+    font-size: 24px;
+  }
+
+  #pg-review .photo-input {
+    display: none;
+  }
+
+  #pg-review .action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 48px;
+  }
+
+  #pg-review .action-btn {
+    min-height: 59px;
+    border: none;
+    border-radius: 10px;
+    background: #d9d9d9;
+    color: #000;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  #pg-review .submitted-wrap {
+    margin: 6px 0 54px;
+  }
+
+  #pg-review .submitted-badge {
+    width: 160px;
+    height: 160px;
+    border-radius: 999px;
+    background: #d9d9d9;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 62px;
+    line-height: 1;
+  }
+
+  #pg-review .submitted-title {
+    margin: 0;
+    text-align: center;
+    font-size: 24px;
+    line-height: 1.45;
+    letter-spacing: 0.15em;
+    color: #000;
+    font-weight: 400;
+  }
+
+  #pg-review .submitted-cards {
+    margin-top: 56px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  #pg-review .submitted-card {
+    background: #d9d9d9;
+    min-height: 122px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 16px 14px;
+  }
+
+  #pg-review .submitted-card .top {
+    font-size: 35px;
+    line-height: 1.1;
+    letter-spacing: 0.15em;
+    color: #000;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  #pg-review .submitted-card .label {
+    font-size: 35px;
+    line-height: 1.1;
+    letter-spacing: 0.1em;
+    color: #000;
+    margin-top: 8px;
+  }
+
+  #pg-review .shop-again {
+    margin-top: 20px;
+    display: flex;
+  }
+
+  #pg-review .shop-again-btn {
+    width: 100%;
+    min-height: 71px;
+    background: #d9d9d9;
+    color: #000;
+    font-size: 35px;
+    line-height: 1.2;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  #pg-review .shop-again-btn .bag {
+    color: #0d99ff;
+    font-size: 34px;
+    line-height: 1;
+  }
+
+  #pg-review .lp-partners {
+    margin-top: 0;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+  }
+
+  #pg-review .lp-footer {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: 0;
+  }
+
+  @media (max-width: 768px) {
+    #pg-review .review-title {
+      font-size: 24px;
+    }
+
+    #pg-review .order-item {
+      grid-template-columns: 1fr;
+    }
+
+    #pg-review .item-thumb {
+      width: 100%;
+      height: 160px;
+    }
+
+    #pg-review .action-row {
+      grid-template-columns: 1fr;
+    }
+
+    #pg-review .submitted-title {
+      font-size: 18px;
+      letter-spacing: 0.08em;
+    }
+
+    #pg-review .submitted-cards {
+      grid-template-columns: 1fr;
+      margin-top: 28px;
+      gap: 12px;
+    }
+
+    #pg-review .submitted-card .top,
+    #pg-review .submitted-card .label,
+    #pg-review .shop-again-btn {
+      font-size: 26px;
+    }
+
+    #pg-review .rating-label,
+    #pg-review .review-label,
+    #pg-review .photo-label,
+    #pg-review .review-counter,
+    #pg-review .rating-caption {
+      letter-spacing: 0.08em;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-review">
+  <h1 class="review-title">Riwayat Pemesanan</h1>
+
+  <section class="order-card">
+    <div class="order-items">
+      {% for order_item in order_items %}
+      <div class="order-item">
+        <div class="item-thumb">
+          {% if 'Mukenah' in order_item.product_name %}
+            <img src="{% static 'album/mukena.jpg' %}" alt="{{ order_item.product_name }}">
+          {% elif 'Jamu' in order_item.product_name %}
+            <img src="{% static 'album/jamu_botol.jpg' %}" alt="{{ order_item.product_name }}">
+          {% elif 'Tas Bambu' in order_item.product_name %}
+            <img src="{% static 'album/tas_bambu.jpg' %}" alt="{{ order_item.product_name }}">
+          {% elif 'Yogurt' in order_item.product_name %}
+            <img src="{% static 'album/yogurt.jpg' %}" alt="{{ order_item.product_name }}">
+          {% elif 'Abon Salmon' in order_item.product_name or 'Abon Rendang' in order_item.product_name %}
+            <img src="{% static 'album/abon_salmon.jpg' %}" alt="{{ order_item.product_name }}">
+          {% elif 'Sabun Cuci Piring' in order_item.product_name %}
+            <img src="{% static 'album/sabun_cuci_piring.jpg' %}" alt="{{ order_item.product_name }}">
+          {% elif 'Daster' in order_item.product_name %}
+            <img src="{% static 'album/daster_motif.jpg' %}" alt="{{ order_item.product_name }}">
+          {% elif 'iPhone' in order_item.product_name %}
+            <img src="{% static 'album/produk1.png' %}" alt="{{ order_item.product_name }}">
+          {% elif order_item.product and order_item.product.image %}
+            <img src="{{ order_item.product.image.url }}" alt="{{ order_item.product_name }}">
+          {% else %}
+            <img src="{% static 'album/produk1.png' %}" alt="{{ order_item.product_name }}">
+          {% endif %}
+        </div>
+        <div>
+          <p class="item-name">{{ order_item.product_name }}</p>
+          <p class="item-variant">{{ order_item.variant|default:'-' }}</p>
+          <p class="item-qty">{{ order_item.quantity }} barang</p>
+          <p class="item-price">Rp {{ order_item.product_price|rupiah }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <form method="post">
+    {% csrf_token %}
+    <section class="rating-panel">
+      <div class="rating-head">
+        <div class="rating-line"></div>
+        <div class="rating-label">Rating Produk</div>
+        <div class="rating-line"></div>
+      </div>
+
+      <div class="rating-stars" aria-label="Rating produk">
+        {% for value in "54321" %}
+          <input
+            type="radio"
+            name="rating"
+            id="rating-{{ value }}"
+            value="{{ value }}"
+            {% if review_rating == value|add:'0' %}checked{% endif %}
+          >
+          <label for="rating-{{ value }}">★</label>
+        {% endfor %}
+      </div>
+
+      <p class="rating-caption">Bagus — Produk sesuai ekspektasi</p>
+    </section>
+
+    <label class="review-label" for="review-comment">Tulis ulasan (opsional)</label>
+    <section class="review-panel">
+      <textarea
+        id="review-comment"
+        name="comment"
+        class="review-textarea"
+        maxlength="500"
+      >{{ review_comment }}</textarea>
+      <div class="review-counter"><span id="review-counter">{{ review_comment|length }}</span>/500</div>
+    </section>
+
+    <label class="photo-label">Tambah Foto (opsional)</label>
+    <section class="photo-panel">
+      <div class="photo-row">
+        <label class="photo-box add" for="review-photo">+</label>
+        <label class="photo-box camera" for="review-photo">📷</label>
+        <input id="review-photo" class="photo-input" type="file" accept="image/*" multiple>
+      </div>
+    </section>
+
+    <div class="action-row">
+      <a class="action-btn" href="{% url 'orders' %}">Kembali</a>
+      <button class="action-btn" type="submit">Kirim Ulasan</button>
+    </div>
+  </form>
+
+  {% if submitted %}
+  <section class="submitted-wrap">
+    <div class="submitted-badge">🎉</div>
+    <p class="submitted-title">
+      Pesanan Selesai!<br>
+      Terima kasih telah berbelanja. Ulasan Anda<br>
+      membantu pembeli lain membuat keputusan<br>
+      yang lebih baik.
+    </p>
+
+    <div class="submitted-cards">
+      <article class="submitted-card">
+        <div class="top">{{ review_rating }} <span style="color:#0d99ff;">★</span></div>
+        <div class="label">Rating Diberikan</div>
+      </article>
+      <article class="submitted-card">
+        <div class="top">+{{ reward_points }}</div>
+        <div class="label">Poin Reward</div>
+      </article>
+      <article class="submitted-card">
+        <div class="top">{{ total_orders }}</div>
+        <div class="label">Total Pesanan</div>
+      </article>
+    </div>
+
+    <div class="shop-again">
+      <a class="shop-again-btn" href="{% url 'home' %}"><span class="bag">🛍</span>Belanja lagi</a>
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="lp-partners">
+    <h2 class="lp-partners-title">T R U S T E D &nbsp;&nbsp; P A R T N E R S</h2>
+    <div class="lp-partners-grid">
+      <div class="lp-partner-item"><img src="{% static 'album/logo_sleman.png' %}" alt="Pemerintah Daerah Kabupaten Sleman"></div>
+      <div class="lp-partner-item"><img src="{% static 'album/logo_forkom.png' %}" alt="Forkom UMKM Kabupaten Sleman"></div>
+      <div class="lp-partner-item"><img src="{% static 'album/RST.png' %}" alt="RST"></div>
+      <div class="lp-partner-item"><img src="{% static 'album/kopmas_forkom.png' %}" alt="Kopmas Forkom UMKM Sleman"></div>
+    </div>
+  </div>
+
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <div class="lp-footer-grid">
+        <div class="lp-footer-brand">
+          <img src="{% static 'logokopmas.png' %}" alt="KOPMAS" class="lp-footer-logo">
+          <p class="lp-footer-tagline">Emporing UMKM</p>
+          <p class="lp-footer-subtitle">Growing Sleman</p>
+          <p class="lp-footer-desc">
+            "Platform online resmi Koperasi Pemasaran UMKM Kabupaten Sleman untuk
+            memasarkan produk unggulan UMKM lokal secara mudah, aman, dan
+            terpercaya."
+          </p>
+          <div class="lp-footer-social" aria-label="Media sosial">
+            <a href="#" class="lp-footer-social-link" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
+              </svg>
+            </a>
+            <a href="#" class="lp-footer-social-link" aria-label="Website">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">LAYANAN</h4>
+          <ul class="lp-footer-links">
+            <li> > Kategori Produk</li>
+            <li> > Belanja Sekarang</li>
+            <li> > Promo &amp; Diskon</li>
+            <li> > Wishlist</li>
+            <li> > Konsultasi UMKM</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">USEFUL LINKS</h4>
+          <ul class="lp-footer-links">
+            <li> > Tentang Kami</li>
+            <li> > Cara Berjualan</li>
+            <li> > Kebijakan Privasi</li>
+            <li> > Syarat &amp; Ketentuan</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="lp-footer-heading">HUBUNGI KAMI</h4>
+          <div class="lp-footer-contact-box">
+            <div class="lp-footer-contact-addr">
+              <span class="lp-footer-icon" aria-hidden="true">📍</span>
+              <div>
+                <strong>LOKASI</strong>
+                <p>JL. Cangkringan Indah 1 No.17<br>KarangSari, Wedomartani<br>Kec. Ngemplak<br>Kabupaten Sleman</p>
+              </div>
+            </div>
+            <div class="lp-footer-contact-wa">
+              <span class="lp-footer-icon" aria-hidden="true">💬</span>
+              <div>
+                <strong>OFFICIAL WHATSAPP</strong>
+                <div class="lp-footer-wa-num">081234567890</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lp-footer-bottom">
+      Copyright © 2026 - KopmasShop.Com All Rights Reserved
+      <div class="lp-footer-report">Support by OpenCash.ID</div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    const textarea = document.getElementById('review-comment');
+    const counter = document.getElementById('review-counter');
+    if (!textarea || !counter) {
+      return;
+    }
+
+    const updateCounter = () => {
+      counter.textContent = textarea.value.length;
+    };
+
+    textarea.addEventListener('input', updateCounter);
+    updateCounter();
+  }());
+</script>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'layouts/base/base.html' %}
+{% load humanize %}
+
+{% block title %}Detail Pesanan #{{ order.order_number }} - Kopmas Shop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'landing_app:home' %}">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'landing_app:order_history' %}">Riwayat Pesanan</a></li>
+            <li class="breadcrumb-item active">{{ order.order_number }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Order Status -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="mb-1">Pesanan #{{ order.order_number }}</h5>
+                            <p class="text-muted mb-0">{{ order.created_at|date:"d M Y, H:i" }}</p>
+                        </div>
+                        <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% else %}warning{% endif %} fs-6">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="progress-tracker">
+                        <div class="d-flex justify-content-between">
+                            <div class="text-center {% if order.status != 'cancelled' %}text-success{% else %}text-muted{% endif %}">
+                                <i class="bi bi-{% if order.status != 'cancelled' %}check-circle-fill{% else %}x-circle-fill{% endif %} fs-3"></i>
+                                <p class="small mb-0">Pesanan Dibuat</p>
+                            </div>
+                            <div class="text-center {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}text-success{% else %}text-muted{% endif %}">
+                                <i class="bi bi-{% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}check-circle-fill{% else %}circle{% endif %} fs-3"></i>
+                                <p class="small mb-0">Diproses</p>
+                            </div>
+                            <div class="text-center {% if order.status == 'shipped' or order.status == 'delivered' %}text-success{% else %}text-muted{% endif %}">
+                                <i class="bi bi-{% if order.status == 'shipped' or order.status == 'delivered' %}check-circle-fill{% else %}circle{% endif %} fs-3"></i>
+                                <p class="small mb-0">Dikirim</p>
+                            </div>
+                            <div class="text-center {% if order.status == 'delivered' %}text-success{% else %}text-muted{% endif %}">
+                                <i class="bi bi-{% if order.status == 'delivered' %}check-circle-fill{% else %}circle{% endif %} fs-3"></i>
+                                <p class="small mb-0">Diterima</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Items -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Detail Produk</h5>
+                    
+                    {% for item in order.items.all %}
+                    <div class="d-flex align-items-center mb-4 {% if not forloop.last %}border-bottom pb-4{% endif %}">
+                        {% if item.product_image %}
+                        <img src="{{ item.product_image.url }}" alt="{{ item.product_name }}" class="rounded" width="100" height="100" style="object-fit: cover;">
+                        {% else %}
+                        <img src="https://via.placeholder.com/100x100?text=No+Image" alt="{{ item.product_name }}" class="rounded">
+                        {% endif %}
+                        <div class="ms-3 flex-grow-1">
+                            <h6 class="mb-1">{{ item.product_name }}</h6>
+                            <small class="text-muted d-block">{{ item.quantity }} x Rp {{ item.price|intcomma }}</small>
+                            {% if order.status == 'delivered' %}
+                            <button class="btn btn-sm btn-outline-primary mt-2">Beri Ulasan</button>
+                            {% endif %}
+                        </div>
+                        <span class="fw-bold">Rp {{ item.total|intcomma }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Shipping Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Informasi Pengiriman</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Alamat Pengiriman</h6>
+                            <p class="mb-0"><strong>{{ order.recipient_name }}</strong></p>
+                            <p class="mb-0">{{ order.recipient_phone }}</p>
+                            <p class="text-muted">{{ order.shipping_address }}, {{ order.shipping_city }}, {{ order.shipping_province }} {{ order.shipping_postal_code }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Informasi Kurir</h6>
+                            {% if order.courier %}
+                            <p class="mb-0"><strong>{{ order.courier }}</strong></p>
+                            <p>No. Resi: {{ order.tracking_number }}</p>
+                            {% else %}
+                            <p class="text-muted">Belum dikirim</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Payment Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Informasi Pembayaran</h5>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Metode</span>
+                        <span>{{ order.payment.get_payment_method_display|default:"-" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Status</span>
+                        <span class="badge bg-{% if order.payment_status == 'paid' %}success{% else %}warning{% endif %}">
+                            {{ order.get_payment_status_display }}
+                        </span>
+                    </div>
+                    {% if order.paid_at %}
+                    <div class="d-flex justify-content-between">
+                        <span>Dibayar pada</span>
+                        <span>{{ order.paid_at|date:"d M Y, H:i" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Ringkasan Pesanan</h5>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span>Rp {{ order.subtotal|intcomma }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Ongkir</span>
+                        <span>Rp {{ order.shipping_cost|intcomma }}</span>
+                    </div>
+                    {% if order.discount > 0 %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Diskon</span>
+                        <span class="text-danger">-Rp {{ order.discount|intcomma }}</span>
+                    </div>
+                    {% endif %}
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold text-primary fs-5">Rp {{ order.total|intcomma }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            {% if order.status == 'pending' %}
+            <div class="d-grid gap-2">
+                <a href="#" class="btn btn-primary">Bayar Sekarang</a>
+                <button class="btn btn-outline-danger">Batalkan Pesanan</button>
+            </div>
+            {% elif order.status == 'shipped' %}
+            <div class="d-grid">
+                <button class="btn btn-success">Pesanan Diterima</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'layouts/base/dashboard_base.html' %}
+{% load static %}
+{% block title %}Store Balance Detail - Kopmas Shop{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-5 rounded-[20px] bg-white p-5">
+  <h2 class="font-bold text-xl">Store Balance Detail</h2>
+  <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Store Name</p>
+      <p class="font-bold text-lg">{{ store.store_name }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-grey">Balance</p>
+      <p class="font-bold text-2xl text-custom-blue">
+        Rp {{ store.balance|default:"0" }}
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

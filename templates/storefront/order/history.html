@@ -1,0 +1,310 @@
+{% extends 'layouts/base/base.html' %}
+{% load humanize %}
+
+{% block title %}Riwayat Pesanan - Kopmas Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .oh-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .oh-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .oh-tab {
+        text-decoration: none;
+        border: 1px solid var(--surface3);
+        color: var(--ink3);
+        background: #fff;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .oh-tab.active {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+    }
+
+    .oh-card {
+        background: #fff;
+        border: 1.5px solid var(--surface3);
+        border-radius: var(--rlg);
+        overflow: hidden;
+    }
+
+    .oh-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--surface3);
+    }
+
+    .oh-order-number {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--ink);
+    }
+
+    .oh-date {
+        font-size: 13px;
+        color: var(--muted);
+        text-align: right;
+    }
+
+    .oh-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .oh-badge.pending,
+    .oh-badge.processing {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .oh-badge.shipped {
+        background: #DBEAFE;
+        color: #1D4ED8;
+    }
+
+    .oh-badge.delivered {
+        background: #DCFCE7;
+        color: #166534;
+    }
+
+    .oh-badge.cancelled {
+        background: #FEE2E2;
+        color: #B91C1C;
+    }
+
+    .oh-body {
+        padding: 12px 16px;
+    }
+
+    .oh-item {
+        display: grid;
+        grid-template-columns: 72px 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--surface3);
+    }
+
+    .oh-item:last-child {
+        border-bottom: 0;
+    }
+
+    .oh-item img {
+        width: 72px;
+        height: 72px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--surface3);
+    }
+
+    .oh-item-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--ink);
+    }
+
+    .oh-item-meta {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .oh-item-total {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--ink);
+    }
+
+    .oh-foot {
+        border-top: 1px solid var(--surface3);
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .oh-total {
+        font-size: 14px;
+        color: var(--muted);
+    }
+
+    .oh-total strong {
+        color: var(--blue);
+        font-size: 18px;
+        margin-left: 4px;
+    }
+
+    .oh-empty {
+        background: #fff;
+        border: 1.5px dashed var(--surface3);
+        border-radius: var(--rlg);
+        padding: 28px;
+        text-align: center;
+    }
+
+    .oh-pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .oh-pagination a,
+    .oh-pagination span {
+        min-width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: 1px solid var(--surface3);
+        text-decoration: none;
+        color: var(--ink3);
+        font-size: 13px;
+        font-weight: 700;
+        background: #fff;
+    }
+
+    .oh-pagination span {
+        background: var(--blue);
+        border-color: var(--blue);
+        color: #fff;
+    }
+
+    @media (max-width: 768px) {
+        .oh-item {
+            grid-template-columns: 56px 1fr;
+        }
+
+        .oh-item img {
+            width: 56px;
+            height: 56px;
+        }
+
+        .oh-item-total {
+            grid-column: 2;
+            justify-self: end;
+            margin-top: -4px;
+        }
+
+        .oh-head,
+        .oh-foot {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .oh-date {
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg active" id="pg-order-history">
+    <div class="ph">
+        <div>
+            <div class="ph-title">Riwayat Pesanan</div>
+            <div class="ph-sub">Pantau status dan detail belanja kamu</div>
+        </div>
+    </div>
+
+    <div class="oh-wrap">
+        <div class="oh-tabs">
+            <a class="oh-tab {% if not current_status %}active{% endif %}" href="{% url 'landing_app:order_history' %}">Semua</a>
+            {% for status, label in status_choices %}
+            <a class="oh-tab {% if current_status == status %}active{% endif %}" href="?status={{ status }}">{{ label }}</a>
+            {% endfor %}
+        </div>
+
+        {% if orders %}
+        {% for order in orders %}
+        <article class="oh-card">
+            <div class="oh-head">
+                <div>
+                    <div style="font-size:12px;color:var(--muted);">No. Pesanan</div>
+                    <div class="oh-order-number">{{ order.order_number }}</div>
+                </div>
+                <div>
+                    <div class="oh-badge {{ order.status }}">{{ order.get_status_display }}</div>
+                    <div class="oh-date">{{ order.created_at|date:"d M Y, H:i" }}</div>
+                </div>
+            </div>
+
+            <div class="oh-body">
+                {% for item in order.items.all %}
+                <div class="oh-item">
+                    {% if item.product_image %}
+                    <img src="{{ item.product_image.url }}" alt="{{ item.product_name }}">
+                    {% else %}
+                    <img src="https://via.placeholder.com/80x80?text=No+Image" alt="{{ item.product_name }}">
+                    {% endif %}
+
+                    <div>
+                        <div class="oh-item-name">{{ item.product_name }}</div>
+                        <div class="oh-item-meta">{{ item.quantity }} x Rp {{ item.price|intcomma }}</div>
+                    </div>
+
+                    <div class="oh-item-total">Rp {{ item.total|intcomma }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="oh-foot">
+                <div class="oh-total">Total:<strong>Rp {{ order.total|intcomma }}</strong></div>
+                <a href="{% url 'landing_app:order_detail' order_number=order.order_number %}" class="btn bg bsm">Detail Pesanan</a>
+            </div>
+        </article>
+        {% endfor %}
+
+        {% if is_paginated %}
+        <div class="oh-pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">Prev</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span>{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{% if current_status %}&status={{ current_status }}{% endif %}">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="oh-empty">
+            <div style="font-size:20px;font-weight:800;color:var(--ink);">Belum Ada Pesanan</div>
+            <p style="font-size:14px;color:var(--muted);margin:7px 0 14px;">Anda belum memiliki pesanan.</p>
+            <a href="{% url 'landing_app:product_list' %}" class="btn bp">Mulai Belanja</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

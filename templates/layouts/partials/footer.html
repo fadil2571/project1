@@ -1,0 +1,62 @@
+<footer class="footer bg-dark text-white pt-5 pb-3">
+    <div class="container">
+        <div class="row">
+            <!-- About -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <h5 class="mb-3">Tentang Kopmas Shop</h5>
+                <p>Kopmas Shop adalah platform e-commerce terpercaya yang menghubungkan penjual dan pembeli dengan pengalaman berbelanja yang aman dan nyaman.</p>
+                <div class="social-links">
+                    <a href="#" class="text-white me-3"><i class="bi bi-facebook fs-5"></i></a>
+                    <a href="#" class="text-white me-3"><i class="bi bi-instagram fs-5"></i></a>
+                    <a href="#" class="text-white me-3"><i class="bi bi-twitter fs-5"></i></a>
+                    <a href="#" class="text-white"><i class="bi bi-youtube fs-5"></i></a>
+                </div>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="col-lg-2 col-md-6 mb-4">
+                <h5 class="mb-3">Menu</h5>
+                <ul class="list-unstyled">
+                    <li><a href="{% url 'landing_app:home' %}" class="text-white-50 text-decoration-none">Beranda</a></li>
+                    <li><a href="{% url 'landing_app:product_list' %}" class="text-white-50 text-decoration-none">Produk</a></li>
+                    <li><a href="#" class="text-white-50 text-decoration-none">Tentang Kami</a></li>
+                    <li><a href="#" class="text-white-50 text-decoration-none">Kontak</a></li>
+                </ul>
+            </div>
+            
+            <!-- Categories -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h5 class="mb-3">Kategori</h5>
+                <ul class="list-unstyled">
+                    {% for cat in header_categories %}
+                    <li><a href="{% url 'landing_app:category' slug=cat.slug %}" class="text-white-50 text-decoration-none">{{ cat.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <!-- Contact -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h5 class="mb-3">Hubungi Kami</h5>
+                <ul class="list-unstyled text-white-50">
+                    <li class="mb-2"><i class="bi bi-geo-alt"></i> Jl. Sudirman No. 123, Jakarta</li>
+                    <li class="mb-2"><i class="bi bi-telephone"></i> +62 812-3456-7890</li>
+                    <li class="mb-2"><i class="bi bi-envelope"></i> support@kopmasshop.com</li>
+                    <li><i class="bi bi-clock"></i> Senin - Jumat: 09:00 - 17:00</li>
+                </ul>
+            </div>
+        </div>
+        
+        <hr class="my-4">
+        
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="mb-0 text-white-50">&copy; {% now "Y" %} Kopmas Shop. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <img src="https://via.placeholder.com/50x30?text=VISA" alt="Visa" class="me-2">
+                <img src="https://via.placeholder.com/50x30?text=MC" alt="Mastercard" class="me-2">
+                <img src="https://via.placeholder.com/50x30?text=BCA" alt="BCA">
+            </div>
+        </div>
+    </div>
+</footer>
