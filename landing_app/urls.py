@@ -21,6 +21,7 @@ from .views import (
     profile_views,
     remove_cart_views,
     search_views,
+    shipping_views,
     update_cart_views,
 )
 

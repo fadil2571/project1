@@ -220,6 +220,38 @@
     line-height: 1.6;
   }
 
+  /* Store origin card */
+  #pg-checkout .store-origin-card {
+    border: 1px solid #d5dde8;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  #pg-checkout .store-origin-card .store-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #1b4fd8;
+    margin-bottom: 8px;
+  }
+  #pg-checkout .store-origin-card h5 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  #pg-checkout .store-origin-card p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #475569;
+  }
+
   #pg-checkout .shipping-box,
   #pg-checkout .payment-box {
     border: 1px solid #d5dde8;
@@ -278,10 +310,36 @@
     padding: 7px 10px;
     white-space: nowrap;
     box-shadow: 0 2px 6px rgba(32, 101, 252, 0.14);
+    cursor: pointer;
   }
 
   #pg-checkout .shipping-calc:hover {
     background: #eff4ff;
+  }
+
+  #pg-checkout .shipping-calc:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Shipping selected state */
+  #pg-checkout .shipping-selected {
+    background: #e8f0ff;
+    border: 1px solid #1a4ed8;
+    border-radius: 10px;
+    padding: 12px;
+  }
+  #pg-checkout .shipping-selected .shipping-icon {
+    background: #1b4fd8;
+    color: #fff;
+    font-size: 18px;
+  }
+  #pg-checkout .shipping-selected .shipping-cost-label {
+    margin-left: auto;
+    font-size: 14px;
+    font-weight: 800;
+    color: #1b4fd8;
+    white-space: nowrap;
   }
 
   #pg-checkout .payment-grid {
@@ -489,6 +547,129 @@
     font-style: italic;
   }
 
+  /* ── Shipping Modal ── */
+  .ongkir-overlay {
+    position: fixed; inset: 0; z-index: 9998;
+    background: rgba(0,0,0,.45);
+    display: none;
+    align-items: center; justify-content: center;
+  }
+  .ongkir-overlay.is-open { display: flex; }
+
+  .ongkir-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 92%; max-width: 520px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,.18);
+    animation: modalSlideUp .25s ease-out;
+  }
+  @keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .ongkir-modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .ongkir-modal-head h3 { margin: 0; font-size: 17px; font-weight: 700; }
+  .ongkir-modal-close {
+    background: none; border: none; font-size: 22px; cursor: pointer;
+    color: #6b7280; padding: 4px 8px; border-radius: 8px;
+  }
+  .ongkir-modal-close:hover { background: #f3f4f6; }
+
+  .ongkir-modal-body { padding: 16px 20px 20px; }
+
+  .ongkir-field { margin-bottom: 14px; }
+  .ongkir-field label {
+    display: block; font-size: 12px; font-weight: 700;
+    color: #374151; margin-bottom: 5px;
+  }
+  .ongkir-field input,
+  .ongkir-field select {
+    width: 100%; padding: 9px 12px; border: 1px solid #d1d5db;
+    border-radius: 8px; font-size: 13px; background: #f9fafb;
+    outline: none; transition: border-color .15s;
+  }
+  .ongkir-field input:focus,
+  .ongkir-field select:focus { border-color: #1b4fd8; }
+
+  .ongkir-field .dest-dropdown {
+    position: absolute; left: 0; right: 0; top: 100%;
+    background: #fff; border: 1px solid #d1d5db;
+    border-radius: 0 0 8px 8px; max-height: 200px;
+    overflow-y: auto; z-index: 10; display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,.1);
+  }
+  .ongkir-field .dest-dropdown.is-open { display: block; }
+  .ongkir-field .dest-item {
+    padding: 8px 12px; font-size: 12px; cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .ongkir-field .dest-item:hover { background: #e8f0ff; }
+  .ongkir-field .dest-item strong { color: #0f172a; }
+  .ongkir-field .dest-item span { color: #6b7280; font-size: 11px; }
+
+  .ongkir-btn-calc {
+    width: 100%; padding: 11px; border: none; border-radius: 10px;
+    background: #1b4fd8; color: #fff; font-size: 14px;
+    font-weight: 700; cursor: pointer; margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(27,79,216,.25);
+    transition: background .15s;
+  }
+  .ongkir-btn-calc:hover { background: #1543bb; }
+  .ongkir-btn-calc:disabled { opacity: .5; cursor: not-allowed; }
+
+  .ongkir-results { margin-top: 16px; }
+  .ongkir-results h4 { margin: 0 0 10px; font-size: 14px; font-weight: 700; }
+
+  .ongkir-service-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border: 1px solid #e5e7eb;
+    border-radius: 10px; margin-bottom: 8px; cursor: pointer;
+    transition: all .15s; background: #f9fafb;
+  }
+  .ongkir-service-item:hover { border-color: #93c5fd; background: #eff6ff; }
+  .ongkir-service-item.is-selected {
+    border-color: #1b4fd8; background: #e8f0ff;
+    box-shadow: inset 0 0 0 1px rgba(26,78,216,.12);
+  }
+  .ongkir-service-item input[type="radio"] { accent-color: #1b4fd8; flex-shrink: 0; }
+  .ongkir-service-item .svc-info { flex: 1; min-width: 0; }
+  .ongkir-service-item .svc-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+  .ongkir-service-item .svc-desc { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .ongkir-service-item .svc-etd { font-size: 10px; color: #9ca3af; }
+  .ongkir-service-item .svc-cost {
+    font-size: 14px; font-weight: 800; color: #1b4fd8;
+    white-space: nowrap;
+  }
+
+  .ongkir-apply-btn {
+    width: 100%; padding: 11px; border: none; border-radius: 10px;
+    background: #059669; color: #fff; font-size: 14px;
+    font-weight: 700; cursor: pointer; margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(5,150,105,.25);
+  }
+  .ongkir-apply-btn:hover { background: #047857; }
+  .ongkir-apply-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .ongkir-error {
+    background: #fef2f2; color: #dc2626; padding: 8px 12px;
+    border-radius: 8px; font-size: 12px; margin-top: 10px;
+    display: none;
+  }
+  .ongkir-error.is-visible { display: block; }
+
+  .ongkir-loading {
+    text-align: center; padding: 20px; color: #6b7280; font-size: 13px;
+    display: none;
+  }
+  .ongkir-loading.is-visible { display: block; }
+
   @media (max-width: 1024px) {
     #pg-checkout .co-layout {
       grid-template-columns: 1fr;
@@ -562,8 +743,21 @@
   </div>
 
   <div class="co-layout">
-    <form method="post" id="checkoutForm" class="card co-sec" style="display:block;margin-bottom:0">
+    <form method="post" id="checkoutForm" action="{% url 'landing_app:order_create' %}" class="card co-sec" style="display:block;margin-bottom:0">
       {% csrf_token %}
+      <!-- Hidden fields for shipping -->
+      <input type="hidden" name="shipping_cost" id="hiddenShippingCost" value="0">
+      <input type="hidden" name="courier_name" id="hiddenCourierName" value="">
+      <input type="hidden" name="courier_service" id="hiddenCourierService" value="">
+
+      <!-- ── Alamat Asal Toko ── -->
+      <h4>📍 Alamat Toko (Pengirim)</h4>
+      <div class="store-origin-card">
+        <div class="store-label">🏪 Asal Pengiriman</div>
+        <h5>KOPMAS Shop — {{ store_info.city_name }}</h5>
+        <p>{{ store_info.address }}</p>
+        <p style="margin-top:4px">{{ store_info.province }} {{ store_info.postal_code }} · ☎ {{ store_info.phone }}</p>
+      </div>
 
       <h4>Tambah Alamat Pengiriman</h4>
       <div class="co-block">
@@ -577,7 +771,8 @@
       <div class="co-block">
         <div class="address-list">
           {% for address in addresses %}
-            <label class="address-option {% if address.is_primary or forloop.first %}is-selected{% endif %}">
+            <label class="address-option {% if address.is_primary or forloop.first %}is-selected{% endif %}"
+                   data-city="{{ address.city }}">
               <input type="radio" name="address_id" value="{{ address.id }}" {% if address.is_primary or forloop.first %}checked{% endif %}>
               <div style="flex:1;min-width:0">
                 <strong>{{ address.label }}{% if address.is_primary %}<span class="primary-chip">UTAMA</span>{% endif %}</strong>
@@ -598,16 +793,28 @@
       {% endif %}
 
       <h4>Metode Pengiriman (RajaOngkir)</h4>
-      <p class="shipping-note">Klik calculate delivery untuk cek ongkir langsung dari API RajaOngkir.</p>
-      <div class="co-block">
-        <div class="shipping-box">
-          <div class="shipping-row">
+      <p class="shipping-note">Pilih alamat lalu klik "Hitung Ongkir" untuk cek ongkir dari API RajaOngkir. Berat total: <strong>{{ total_weight }}g</strong></p>
+      <div class="co-block" id="shippingBlock">
+        <div class="shipping-box" id="shippingBox">
+          <div class="shipping-row" id="shippingRowDefault">
             <span class="shipping-icon">🚚</span>
-            <div class="shipping-main">
+            <div class="shipping-main" id="shippingMainText">
               <strong>Belum Pilih Kurir</strong>
               <span>Klik hitung untuk pilih kurir</span>
             </div>
-            <button type="button" class="shipping-calc">Hitung Ongkir &gt;</button>
+            <button type="button" class="shipping-calc" id="btnOpenOngkir">Hitung Ongkir &gt;</button>
+          </div>
+          <!-- This will show when courier is selected -->
+          <div class="shipping-row shipping-selected" id="shippingRowSelected" style="display:none">
+            <span class="shipping-icon">🚚</span>
+            <div class="shipping-main">
+              <strong id="selectedCourierLabel">-</strong>
+              <span id="selectedCourierEtd">-</span>
+            </div>
+            <div>
+              <div class="shipping-cost-label" id="selectedCourierCost">Rp 0</div>
+              <button type="button" class="shipping-calc" id="btnChangeOngkir" style="margin-top:6px;margin-left:0;font-size:11px;padding:5px 8px">Ubah</button>
+            </div>
           </div>
         </div>
       </div>
@@ -648,23 +855,7 @@
         {% with item=items.0 %}
           <div class="sum-item">
             <div class="sum-item-img">
-              {% if 'Mukenah' in item.product.name %}
-                <img src="{% static 'album/mukena.jpg' %}" alt="{{ item.product.name }}">
-              {% elif 'Jamu' in item.product.name %}
-                <img src="{% static 'album/jamu_botol.jpg' %}" alt="{{ item.product.name }}">
-              {% elif 'Tas Bambu' in item.product.name %}
-                <img src="{% static 'album/tas_bambu.jpg' %}" alt="{{ item.product.name }}">
-              {% elif 'Yogurt' in item.product.name %}
-                <img src="{% static 'album/yogurt.jpg' %}" alt="{{ item.product.name }}">
-              {% elif 'Abon Salmon' in item.product.name or 'Abon Rendang' in item.product.name %}
-                <img src="{% static 'album/abon_salmon.jpg' %}" alt="{{ item.product.name }}">
-              {% elif 'Sabun Cuci Piring' in item.product.name %}
-                <img src="{% static 'album/sabun_cuci_piring.jpg' %}" alt="{{ item.product.name }}">
-              {% elif 'Daster' in item.product.name %}
-                <img src="{% static 'album/daster_motif.jpg' %}" alt="{{ item.product.name }}">
-              {% elif 'iPhone' in item.product.name %}
-                <img src="{% static 'album/produk1.png' %}" alt="{{ item.product.name }}">
-              {% elif item.product.image %}
+              {% if item.product.image %}
                 <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
               {% else %}
                 <img src="{% static 'album/produk1.png' %}" alt="{{ item.product.name }}">
@@ -680,12 +871,12 @@
 
       <div class="sum-lines">
         <div class="sr"><span>Subtotal</span><span>Rp {{ total_price|rupiah }}</span></div>
-        <div class="sr"><span>Ongkir</span><span>Rp {{ shipping_cost|rupiah }}</span></div>
+        <div class="sr"><span>Ongkir</span><span id="summaryOngkir">Rp {{ shipping_cost|rupiah }}</span></div>
         <div class="sr"><span>PPN</span><span>Rp {{ ppn|rupiah }}</span></div>
         <div class="sr"><span>Metode Pembayaran</span><span id="paymentMethodLabel">{% if selected_payment_method == 'qris' %}QRIS{% else %}Transfer Bank{% endif %}</span></div>
       </div>
 
-      <div class="sr tot"><span>Grand Total</span><span class="amt">Rp {{ grand_total|rupiah }}</span></div>
+      <div class="sr tot"><span>Grand Total</span><span class="amt" id="summaryGrandTotal">Rp {{ grand_total|rupiah }}</span></div>
 
       <div class="sum-actions">
         <a class="btn edit" href="{% url 'cart' %}">Edit Keranjang</a>
@@ -781,7 +972,7 @@
               </span>
               <div>
                 <strong>LOKASI</strong>
-                <p>JL. Cangkringan Indah 1 No.17<br>KarangSari, Wedomartani<br>Kec. Ngemplak<br>Kabupaten Sleman</p>
+                <p>{{ store_info.address }}</p>
               </div>
             </div>
             <div class="lp-footer-contact-wa">
@@ -792,7 +983,7 @@
               </span>
               <div>
                 <strong>OFFICIAL WHATSAPP</strong>
-                <div class="lp-footer-wa-num">081234567890</div>
+                <div class="lp-footer-wa-num">{{ store_info.phone }}</div>
               </div>
             </div>
           </div>
@@ -802,44 +993,368 @@
     </div>
   </footer>
 </div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MODAL: Hitung Ongkir RajaOngkir               -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="ongkir-overlay" id="ongkirOverlay">
+  <div class="ongkir-modal">
+    <div class="ongkir-modal-head">
+      <h3>🚚 Hitung Ongkos Kirim</h3>
+      <button class="ongkir-modal-close" id="ongkirClose">&times;</button>
+    </div>
+    <div class="ongkir-modal-body">
+      <!-- Destination search -->
+      <div class="ongkir-field" style="position:relative">
+        <label>Kota / Kecamatan Tujuan</label>
+        <input type="text" id="destSearch" placeholder="Ketik nama kota tujuan..."
+               autocomplete="off">
+        <div class="dest-dropdown" id="destDropdown"></div>
+        <input type="hidden" id="destId" value="">
+      </div>
+
+      <!-- Courier selection -->
+      <div class="ongkir-field">
+        <label>Pilih Kurir</label>
+        <select id="courierSelect">
+          <option value="">-- Pilih Kurir --</option>
+          <option value="jne">JNE</option>
+          <option value="tiki">TIKI</option>
+          <option value="pos">POS Indonesia</option>
+          <option value="jnt">J&T Express</option>
+          <option value="sicepat">SiCepat</option>
+          <option value="anteraja">AnterAja</option>
+          <option value="lion">Lion Parcel</option>
+          <option value="ninja">Ninja Express</option>
+        </select>
+      </div>
+
+      <!-- Weight display -->
+      <div class="ongkir-field">
+        <label>Berat Paket</label>
+        <input type="text" value="{{ total_weight }}g" readonly style="background:#e5e7eb;color:#6b7280;">
+      </div>
+
+      <button class="ongkir-btn-calc" id="btnCalcOngkir" disabled>Hitung Ongkir</button>
+
+      <div class="ongkir-error" id="ongkirError"></div>
+      <div class="ongkir-loading" id="ongkirLoading">⏳ Menghitung ongkos kirim...</div>
+
+      <!-- Results -->
+      <div class="ongkir-results" id="ongkirResults" style="display:none">
+        <h4>Pilih Layanan Pengiriman</h4>
+        <div id="ongkirServiceList"></div>
+        <button class="ongkir-apply-btn" id="btnApplyOngkir" disabled>Pilih Kurir Ini</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var options = Array.prototype.slice.call(document.querySelectorAll('[data-pay-choice]'));
-    var methodLabel = document.getElementById('paymentMethodLabel');
-    var paymentStepLink = document.getElementById('paymentStepLink');
-    if (!options.length) {
-      return;
-    }
+document.addEventListener('DOMContentLoaded', function () {
+  /* ── Payment method toggle ── */
+  var payOptions = Array.prototype.slice.call(document.querySelectorAll('[data-pay-choice]'));
+  var methodLabel = document.getElementById('paymentMethodLabel');
+  var paymentStepLink = document.getElementById('paymentStepLink');
 
-    function refreshActive() {
-      options.forEach(function (item) {
-        var radio = item.querySelector('input[type="radio"]');
-        item.classList.toggle('is-active', !!radio && radio.checked);
-
-        if (methodLabel && radio && radio.checked) {
-          methodLabel.textContent = radio.value === 'qris' ? 'QRIS' : 'Transfer Bank';
-        }
-
-        if (paymentStepLink && radio && radio.checked) {
-          paymentStepLink.href = "{% url 'payment' %}?payment_method=" + encodeURIComponent(radio.value);
-        }
-      });
-    }
-
-    options.forEach(function (item) {
-      item.addEventListener('click', function () {
-        var radio = item.querySelector('input[type="radio"]');
-        if (radio) {
-          radio.checked = true;
-          refreshActive();
-        }
-      });
+  function refreshPayActive() {
+    payOptions.forEach(function (item) {
+      var radio = item.querySelector('input[type="radio"]');
+      item.classList.toggle('is-active', !!radio && radio.checked);
+      if (methodLabel && radio && radio.checked) {
+        methodLabel.textContent = radio.value === 'qris' ? 'QRIS' : 'Transfer Bank';
+      }
+      if (paymentStepLink && radio && radio.checked) {
+        paymentStepLink.href = "{% url 'payment' %}?payment_method=" + encodeURIComponent(radio.value);
+      }
     });
-
-    refreshActive();
+  }
+  payOptions.forEach(function (item) {
+    item.addEventListener('click', function () {
+      var radio = item.querySelector('input[type="radio"]');
+      if (radio) { radio.checked = true; refreshPayActive(); }
+    });
   });
+  refreshPayActive();
+
+  /* ── Address option toggle ── */
+  var addressOptions = document.querySelectorAll('.address-option');
+  addressOptions.forEach(function(opt) {
+    opt.addEventListener('click', function() {
+      addressOptions.forEach(function(o) { o.classList.remove('is-selected'); });
+      opt.classList.add('is-selected');
+      // Reset shipping when address changes
+      resetShipping();
+    });
+  });
+
+  /* ── Ongkir modal ── */
+  var overlay = document.getElementById('ongkirOverlay');
+  var btnOpen = document.getElementById('btnOpenOngkir');
+  var btnChange = document.getElementById('btnChangeOngkir');
+  var btnClose = document.getElementById('ongkirClose');
+
+  function openModal() { overlay.classList.add('is-open'); }
+  function closeModal() { overlay.classList.remove('is-open'); }
+
+  btnOpen.addEventListener('click', openModal);
+  if (btnChange) btnChange.addEventListener('click', openModal);
+  btnClose.addEventListener('click', closeModal);
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  /* ── Destination search ── */
+  var destSearch = document.getElementById('destSearch');
+  var destDropdown = document.getElementById('destDropdown');
+  var destId = document.getElementById('destId');
+  var searchTimer = null;
+  var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  destSearch.addEventListener('input', function() {
+    var q = destSearch.value.trim();
+    if (q.length < 2) { destDropdown.classList.remove('is-open'); return; }
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() {
+      fetch('/api/shipping/search-destination/?search=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          destDropdown.innerHTML = '';
+          if (!data.success || !data.data) {
+            destDropdown.innerHTML = '<div class="dest-item"><span>Tidak ditemukan</span></div>';
+            destDropdown.classList.add('is-open');
+            return;
+          }
+          // Parse the API response - handle different response structures
+          var items = [];
+          if (Array.isArray(data.data)) {
+            items = data.data;
+          } else if (data.data.rajaongkir && data.data.rajaongkir.results) {
+            items = data.data.rajaongkir.results;
+          } else if (data.data.data) {
+            items = Array.isArray(data.data.data) ? data.data.data : [];
+          }
+
+          if (!items.length) {
+            destDropdown.innerHTML = '<div class="dest-item"><span>Tidak ditemukan</span></div>';
+            destDropdown.classList.add('is-open');
+            return;
+          }
+
+          items.forEach(function(loc) {
+            var div = document.createElement('div');
+            div.className = 'dest-item';
+            var id = loc.id || loc.city_id || loc.subdistrict_id || '';
+            var label = '';
+            if (loc.subdistrict_name) {
+              label = loc.subdistrict_name + ', ' + (loc.city_name || loc.city || '') + ', ' + (loc.province || '');
+            } else if (loc.city_name) {
+              label = (loc.type || '') + ' ' + loc.city_name + ', ' + (loc.province || '');
+            } else if (loc.name) {
+              label = loc.name;
+            } else {
+              label = JSON.stringify(loc).substring(0, 80);
+            }
+            div.innerHTML = '<strong>' + label + '</strong>';
+            div.setAttribute('data-id', id);
+            div.setAttribute('data-label', label);
+            div.addEventListener('click', function() {
+              destId.value = id;
+              destSearch.value = label;
+              destDropdown.classList.remove('is-open');
+              checkCalcReady();
+            });
+            destDropdown.appendChild(div);
+          });
+          destDropdown.classList.add('is-open');
+        })
+        .catch(function() {
+          destDropdown.innerHTML = '<div class="dest-item"><span>Error pencarian</span></div>';
+          destDropdown.classList.add('is-open');
+        });
+    }, 350);
+  });
+
+  // Close dropdown on click outside
+  document.addEventListener('click', function(e) {
+    if (!destSearch.contains(e.target) && !destDropdown.contains(e.target)) {
+      destDropdown.classList.remove('is-open');
+    }
+  });
+
+  /* ── Calculate readiness ── */
+  var courierSelect = document.getElementById('courierSelect');
+  var btnCalc = document.getElementById('btnCalcOngkir');
+
+  function checkCalcReady() {
+    btnCalc.disabled = !(destId.value && courierSelect.value);
+  }
+  courierSelect.addEventListener('change', checkCalcReady);
+
+  /* ── Calculate cost ── */
+  var ongkirError = document.getElementById('ongkirError');
+  var ongkirLoading = document.getElementById('ongkirLoading');
+  var ongkirResults = document.getElementById('ongkirResults');
+  var ongkirServiceList = document.getElementById('ongkirServiceList');
+  var btnApply = document.getElementById('btnApplyOngkir');
+  var STORE_ORIGIN = '{{ store_info.city_id }}';
+  var TOTAL_WEIGHT = {{ total_weight }};
+  var selectedService = null;
+
+  btnCalc.addEventListener('click', function() {
+    ongkirError.classList.remove('is-visible');
+    ongkirLoading.classList.add('is-visible');
+    ongkirResults.style.display = 'none';
+    ongkirServiceList.innerHTML = '';
+    btnApply.disabled = true;
+    selectedService = null;
+
+    var formData = new URLSearchParams();
+    formData.append('origin', STORE_ORIGIN);
+    formData.append('destination', destId.value);
+    formData.append('weight', TOTAL_WEIGHT);
+    formData.append('courier', courierSelect.value);
+
+    fetch('/api/shipping/calculate-cost/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': csrfToken
+      },
+      body: formData.toString()
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      ongkirLoading.classList.remove('is-visible');
+
+      if (!data.success) {
+        ongkirError.textContent = data.error || 'Gagal menghitung ongkir.';
+        ongkirError.classList.add('is-visible');
+        return;
+      }
+
+      // Parse results - handle different response structures
+      var services = [];
+      var raw = data.data;
+      if (raw && raw.rajaongkir && raw.rajaongkir.results) {
+        raw.rajaongkir.results.forEach(function(courier) {
+          if (courier.costs) {
+            courier.costs.forEach(function(svc) {
+              var costInfo = svc.cost && svc.cost[0] ? svc.cost[0] : {};
+              services.push({
+                courier: courier.code || courierSelect.value,
+                courier_name: courier.name || courierSelect.options[courierSelect.selectedIndex].text,
+                service: svc.service || '',
+                description: svc.description || '',
+                cost: costInfo.value || 0,
+                etd: costInfo.etd || '-'
+              });
+            });
+          }
+        });
+      } else if (raw && raw.data) {
+        // Komerce API format
+        var results = Array.isArray(raw.data) ? raw.data : [raw.data];
+        results.forEach(function(courier) {
+          var costs = courier.costs || courier.cost || [];
+          if (!Array.isArray(costs)) costs = [costs];
+          costs.forEach(function(svc) {
+            var costArr = svc.cost || [];
+            if (!Array.isArray(costArr)) costArr = [costArr];
+            var costInfo = costArr[0] || svc;
+            services.push({
+              courier: courier.code || courierSelect.value,
+              courier_name: courier.name || courierSelect.options[courierSelect.selectedIndex].text,
+              service: svc.service || '',
+              description: svc.description || '',
+              cost: costInfo.value || costInfo.cost || 0,
+              etd: costInfo.etd || '-'
+            });
+          });
+        });
+      }
+
+      if (!services.length) {
+        ongkirError.textContent = 'Tidak ada layanan pengiriman tersedia untuk rute ini.';
+        ongkirError.classList.add('is-visible');
+        return;
+      }
+
+      // Render services
+      services.forEach(function(svc, idx) {
+        var div = document.createElement('div');
+        div.className = 'ongkir-service-item';
+        div.innerHTML =
+          '<input type="radio" name="ongkir_service" value="' + idx + '">' +
+          '<div class="svc-info">' +
+            '<div class="svc-name">' + svc.courier_name.toUpperCase() + ' — ' + svc.service + '</div>' +
+            '<div class="svc-desc">' + svc.description + '</div>' +
+            '<div class="svc-etd">Estimasi: ' + svc.etd + ' hari</div>' +
+          '</div>' +
+          '<div class="svc-cost">Rp ' + Number(svc.cost).toLocaleString('id-ID') + '</div>';
+
+        div.addEventListener('click', function() {
+          var radio = div.querySelector('input[type="radio"]');
+          radio.checked = true;
+          // Remove selection from all
+          ongkirServiceList.querySelectorAll('.ongkir-service-item').forEach(function(el) {
+            el.classList.remove('is-selected');
+          });
+          div.classList.add('is-selected');
+          selectedService = svc;
+          btnApply.disabled = false;
+        });
+        ongkirServiceList.appendChild(div);
+      });
+      ongkirResults.style.display = 'block';
+    })
+    .catch(function(err) {
+      ongkirLoading.classList.remove('is-visible');
+      ongkirError.textContent = 'Gagal menghubungi server. Coba lagi.';
+      ongkirError.classList.add('is-visible');
+    });
+  });
+
+  /* ── Apply selected service ── */
+  btnApply.addEventListener('click', function() {
+    if (!selectedService) return;
+
+    // Update hidden form fields
+    document.getElementById('hiddenShippingCost').value = selectedService.cost;
+    document.getElementById('hiddenCourierName').value = selectedService.courier_name;
+    document.getElementById('hiddenCourierService').value = selectedService.service;
+
+    // Update shipping display
+    document.getElementById('shippingRowDefault').style.display = 'none';
+    var selRow = document.getElementById('shippingRowSelected');
+    selRow.style.display = 'flex';
+    document.getElementById('selectedCourierLabel').textContent = selectedService.courier_name.toUpperCase() + ' — ' + selectedService.service;
+    document.getElementById('selectedCourierEtd').textContent = 'Estimasi: ' + selectedService.etd + ' hari';
+    document.getElementById('selectedCourierCost').textContent = 'Rp ' + Number(selectedService.cost).toLocaleString('id-ID');
+
+    // Update summary
+    document.getElementById('summaryOngkir').textContent = 'Rp ' + Number(selectedService.cost).toLocaleString('id-ID');
+    var subtotal = {{ total_price }};
+    var grandTotal = subtotal + Number(selectedService.cost);
+    document.getElementById('summaryGrandTotal').textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
+
+    closeModal();
+  });
+
+  /* ── Reset shipping ── */
+  function resetShipping() {
+    document.getElementById('shippingRowDefault').style.display = 'flex';
+    document.getElementById('shippingRowSelected').style.display = 'none';
+    document.getElementById('hiddenShippingCost').value = '0';
+    document.getElementById('hiddenCourierName').value = '';
+    document.getElementById('hiddenCourierService').value = '';
+    document.getElementById('summaryOngkir').textContent = 'Rp 0';
+    var subtotal = {{ total_price }};
+    document.getElementById('summaryGrandTotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+    selectedService = null;
+  }
+});
 </script>
 {% endblock %}

@@ -11,21 +11,51 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 
+# ==============================================================================
+# USER & AUTENTIKASI
+# ==============================================================================
+
+
 class AppUserManager(BaseUserManager):
-    """Custom manager to preserve role assignment API during role table refactor."""
+    """
+    Custom manager untuk model User.
+
+    Dibuat untuk menjaga kompatibilitas API assignment role
+    selama proses refactor tabel role.
+    """
 
     @staticmethod
     def _normalize_role_input(extra_fields, default_role="buyer"):
+        """
+        NORMALISASI INPUT ROLE KE DALAM FORMAT role_id.
+
+        Menerima role dalam berbagai bentuk:
+        - Objek model Role (misal: Role instance)
+        - String ID langsung (misal: "buyer", "seller")
+        - Tidak diisi → pakai default_role
+
+        Hasil akhirnya disimpan ke key 'role_id' di extra_fields.
+        """
         role_value = extra_fields.pop("role", None)
         if role_value is not None and "role_id" not in extra_fields:
             if hasattr(role_value, "pk"):
+                # Jika yang dikirim adalah objek model Role, ambil primary key-nya
                 extra_fields["role_id"] = role_value.pk
             else:
+                # Jika yang dikirim adalah string ID langsung
                 extra_fields["role_id"] = role_value
+        # Jika role tidak diisi sama sekali, gunakan default_role
         extra_fields.setdefault("role_id", default_role)
         return extra_fields
 
     def create_user(self, email, password=None, **extra_fields):
+        """
+        MEMBUAT USER BIASA (buyer by default).
+
+        - Email wajib diisi dan akan dinormalisasi ke huruf kecil.
+        - Password di-hash otomatis oleh Django.
+        - Role default: buyer.
+        """
         extra_fields = self._normalize_role_input(extra_fields, default_role="buyer")
         if not email:
             raise ValueError("Email wajib diisi.")
@@ -36,6 +66,13 @@ class AppUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
+        """
+        MEMBUAT SUPERUSER MELALUI CLI (python manage.py createsuperuser).
+
+        - Role default: superadmin.
+        - is_staff, is_superuser, is_verified otomatis diset True.
+        - Akan raise ValueError jika is_staff atau is_superuser di-override ke False.
+        """
         extra_fields = self._normalize_role_input(
             extra_fields, default_role="superadmin"
         )
@@ -52,7 +89,12 @@ class AppUserManager(BaseUserManager):
 
 
 class Role(models.Model):
-    """Role master table separated from users table."""
+    """
+    TABEL MASTER ROLE PENGGUNA.
+
+    Dipisah dari tabel users agar role dapat dikelola secara independen.
+    Contoh data: superadmin, admin, seller, buyer.
+    """
 
     id = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=50)
@@ -67,7 +109,14 @@ class Role(models.Model):
 
 
 class User(AbstractUser):
-    """Custom User Model with roles"""
+    """
+    MODEL USER KUSTOM — MENGGANTIKAN User BAWAAN DJANGO.
+
+    Perubahan utama dari AbstractUser standar:
+    - Field username dihapus, diganti dengan email sebagai USERNAME_FIELD.
+    - Tambahan field: role, phone, avatar, is_verified, is_suspended.
+    - Menggunakan AppUserManager sebagai objects manager.
+    """
 
     ROLE_CHOICES = [
         ("superadmin", "Super Administrator"),
@@ -76,20 +125,21 @@ class User(AbstractUser):
         ("buyer", "Buyer"),
     ]
 
+    # Username tidak dipakai, login menggunakan email
     username = None
     email = models.EmailField(unique=True)
 
     role = models.ForeignKey(
         Role,
-        on_delete=models.PROTECT,
+        on_delete=models.PROTECT,  # Role tidak bisa dihapus jika masih ada user
         related_name="users",
         db_column="role",
         default="buyer",
     )
     phone = models.CharField(max_length=20, blank=True, null=True)
     avatar = models.ImageField(upload_to="users/avatars/", blank=True, null=True)
-    is_verified = models.BooleanField(default=False)
-    is_suspended = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)  # Status verifikasi email
+    is_suspended = models.BooleanField(default=False)  # Status suspend akun
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -106,10 +156,17 @@ class User(AbstractUser):
         return f"{self.email} ({self.get_role_display()})"
 
     def get_role_display(self):
+        """MENGEMBALIKAN LABEL ROLE YANG TERBACA MANUSIA (misal: 'Seller', 'Buyer')."""
         return dict(self.ROLE_CHOICES).get(self.role_id, self.role_id or "-")
 
     def save(self, *args, **kwargs):
-        # Keep email unique at app layer for current schema.
+        """
+        OVERRIDE SAVE — VALIDASI UNIK EMAIL DI LEVEL APLIKASI.
+
+        Django sudah menangani unique di database, tapi validasi ini
+        ditambahkan untuk menangkap duplikat email secara case-insensitive
+        sebelum query ke database.
+        """
         if (
             self.email
             and User.objects.filter(email__iexact=self.email)
@@ -119,61 +176,100 @@ class User(AbstractUser):
             raise IntegrityError("UNIQUE constraint failed: users.email")
         super().save(*args, **kwargs)
 
+    # ------------------------------------------------------------------
+    # PROPERTI SHORTCUT KE DATA TOKO MILIK SELLER
+    # Dipakai di template atau serializer tanpa perlu query eksplisit.
+    # ------------------------------------------------------------------
+
     @property
     def store_name(self):
+        """Nama toko seller. Kosong jika user bukan seller atau belum punya toko."""
         store = getattr(self, "store", None)
         return store.name if store else ""
 
     @property
     def store_description(self):
+        """Deskripsi toko seller."""
         store = getattr(self, "store", None)
         return store.description if store else ""
 
     @property
     def store_supplier_id(self):
+        """ID supplier toko seller."""
         store = getattr(self, "store", None)
         return store.supplier_id if store else ""
 
+    # ------------------------------------------------------------------
+    # PROPERTI CEK ROLE — digunakan untuk permission check di view/template
+    # ------------------------------------------------------------------
+
     @property
     def is_admin(self):
+        """True jika user adalah admin atau superadmin."""
         return self.role_id in {"admin", "superadmin"} or self.is_superuser
 
     @property
     def is_super_admin(self):
+        """True jika user adalah superadmin."""
         return self.role_id == "superadmin" or self.is_superuser
 
     @property
     def is_seller_user(self):
+        """True jika user adalah seller."""
         return self.role_id == "seller"
 
     @property
     def is_buyer_user(self):
+        """True jika user adalah buyer."""
         return self.role_id == "buyer"
 
 
 def _username_alias(self):
-    # Backward compatibility for templates/legacy code that still read user.username.
+    """
+    GETTER KOMPATIBILITAS MUNDUR UNTUK user.username.
+
+    Beberapa library pihak ketiga (misal: allauth) masih mengakses
+    user.username. Properti ini mengembalikan bagian lokal dari email
+    (sebelum '@') sebagai pengganti username.
+    """
     return (self.email or "").split("@")[0] if self.email else ""
 
 
 def _set_username_alias(self, value):
-    # Compatibility setter for libraries (e.g. allauth) that still assign username.
-    # This project uses email as USERNAME_FIELD, so username assignment is ignored.
+    """
+    SETTER KOMPATIBILITAS MUNDUR UNTUK user.username.
+
+    Dibuat agar library yang masih melakukan assignment user.username = ...
+    tidak menghasilkan error. Assignment diabaikan karena project ini
+    menggunakan email sebagai USERNAME_FIELD.
+    """
     return None
 
 
+# Pasang properti username ke model User secara dinamis
 User.username = property(_username_alias, _set_username_alias)
 
 
+# ==============================================================================
+# TOKO (STORE)
+# ==============================================================================
+
+
 class Store(models.Model):
-    """Store profile separated from users table."""
+    """
+    PROFIL TOKO MILIK SELLER.
+
+    Dipisah dari tabel users agar data toko dapat berkembang sendiri
+    tanpa mempengaruhi struktur User.
+    Setiap seller hanya boleh memiliki satu toko (OneToOne).
+    """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     seller = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name="store",
-        limit_choices_to={"role": "seller"},
+        limit_choices_to={"role": "seller"},  # Hanya user ber-role seller
     )
     supplier_id = models.CharField(max_length=40, blank=True, default="")
     name = models.CharField(max_length=120)
@@ -189,8 +285,20 @@ class Store(models.Model):
         return self.name
 
 
+# ==============================================================================
+# KATEGORI PRODUK
+# ==============================================================================
+
+
 class Category(models.Model):
-    """Product Category"""
+    """
+    KATEGORI PRODUK.
+
+    Setiap kategori memiliki icon_key yang menentukan ikon dan warna
+    yang ditampilkan di UI (menggunakan Tailwind CSS class).
+    Slug di-generate otomatis dari nama kategori, dengan suffix random
+    jika terjadi duplikat.
+    """
 
     ICON_CHOICES = [
         ("food", "Makanan"),
@@ -215,6 +323,7 @@ class Category(models.Model):
         ("baby", "Bayi & Anak"),
     ]
 
+    # Mapping icon_key ke Tailwind CSS class untuk background dan warna teks
     ICON_STYLE_MAP = {
         "food": ("bg-amber-50", "text-amber-600"),
         "drink": ("bg-sky-50", "text-sky-600"),
@@ -254,10 +363,31 @@ class Category(models.Model):
 
     @staticmethod
     def rand_slug(length=8):
-        return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length)).lower()
+        """
+        MEMBUAT SUFFIX RANDOM UNTUK SLUG JIKA TERJADI DUPLIKAT.
+
+        Menghasilkan string acak 8 karakter (huruf + angka, semua huruf kecil).
+        Contoh hasil: 'a3f9kx2m'
+        """
+        return "".join(
+            random.choice(string.ascii_letters + string.digits) for _ in range(length)
+        ).lower()
 
     @classmethod
     def generate_unique_slug(cls, name, exclude_id=None):
+        """
+        MEMBUAT SLUG UNIK DARI NAMA KATEGORI.
+
+        Alur:
+        1. Buat base slug dari nama (misal: "Makanan Ringan" → "makanan-ringan").
+        2. Cek apakah slug sudah dipakai di database.
+        3. Jika sudah ada, tambahkan suffix random hingga ditemukan slug yang unik.
+           Contoh: "makanan-ringan-a3f9kx2m"
+
+        Parameter:
+            name       : Nama kategori sebagai sumber slug.
+            exclude_id : ID kategori yang sedang diedit (agar tidak konflik dengan dirinya sendiri).
+        """
         base_slug = slugify(name or "") or "category"
         slug = base_slug
 
@@ -269,34 +399,63 @@ class Category(models.Model):
             if not queryset.exists():
                 return slug
 
+            # Slug sudah dipakai, coba tambah suffix random
             slug = f"{base_slug}-{cls.rand_slug()}"
 
     def save(self, *args, **kwargs):
+        """
+        OVERRIDE SAVE — AUTO-GENERATE SLUG SAAT SIMPAN.
+
+        Slug akan di-generate ulang jika:
+        - Slug belum diisi (objek baru).
+        - Ini adalah data baru (belum ada di DB).
+        - Nama kategori berubah saat edit.
+        - Slug yang ada sudah dipakai oleh kategori lain (konflik).
+        """
         original_name = None
 
         if self.pk:
+            # Ambil nama sebelumnya dari DB untuk cek apakah nama berubah
             original = Category.objects.filter(pk=self.pk).only("name", "slug").first()
             if original:
                 original_name = original.name
 
-        if not self.slug or not self.pk or (original_name is not None and self.name != original_name):
+        if (
+            not self.slug
+            or not self.pk
+            or (original_name is not None and self.name != original_name)
+        ):
             self.slug = self.generate_unique_slug(self.name, exclude_id=self.pk)
         elif Category.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+            # Slug sudah dipakai oleh kategori lain, generate ulang
             self.slug = self.generate_unique_slug(self.name, exclude_id=self.pk)
 
         super().save(*args, **kwargs)
 
     @property
     def icon_bg_class(self):
+        """Tailwind CSS class untuk warna background ikon kategori di UI."""
         return self.ICON_STYLE_MAP.get(self.icon_key, self.ICON_STYLE_MAP["food"])[0]
 
     @property
     def icon_text_class(self):
+        """Tailwind CSS class untuk warna teks ikon kategori di UI."""
         return self.ICON_STYLE_MAP.get(self.icon_key, self.ICON_STYLE_MAP["food"])[1]
 
 
+# ==============================================================================
+# PRODUK
+# ==============================================================================
+
+
 class Product(models.Model):
-    """Product Model"""
+    """
+    MODEL PRODUK UTAMA.
+
+    Setiap produk dimiliki oleh satu seller dan masuk ke satu kategori.
+    Fitur stok saat ini dinonaktifkan (lihat properti `stock`).
+    Harga disimpan tanpa desimal (decimal_places=0) sesuai format Rupiah.
+    """
 
     STATUS_CHOICES = [
         ("active", "Active"),
@@ -311,20 +470,27 @@ class Product(models.Model):
         limit_choices_to={"role": "seller"},
     )
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, null=True, related_name="products"
+        Category,
+        on_delete=models.SET_NULL,  # Produk tetap ada meski kategori dihapus
+        null=True,
+        related_name="products",
     )
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     description = models.TextField()
     price = models.DecimalField(
-        max_digits=15, decimal_places=0, validators=[MinValueValidator(0)]
+        max_digits=15,
+        decimal_places=0,
+        validators=[MinValueValidator(0)],
     )
-
     weight = models.DecimalField(
-        max_digits=8, decimal_places=0, default=0, help_text="Weight in grams"
+        max_digits=8,
+        decimal_places=0,
+        default=0,
+        help_text="Berat produk dalam gram (digunakan untuk kalkulasi ongkos kirim).",
     )
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="active")
-    is_featured = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)  # Produk unggulan / highlight
     views_count = models.PositiveIntegerField(default=0)
     sales_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -339,30 +505,65 @@ class Product(models.Model):
 
     @property
     def final_price(self):
+        """
+        HARGA AKHIR PRODUK SETELAH DISKON.
+
+        Saat ini diskon belum diimplementasikan, jadi final_price = price.
+        Properti ini tetap disediakan agar kode konsisten jika diskon ditambahkan nanti.
+        """
         return self.price
 
     @property
     def discount_percentage(self):
+        """
+        PERSENTASE DISKON PRODUK.
+
+        Fitur diskon belum diimplementasikan. Selalu mengembalikan 0.
+        """
         return 0
 
     @property
     def stock(self):
-        # Stock feature is disabled in current system scope.
+        """
+        STOK PRODUK.
+
+        Fitur stok dinonaktifkan pada scope sistem saat ini.
+        Selalu mengembalikan 0 agar tidak ada error di kode yang mengaksesnya.
+        """
         return 0
 
     @stock.setter
     def stock(self, value):
-        # Keep setter for backwards compatibility, but no-op when stock is disabled.
+        """
+        SETTER STOK — SENGAJA DIABAIKAN (NO-OP).
+
+        Disediakan untuk menjaga kompatibilitas mundur dengan kode
+        yang masih melakukan assignment product.stock = nilai.
+        """
         return
 
     @property
     def is_in_stock(self):
+        """
+        CEK KETERSEDIAAN PRODUK.
+
+        Produk dianggap tersedia selama statusnya 'active',
+        karena fitur stok numerik belum diaktifkan.
+        """
         return self.status == "active"
 
     @property
     def main_image(self):
-        # Use .all() so Django's prefetch_related cache is hit when available,
-        # avoiding N+1 queries in list views that prefetch images.
+        """
+        MENGAMBIL GAMBAR UTAMA PRODUK.
+
+        Prioritas: gambar dengan is_main=True.
+        Fallback: gambar pertama yang tersedia.
+        Mengembalikan None jika tidak ada gambar sama sekali.
+
+        Menggunakan list() dari .all() agar memanfaatkan cache
+        prefetch_related jika dipanggil dari list view (menghindari N+1 query).
+        """
         all_images = list(self.images.all())
         for img in all_images:
             if img.is_main:
@@ -371,10 +572,18 @@ class Product(models.Model):
 
     @property
     def image(self):
+        """Alias dari main_image untuk kompatibilitas template lama."""
         return self.main_image
 
     @property
     def rating(self):
+        """
+        RATA-RATA RATING PRODUK (skala 1–5, dibulatkan 1 desimal).
+
+        Jika review sudah di-prefetch (misal: prefetch_related('product_reviews')),
+        hitung rata-rata dari cache prefetch untuk menghindari query tambahan.
+        Jika tidak, lakukan agregasi langsung ke database.
+        """
         prefetched_reviews = getattr(self, "_prefetched_objects_cache", {}).get(
             "product_reviews"
         )
@@ -384,11 +593,17 @@ class Product(models.Model):
                 return 0
             return round(sum(review.rating for review in reviews) / len(reviews), 1)
 
+        # Fallback: hitung via query agregasi ke DB
         aggregate = self.product_reviews.aggregate(avg_rating=Avg("rating"))
         return round(aggregate["avg_rating"] or 0, 1)
 
     @property
     def shop_name(self):
+        """
+        NAMA TOKO SELLER YANG MENJUAL PRODUK INI.
+
+        Fallback ke email seller jika toko belum diisi.
+        """
         store = getattr(self.seller, "store", None)
         if store and store.name:
             return store.name
@@ -396,7 +611,13 @@ class Product(models.Model):
 
 
 class ProductImage(models.Model):
-    """Product Images"""
+    """
+    GAMBAR PRODUK.
+
+    Satu produk dapat memiliki banyak gambar.
+    Gambar dengan is_main=True akan ditampilkan sebagai gambar utama.
+    Urutan default: gambar utama dulu, lalu berdasarkan waktu upload.
+    """
 
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="images"
@@ -408,27 +629,39 @@ class ProductImage(models.Model):
 
     class Meta:
         db_table = "product_images"
-        ordering = ["-is_main", "created_at"]
+        ordering = ["-is_main", "created_at"]  # Gambar utama selalu tampil paling depan
 
     def __str__(self):
         return f"Image for {self.product.name}"
 
 
 class ProductVariation(models.Model):
-    """Product variations with per-variant stock."""
+    """
+    VARIASI PRODUK (misal: Ukuran, Warna, dll).
+
+    Setiap variasi memiliki nama unik per produk dan harga opsional.
+    Jika harga tidak diisi, gunakan harga utama dari produk.
+    Detail opsi variasi disimpan di model VariantOption.
+    """
 
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="variations"
     )
     variant_name = models.CharField(max_length=120)
-    price = models.PositiveIntegerField(blank=True, null=True)
+    price = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        # Kosong = gunakan harga dari Product.price
+    )
 
     class Meta:
         db_table = "product_variations"
         ordering = ["id"]
         constraints = [
             models.UniqueConstraint(
-                fields=["product", "variant_name"], name="unique_product_variant_name"
+                fields=["product", "variant_name"],
+                name="unique_product_variant_name",
+                # Satu produk tidak boleh punya dua variasi dengan nama yang sama
             ),
         ]
 
@@ -437,7 +670,13 @@ class ProductVariation(models.Model):
 
 
 class VariantOption(models.Model):
-    """Variant option parts parsed from ProductVariation.variant_name."""
+    """
+    OPSI DETAIL DARI SEBUAH VARIASI PRODUK.
+
+    Menyimpan pasangan option_name dan option_value hasil parsing
+    dari ProductVariation.variant_name.
+    Contoh: option_name='Warna', option_value='Merah'
+    """
 
     variation = models.ForeignKey(
         ProductVariation, on_delete=models.CASCADE, related_name="variant_options"
@@ -452,6 +691,7 @@ class VariantOption(models.Model):
             models.UniqueConstraint(
                 fields=["variation", "option_name", "option_value"],
                 name="unique_variation_option_pair",
+                # Kombinasi variation + option_name + option_value harus unik
             ),
         ]
 
@@ -459,54 +699,98 @@ class VariantOption(models.Model):
         return f"{self.variation_id} - {self.option_name}: {self.option_value}"
 
 
+# ==============================================================================
+# ALAMAT PENGIRIMAN
+# ==============================================================================
+
+
 class Address(models.Model):
-    """User Address"""
+    """
+    ALAMAT PENGIRIMAN MILIK USER.
+
+    Satu user dapat memiliki banyak alamat.
+    Hanya boleh ada satu alamat default per user (is_default=True).
+    Saat alamat baru diset sebagai default, semua alamat lain otomatis
+    diubah menjadi non-default di method save().
+    """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="addresses")
-    label = models.CharField(max_length=50, default="Rumah")  # Rumah, Kantor, dll
+    label = models.CharField(max_length=50, default="Rumah")  # Misal: Rumah, Kantor
     recipient_name = models.CharField(max_length=100)
     recipient_phone = models.CharField(max_length=20)
     address = models.TextField()
+    province = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     sub_district = models.CharField(max_length=100, blank=True, default="")
     village = models.CharField(max_length=100, blank=True, default="")
-    province = models.CharField(max_length=100)
     postal_code = models.CharField(max_length=10)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "addresses"
-        ordering = ["-is_default", "-created_at"]
+        ordering = [
+            "-is_default",
+            "-created_at",
+        ]  # Alamat default selalu tampil pertama
 
     def __str__(self):
         return f"{self.label} - {self.recipient_name}"
 
     def save(self, *args, **kwargs):
+        """
+        OVERRIDE SAVE — PASTIKAN HANYA SATU ALAMAT DEFAULT PER USER.
+
+        Jika alamat ini diset sebagai default (is_default=True),
+        semua alamat lain milik user yang sama akan diubah ke False
+        sebelum alamat ini disimpan.
+        """
         if self.is_default:
-            # Set all other addresses to non-default
             Address.objects.filter(user=self.user).update(is_default=False)
         super().save(*args, **kwargs)
 
+    # ------------------------------------------------------------------
+    # PROPERTI ALIAS — untuk kompatibilitas template/serializer lama
+    # ------------------------------------------------------------------
+
     @property
     def street(self):
+        """Alias dari field 'address' untuk kompatibilitas template."""
         return self.address
 
     @property
     def phone(self):
+        """Alias dari recipient_phone."""
         return self.recipient_phone
 
     @property
     def is_primary(self):
+        """Alias dari is_default."""
         return self.is_default
 
     @property
     def district(self):
+        """Alias dari sub_district (Kecamatan) untuk kompatibilitas."""
         return self.sub_district
 
 
+# ==============================================================================
+# ORDER & PEMBAYARAN
+# ==============================================================================
+
+
 class Order(models.Model):
-    """Order Model"""
+    """
+    MODEL PESANAN (ORDER).
+
+    Setiap order memiliki:
+    - Nomor unik yang di-generate otomatis saat pertama kali disimpan.
+    - Informasi pembeli (buyer) dan penjual (seller).
+    - Snapshot alamat pengiriman (disimpan langsung, bukan relasi ke Address,
+      agar tetap terjaga meski alamat asli diedit/dihapus).
+    - Rincian harga: subtotal, ongkos kirim, diskon, dan total.
+    - Timestamp untuk setiap perubahan status: paid_at, shipped_at, delivered_at.
+    """
 
     STATUS_CHOICES = [
         ("pending", "Pending"),
@@ -538,26 +822,28 @@ class Order(models.Model):
         max_length=15, choices=PAYMENT_STATUS_CHOICES, default="pending"
     )
 
-    # Address
+    # Snapshot alamat pengiriman saat order dibuat (tidak terhubung ke tabel Address)
     shipping_address = models.TextField()
     shipping_city = models.CharField(max_length=100)
+    shipping_sub_district = models.CharField(max_length=100, blank=True, default="")
+    shipping_village = models.CharField(max_length=100, blank=True, default="")
     shipping_province = models.CharField(max_length=100)
     shipping_postal_code = models.CharField(max_length=10)
     recipient_name = models.CharField(max_length=100)
     recipient_phone = models.CharField(max_length=20)
 
-    # Pricing
+    # Rincian harga
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=12, decimal_places=2)
 
-    # Tracking
+    # Informasi pengiriman
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
     courier = models.CharField(max_length=50, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
 
-    # Timestamps
+    # Timestamp perubahan status
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     paid_at = models.DateTimeField(blank=True, null=True)
@@ -572,17 +858,34 @@ class Order(models.Model):
         return f"Order #{self.order_number}"
 
     def save(self, *args, **kwargs):
+        """
+        OVERRIDE SAVE — AUTO-GENERATE NOMOR ORDER SAAT PERTAMA KALI DIBUAT.
+
+        Nomor order hanya di-generate jika belum ada (order baru).
+        """
         if not self.order_number:
             self.order_number = self.generate_order_number()
         super().save(*args, **kwargs)
 
     def generate_order_number(self):
+        """
+        MEMBUAT NOMOR ORDER UNIK.
+
+        Format: ORD{YYYYMMDD}{6 digit acak dari UUID}
+        Contoh: ORD20240715483921
+        """
         timestamp = timezone.now().strftime("%Y%m%d")
         unique_id = str(uuid.uuid4().int)[:6]
         return f"ORD{timestamp}{unique_id}"
 
     @property
     def address(self):
+        """
+        MENGEMBALIKAN DATA ALAMAT PENGIRIMAN SEBAGAI OBJEK SEDERHANA.
+
+        Menggunakan SimpleNamespace agar bisa diakses dengan dot notation
+        (misal: order.address.city) tanpa perlu membuat model terpisah.
+        """
         return SimpleNamespace(
             street=self.shipping_address,
             city=self.shipping_city,
@@ -594,6 +897,12 @@ class Order(models.Model):
 
     @property
     def payment_method(self):
+        """
+        METODE PEMBAYARAN YANG DIGUNAKAN PADA ORDER INI.
+
+        Diambil dari relasi Payment jika ada.
+        Fallback ke 'bank_transfer' jika data pembayaran belum tersedia.
+        """
         payment = getattr(self, "payment", None)
         if payment and payment.payment_method:
             return payment.payment_method
@@ -601,15 +910,29 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    """Order Item"""
+    """
+    ITEM PRODUK DI DALAM SEBUAH ORDER.
+
+    Menyimpan snapshot nama produk dan gambar saat order dibuat,
+    agar tampilan riwayat order tidak terpengaruh jika produk diedit/dihapus.
+    Total harga per item dihitung otomatis saat disimpan (price × quantity).
+    """
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-    product_name = models.CharField(max_length=200)
-    product_image = models.ImageField(upload_to="order_items/", blank=True, null=True)
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.SET_NULL,  # Produk bisa dihapus, histori order tetap ada
+        null=True,
+    )
+    product_name = models.CharField(max_length=200)  # Snapshot nama produk
+    product_image = models.ImageField(
+        upload_to="order_items/",
+        blank=True,
+        null=True,
+    )
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(max_digits=12, decimal_places=2)
-    total = models.DecimalField(max_digits=12, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=2)  # Harga saat order
+    total = models.DecimalField(max_digits=12, decimal_places=2)  # Dihitung otomatis
 
     class Meta:
         db_table = "order_items"
@@ -618,20 +941,29 @@ class OrderItem(models.Model):
         return f"{self.product_name} x {self.quantity}"
 
     def save(self, *args, **kwargs):
+        """OVERRIDE SAVE — HITUNG TOTAL ITEM SECARA OTOMATIS (price × quantity)."""
         self.total = self.price * self.quantity
         super().save(*args, **kwargs)
 
     @property
     def product_price(self):
+        """Alias dari field price untuk kompatibilitas template."""
         return self.price
 
     @property
     def variant(self):
+        """Placeholder variasi produk. Belum diimplementasikan, selalu kosong."""
         return ""
 
 
 class Payment(models.Model):
-    """Payment Record"""
+    """
+    CATATAN PEMBAYARAN UNTUK SEBUAH ORDER.
+
+    Setiap order hanya memiliki satu record pembayaran (OneToOne).
+    Menyimpan metode pembayaran, jumlah, status, dan URL pembayaran
+    (misal: link payment gateway).
+    """
 
     PAYMENT_METHOD_CHOICES = [
         ("bank_transfer", "Bank Transfer"),
@@ -652,7 +984,7 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="pending")
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
-    payment_url = models.URLField(blank=True, null=True)
+    payment_url = models.URLField(blank=True, null=True)  # Link pembayaran dari gateway
     paid_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -665,7 +997,13 @@ class Payment(models.Model):
 
 
 class SellerPaymentMethodSetting(models.Model):
-    """Seller payment method settings for dashboard payment page."""
+    """
+    PENGATURAN METODE PEMBAYARAN MILIK SELLER.
+
+    Setiap seller dapat mengaktifkan/menonaktifkan metode pembayaran
+    yang mereka terima (bank transfer dan/atau QRIS).
+    Data QRIS (gambar, merchant name, merchant ID) juga disimpan di sini.
+    """
 
     seller = models.OneToOneField(
         User,
@@ -689,7 +1027,14 @@ class SellerPaymentMethodSetting(models.Model):
 
 
 class SellerBankAccount(models.Model):
-    """Seller bank account list used in transfer bank checkout settings."""
+    """
+    DAFTAR REKENING BANK MILIK SELLER.
+
+    Digunakan untuk menampilkan tujuan transfer saat checkout.
+    Satu seller dapat mendaftarkan lebih dari satu rekening.
+    Hanya boleh ada satu rekening default (is_default=True) per seller —
+    diatur otomatis di method save() mirip dengan logika Address.
+    """
 
     seller = models.ForeignKey(
         User,
@@ -701,7 +1046,11 @@ class SellerBankAccount(models.Model):
     bank_code = models.CharField(max_length=20, blank=True)
     account_number = models.CharField(max_length=50)
     account_holder = models.CharField(max_length=120)
-    icon = models.ImageField(upload_to="payments/banks/", blank=True, null=True)
+    icon = models.ImageField(
+        upload_to="payments/banks/",
+        blank=True,
+        null=True,
+    )
     is_active = models.BooleanField(default=True)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -709,12 +1058,18 @@ class SellerBankAccount(models.Model):
 
     class Meta:
         db_table = "seller_bank_accounts"
-        ordering = ["-is_default", "created_at"]
+        ordering = ["-is_default", "created_at"]  # Rekening default selalu di atas
 
     def __str__(self):
         return f"{self.bank_name} - {self.account_number}"
 
     def save(self, *args, **kwargs):
+        """
+        OVERRIDE SAVE — PASTIKAN HANYA SATU REKENING DEFAULT PER SELLER.
+
+        Rekening lain milik seller yang sama akan di-update ke is_default=False
+        setelah rekening ini disimpan sebagai default.
+        """
         super().save(*args, **kwargs)
         if self.is_default:
             SellerBankAccount.objects.filter(seller=self.seller).exclude(
@@ -722,8 +1077,21 @@ class SellerBankAccount(models.Model):
             ).update(is_default=False)
 
 
+# ==============================================================================
+# REVIEW PRODUK
+# ==============================================================================
+
+
 class ProductReview(models.Model):
-    """Temporary product review schema that follows current ERD draft."""
+    """
+    ULASAN / REVIEW PRODUK DARI PEMBELI.
+
+    Skema sementara mengikuti draft ERD terkini.
+    Satu review terhubung ke satu order dan satu produk (kombinasi unik).
+    Pembeli yang sama tidak bisa mereview produk yang sama dalam satu order dua kali.
+
+    Status review defaultnya 'approved' karena moderasi manual belum diaktifkan.
+    """
 
     REVIEW_STATUS_PENDING = "pending"
     REVIEW_STATUS_APPROVED = "approved"
@@ -740,7 +1108,7 @@ class ProductReview(models.Model):
         on_delete=models.SET_NULL,
         related_name="product_reviews",
         db_column="transaction_id",
-        to_field="order_number",
+        to_field="order_number",  # Relasi ke order_number, bukan PK integer
         null=True,
         blank=True,
     )
@@ -752,20 +1120,32 @@ class ProductReview(models.Model):
     )
     review = models.TextField()
     status = models.CharField(
-        max_length=12, choices=REVIEW_STATUS_CHOICES, default=REVIEW_STATUS_APPROVED
+        max_length=12,
+        choices=REVIEW_STATUS_CHOICES,
+        default=REVIEW_STATUS_APPROVED,  # Langsung approved, moderasi belum aktif
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "product_review"
         ordering = ["-created_at"]
-        unique_together = ["transaction", "product"]
+        unique_together = [
+            "transaction",
+            "product",
+        ]  # Satu review per produk per transaksi
 
     def __str__(self):
         return f"Review {self.id} for {self.product.name}"
 
     @property
     def user(self):
+        """
+        MENGEMBALIKAN USER PEMBUAT REVIEW.
+
+        Diambil dari buyer pada transaksi terkait.
+        Fallback ke objek SimpleNamespace dengan username='Pengguna'
+        jika transaksi tidak ditemukan (misal: order sudah dihapus).
+        """
         transaction = getattr(self, "transaction", None)
         if transaction and transaction.buyer_id:
             return transaction.buyer
@@ -773,20 +1153,44 @@ class ProductReview(models.Model):
 
     @property
     def comment(self):
+        """Alias dari field 'review' untuk kompatibilitas template."""
         return self.review
 
     @property
     def variant(self):
+        """Placeholder variasi produk pada review. Belum diimplementasikan."""
         return ""
 
 
+# ==============================================================================
+# KERANJANG BELANJA (CART)
+# ==============================================================================
+
+
 class Cart(models.Model):
-    """Shopping Cart"""
+    """
+    KERANJANG BELANJA.
+
+    Mendukung dua mode:
+    - User login: cart terhubung ke user melalui ForeignKey.
+    - Guest (belum login): cart diidentifikasi melalui session_id.
+
+    Satu user bisa memiliki lebih dari satu cart record (misal: cart lama
+    yang belum dibersihkan), meskipun dalam praktiknya hanya satu yang aktif.
+    """
 
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="cart", null=True, blank=True
+        User,
+        on_delete=models.CASCADE,
+        related_name="cart",
+        null=True,
+        blank=True,  # Null jika guest (belum login)
     )
-    session_id = models.CharField(max_length=100, blank=True, null=True)
+    session_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,  # Null jika user sudah login
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -800,15 +1204,23 @@ class Cart(models.Model):
 
     @property
     def total_items(self):
+        """Total jumlah item (quantity) di dalam cart."""
         return sum(item.quantity for item in self.items.all())
 
     @property
     def subtotal(self):
+        """Total harga semua item di dalam cart."""
         return sum(item.total for item in self.items.all())
 
 
 class CartItem(models.Model):
-    """Cart Item"""
+    """
+    ITEM DI DALAM KERANJANG BELANJA.
+
+    Setiap kombinasi cart + product harus unik (unique_together).
+    Jika produk yang sama ditambahkan lagi, quantity-nya yang diupdate,
+    bukan membuat record baru.
+    """
 
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -816,26 +1228,40 @@ class CartItem(models.Model):
 
     class Meta:
         db_table = "cart_items"
-        unique_together = ["cart", "product"]
+        unique_together = ["cart", "product"]  # Satu produk hanya satu baris per cart
 
     def __str__(self):
         return f"{self.product.name} x {self.quantity}"
 
     @property
     def total(self):
+        """Total harga item ini (final_price × quantity)."""
         return self.product.final_price * self.quantity
 
     @property
     def subtotal(self):
+        """Alias dari total untuk kompatibilitas template."""
         return self.total
 
     @property
     def variant(self):
+        """Placeholder variasi produk di cart. Belum diimplementasikan."""
         return ""
 
 
+# ==============================================================================
+# OTP & NOTIFIKASI
+# ==============================================================================
+
+
 class EmailOTP(models.Model):
-    """OTP records for email verification and password reset."""
+    """
+    KODE OTP UNTUK VERIFIKASI EMAIL DAN RESET PASSWORD.
+
+    OTP tidak disimpan sebagai plaintext, melainkan dalam bentuk hash (otp_hash).
+    Setiap OTP memiliki waktu kadaluarsa (expires_at) dan flag is_used
+    untuk mencegah penggunaan ulang.
+    """
 
     PURPOSE_CHOICES = [
         ("email_verification", "Email Verification"),
@@ -844,9 +1270,9 @@ class EmailOTP(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="email_otps")
     purpose = models.CharField(max_length=30, choices=PURPOSE_CHOICES)
-    otp_hash = models.CharField(max_length=255)
+    otp_hash = models.CharField(max_length=255)  # OTP disimpan dalam bentuk hash
     expires_at = models.DateTimeField()
-    is_used = models.BooleanField(default=False)
+    is_used = models.BooleanField(default=False)  # True setelah OTP berhasil dipakai
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -858,7 +1284,13 @@ class EmailOTP(models.Model):
 
 
 class Notification(models.Model):
-    """User Notifications"""
+    """
+    NOTIFIKASI UNTUK USER.
+
+    Digunakan untuk memberi tahu user tentang aktivitas terkait
+    order, pembayaran, produk, atau sistem.
+    Notifikasi dapat disertai link untuk navigasi langsung ke halaman terkait.
+    """
 
     TYPE_CHOICES = [
         ("order", "Order"),
@@ -876,7 +1308,7 @@ class Notification(models.Model):
         max_length=15, choices=TYPE_CHOICES, default="system"
     )
     is_read = models.BooleanField(default=False)
-    link = models.URLField(blank=True, null=True)
+    link = models.URLField(blank=True, null=True)  # URL tujuan saat notifikasi diklik
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

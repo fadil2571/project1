@@ -19,7 +19,7 @@ class CartView(View):
         stores_dict = {}
         for item in cart_items:
             seller = item.product.seller
-            store_name = seller.store.store_name if hasattr(seller, 'store') and seller.store else str(seller)
+            store_name = seller.store.name if hasattr(seller, 'store') and seller.store else str(seller)
             
             if store_name not in stores_dict:
                 stores_dict[store_name] = {

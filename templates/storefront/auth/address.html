@@ -291,7 +291,7 @@
 
                         <div class="ad-field full">
                             <label class="ad-label">Nomor Telepon</label>
-                            <input type="tel" name="recipient_phone" class="ad-input" value="{{ edit_address.recipient_phone|default:'' }}" required>
+                            <input type="number" name="recipient_phone" class="ad-input" value="{{ edit_address.recipient_phone|default:'' }}" required>
                         </div>
 
                         <div class="ad-field">
@@ -299,8 +299,8 @@
                             <select name="province_id" id="provinceSelect" class="ad-input" required>
                                 <option value="">-- Pilih Provinsi --</option>
                                 {% for province in provinces %}
-                                <option value="{{ province.province_id }}" data-name="{{ province.province }}">{{ province.province }}</option>
-                                {% endfor %}
+                                 <option value="{{ province.id }}" data-name="{{ province.name }}{{ province.nama }}">{{ province.name }}{{ province.nama }}</option>
+                                 {% endfor %}
                             </select>
                             <input type="hidden" name="province" id="provinceName">
                         </div>
@@ -331,7 +331,9 @@
 
                         <div class="ad-field">
                             <label class="ad-label">Kode Pos</label>
-                            <input type="text" name="postal_code" id="postalCodeInput" class="ad-input" value="{{ edit_address.postal_code|default:'' }}" required>
+                            <div id="postalCodeContainer">
+                                <input type="text" name="postal_code" id="postalCodeInput" class="ad-input" value="{{ edit_address.postal_code|default:'' }}" required placeholder="Pilih kelurahan...">
+                            </div>
                         </div>
 
                         <div class="ad-field full">
@@ -375,7 +377,7 @@
                             <a href="?edit={{ address.id }}" class="btn bg bsm">Edit</a>
 
                             {% if not address.is_default %}
-                            <form method="post" style="display:inline;">
+                            <form method="post" action="{% url 'landing_app:addresses' %}" style="display:inline;">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="set_default">
                                 <input type="hidden" name="address_id" value="{{ address.id }}">
@@ -383,7 +385,7 @@
                             </form>
                             {% endif %}
 
-                            <form method="post" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus alamat ini?');">
+                            <form method="post" action="{% url 'landing_app:addresses' %}" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus alamat ini?');">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="address_id" value="{{ address.id }}">
@@ -403,7 +405,7 @@
 
 {% block extra_js %}
 <script>
-    // API Integration: RajaOngkir (Province/City), EMSIFA (District/Village), Nominatim (Geocoding)
+    // API Integration: EMSIFA (Region Data)
     document.addEventListener('DOMContentLoaded', function() {
         const provinceSelect = document.getElementById('provinceSelect');
         const citySelect = document.getElementById('citySelect');
@@ -415,187 +417,163 @@
         const districtNameInput = document.getElementById('districtName');
         const villageNameInput = document.getElementById('villageName');
         const postalCodeInput = document.getElementById('postalCodeInput');
-        
-        // When province is selected, fetch cities from RajaOngkir API
-        if (provinceSelect) {
-            provinceSelect.addEventListener('change', function() {
-                const provinceId = this.value;
-                const provinceName = this.options[this.selectedIndex]?.dataset?.name || '';
-                
-                // Set hidden input for province name
-                provinceNameInput.value = provinceName;
-                
-                // Reset city dropdown
-                citySelect.innerHTML = '<option value="">-- Loading Kota/Kabupaten --</option>';
-                citySelect.disabled = true;
-                cityNameInput.value = '';
-                
-                // Reset dependent dropdowns
-                districtSelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten Terlebih Dahulu --</option>';
-                districtSelect.disabled = true;
-                districtNameInput.value = '';
-                
-                villageSelect.innerHTML = '<option value="">-- Pilih Kecamatan Terlebih Dahulu --</option>';
-                villageSelect.disabled = true;
-                villageNameInput.value = '';
-                
-                postalCodeInput.value = '';
-                
-                if (provinceId) {
-                    // Fetch cities from RajaOngkir API
-                    fetch(`/api/cities/?province_id=${provinceId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success && data.data) {
-                                citySelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
-                                data.data.forEach(city => {
-                                    const option = document.createElement('option');
-                                    option.value = city.city_id;
-                                    option.dataset.name = city.city_name;
-                                    option.textContent = city.city_name;
-                                    citySelect.appendChild(option);
-                                });
-                                citySelect.disabled = false;
-                            } else {
-                                citySelect.innerHTML = '<option value="">-- Gagal memuat kota --</option>';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching cities:', error);
-                            citySelect.innerHTML = '<option value="">-- Error loading cities --</option>';
-                        });
-                } else {
-                    citySelect.innerHTML = '<option value="">-- Pilih Provinsi Terlebih Dahulu --</option>';
-                    citySelect.disabled = true;
+
+        // Helper to trigger physical change event
+        const triggerChange = (el) => el.dispatchEvent(new Event('change'));
+
+        // Load Cities Functional
+        const loadCities = async (provinceId, selectedIdOrName = null) => {
+            if (!provinceId) return;
+            citySelect.innerHTML = '<option value="">-- Loading Kota/Kabupaten --</option>';
+            citySelect.disabled = true;
+            try {
+                const response = await fetch(`/api/cities/?province_id=${provinceId}`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    citySelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+                    data.data.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.id;
+                        const name = city.name || city.nama;
+                        option.dataset.name = name;
+                        option.textContent = name;
+                        if (selectedIdOrName && (city.id == selectedIdOrName || name == selectedIdOrName)) option.selected = true;
+                        citySelect.appendChild(option);
+                    });
+                    citySelect.disabled = false;
                 }
-            });
-        }
-        
-        // When city is selected, fetch districts from EMSIFA API
-        if (citySelect) {
-            citySelect.addEventListener('change', function() {
-                const cityId = this.value;
-                const cityName = this.options[this.selectedIndex]?.dataset?.name || '';
-                
-                // Set hidden input for city name
-                cityNameInput.value = cityName;
-                
-                // Reset district dropdown
-                districtSelect.innerHTML = '<option value="">-- Loading Kecamatan --</option>';
-                districtSelect.disabled = true;
-                districtNameInput.value = '';
-                
-                // Reset dependent dropdowns
-                villageSelect.innerHTML = '<option value="">-- Pilih Kecamatan Terlebih Dahulu --</option>';
-                villageSelect.disabled = true;
-                villageNameInput.value = '';
-                
-                postalCodeInput.value = '';
-                
-                if (cityId) {
-                    // Fetch districts from EMSIFA API
-                    fetch(`/api/districts/?city_id=${cityId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success && data.data) {
-                                districtSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
-                                data.data.forEach(district => {
-                                    const option = document.createElement('option');
-                                    option.value = district.id;
-                                    option.dataset.name = district.nama;
-                                    option.textContent = district.nama;
-                                    districtSelect.appendChild(option);
-                                });
-                                districtSelect.disabled = false;
-                            } else {
-                                districtSelect.innerHTML = '<option value="">-- Gagal memuat kecamatan --</option>';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching districts:', error);
-                            districtSelect.innerHTML = '<option value="">-- Error loading districts --</option>';
-                        });
-                } else {
-                    districtSelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten Terlebih Dahulu --</option>';
-                    districtSelect.disabled = true;
+            } catch (err) { console.error('Cities Error:', err); }
+        };
+
+        // Load Districts Functional
+        const loadDistricts = async (cityId, selectedIdOrName = null) => {
+            if (!cityId) return;
+            districtSelect.innerHTML = '<option value="">-- Loading Kecamatan --</option>';
+            districtSelect.disabled = true;
+            try {
+                const response = await fetch(`/api/districts/?city_id=${cityId}`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    districtSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+                    data.data.forEach(d => {
+                        const option = document.createElement('option');
+                        option.value = d.id;
+                        const name = d.name || d.nama;
+                        option.dataset.name = name;
+                        option.textContent = name;
+                        if (selectedIdOrName && (d.id == selectedIdOrName || name == selectedIdOrName)) option.selected = true;
+                        districtSelect.appendChild(option);
+                    });
+                    districtSelect.disabled = false;
                 }
-            });
-        }
-        
-        // When district is selected, fetch villages from EMSIFA API
-        if (districtSelect) {
-            districtSelect.addEventListener('change', function() {
-                const districtId = this.value;
-                const districtName = this.options[this.selectedIndex]?.dataset?.name || '';
-                
-                // Set hidden input for district name
-                districtNameInput.value = districtName;
-                
-                // Reset village dropdown
-                villageSelect.innerHTML = '<option value="">-- Loading Kelurahan --</option>';
-                villageSelect.disabled = true;
-                villageNameInput.value = '';
-                
-                postalCodeInput.value = '';
-                
-                if (districtId) {
-                    // Fetch villages from EMSIFA API
-                    fetch(`/api/villages/?district_id=${districtId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success && data.data) {
-                                villageSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
-                                data.data.forEach(village => {
-                                    const option = document.createElement('option');
-                                    option.value = village.id;
-                                    option.dataset.name = village.nama;
-                                    option.textContent = village.nama;
-                                    option.dataset.postal_code = village.kodepos || '';
-                                    villageSelect.appendChild(option);
-                                });
-                                villageSelect.disabled = false;
-                            } else {
-                                villageSelect.innerHTML = '<option value="">-- Gagal memuat kelurahan --</option>';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching villages:', error);
-                            villageSelect.innerHTML = '<option value="">-- Error loading villages --</option>';
-                        });
-                } else {
-                    villageSelect.innerHTML = '<option value="">-- Pilih Kecamatan Terlebih Dahulu --</option>';
-                    villageSelect.disabled = true;
+            } catch (err) { console.error('Districts Error:', err); }
+        };
+
+        // Load Villages Functional
+        const loadVillages = async (districtId, districtName, selectedIdOrName = null) => {
+            if (!districtId) return;
+            villageSelect.innerHTML = '<option value="">-- Loading Kelurahan --</option>';
+            villageSelect.disabled = true;
+            try {
+                const response = await fetch(`/api/villages/?district_id=${districtId}&district_name=${encodeURIComponent(districtName)}`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    villageSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+                    data.data.forEach(v => {
+                        const option = document.createElement('option');
+                        option.value = v.id;
+                        const name = v.name || v.nama;
+                        option.dataset.name = name;
+                        option.textContent = name;
+                        option.dataset.postcodes = JSON.stringify(v.postcodes || []);
+                        if (selectedIdOrName && (v.id == selectedIdOrName || name == selectedIdOrName)) option.selected = true;
+                        villageSelect.appendChild(option);
+                    });
+                    villageSelect.disabled = false;
                 }
-            });
-        }
-        
-        // When village is selected, auto-fill postal code
-        if (villageSelect) {
-            villageSelect.addEventListener('change', function() {
-                const villageName = this.options[this.selectedIndex]?.dataset?.name || '';
-                const postalCode = this.options[this.selectedIndex]?.dataset?.postal_code || '';
-                
-                // Set hidden input for village name
-                villageNameInput.value = villageName;
-                
-                // Auto-fill postal code if available
-                if (postalCode && !postalCodeInput.value) {
-                    postalCodeInput.value = postalCode;
+            } catch (err) { console.error('Villages Error:', err); }
+        };
+
+        // Event Listeners
+        provinceSelect?.addEventListener('change', async function() {
+            provinceNameInput.value = this.options[this.selectedIndex]?.dataset?.name || '';
+            await loadCities(this.value);
+            districtSelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten Terlebih Dahulu --</option>';
+            districtSelect.disabled = true;
+            villageSelect.innerHTML = '<option value="">-- Pilih Kecamatan Terlebih Dahulu --</option>';
+            villageSelect.disabled = true;
+        });
+
+        citySelect?.addEventListener('change', async function() {
+            cityNameInput.value = this.options[this.selectedIndex]?.dataset?.name || '';
+            await loadDistricts(this.value);
+            villageSelect.innerHTML = '<option value="">-- Pilih Kecamatan Terlebih Dahulu --</option>';
+            villageSelect.disabled = true;
+        });
+
+        districtSelect?.addEventListener('change', async function() {
+            const name = this.options[this.selectedIndex]?.dataset?.name || '';
+            districtNameInput.value = name;
+            await loadVillages(this.value, name);
+        });
+
+        villageSelect?.addEventListener('change', function() {
+            const opt = this.options[this.selectedIndex];
+            villageNameInput.value = opt?.dataset?.name || '';
+            const postcodes = JSON.parse(opt?.dataset?.postcodes || '[]');
+            const container = document.getElementById('postalCodeContainer');
+            const currentPC = "{{ edit_address.postal_code|default:'' }}";
+            
+            if (postcodes.length === 1) {
+                container.innerHTML = `<input type="text" name="postal_code" id="postalCodeInput" class="ad-input" value="${postcodes[0]}" required>`;
+            } else if (postcodes.length > 1) {
+                let html = `<select name="postal_code" id="postalCodeInput" class="ad-input" required><option value="">-- Pilih Kode Pos --</option>`;
+                postcodes.forEach(pc => {
+                    const sel = (pc == currentPC) ? 'selected' : '';
+                    html += `<option value="${pc}" ${sel}>${pc}</option>`;
+                });
+                container.innerHTML = html + `</select>`;
+            } else {
+                container.innerHTML = `<input type="text" name="postal_code" id="postalCodeInput" class="ad-input" value="${currentPC}" placeholder="Masukkan manual" required>`;
+            }
+        });
+
+        // --- EDIT MODE AUTO-LOADER ---
+        {% if edit_address %}
+        (async function() {
+            const savedProv = "{{ edit_address.province|safe }}";
+            const savedCity = "{{ edit_address.city|safe }}";
+            const savedDist = "{{ edit_address.sub_district|safe }}";
+            const savedVill = "{{ edit_address.village|safe }}";
+
+            // 1. Select Province
+            for (let opt of provinceSelect.options) {
+                if (opt.dataset.name === savedProv || opt.textContent === savedProv) {
+                    opt.selected = true;
+                    provinceNameInput.value = savedProv;
+                    // 2. Load Cities
+                    await loadCities(opt.value, savedCity);
+                    // 3. Load Districts
+                    if (citySelect.value) {
+                        cityNameInput.value = savedCity;
+                        await loadDistricts(citySelect.value, savedDist);
+                    }
+                    // 4. Load Villages
+                    if (districtSelect.value) {
+                        districtNameInput.value = savedDist;
+                        await loadVillages(districtSelect.value, savedDist, savedVill);
+                    }
+                    // 5. Trigger village change for postcodes
+                    if (villageSelect.value) {
+                        triggerChange(villageSelect);
+                    }
+                    break;
                 }
-            });
-        }
-        
-        // Form submission validation
-        const form = document.querySelector('form[method="post"]');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                if (!provinceNameInput.value || !cityNameInput.value) {
-                    e.preventDefault();
-                    alert('Mohon pilih Provinsi dan Kota/Kabupaten terlebih dahulu');
-                    return false;
-                }
-            });
-        }
+            }
+        })();
+        {% endif %}
     });
 </script>
 {% endblock %}
+
+

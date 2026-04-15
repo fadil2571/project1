@@ -363,25 +363,54 @@ class FrontendCheckoutAddressView(LoginRequiredMixin, View):
     login_url = "/auth/login/"
 
     def get(self, request, *args, **kwargs):
-        # Fetch provinces for dropdown using API
+        # Fallback data if API fails
+        fallback_provinces = [
+            {'id': '11', 'name': 'ACEH', 'nama': 'ACEH'}, {'id': '12', 'name': 'SUMATERA UTARA', 'nama': 'SUMATERA UTARA'},
+            {'id': '13', 'name': 'SUMATERA BARAT', 'nama': 'SUMATERA BARAT'}, {'id': '14', 'name': 'RIAU', 'nama': 'RIAU'},
+            {'id': '15', 'name': 'JAMBI', 'nama': 'JAMBI'}, {'id': '16', 'name': 'SUMATERA SELATAN', 'nama': 'SUMATERA SELATAN'},
+            {'id': '17', 'name': 'BENGKULU', 'nama': 'BENGKULU'}, {'id': '18', 'name': 'LAMPUNG', 'nama': 'LAMPUNG'},
+            {'id': '19', 'name': 'KEPULAUAN BANGKA BELITUNG', 'nama': 'KEPULAUAN BANGKA BELITUNG'},
+            {'id': '21', 'name': 'KEPULAUAN RIAU', 'nama': 'KEPULAUAN RIAU'}, {'id': '31', 'name': 'DKI JAKARTA', 'nama': 'DKI JAKARTA'},
+            {'id': '32', 'name': 'JAWA BARAT', 'nama': 'JAWA BARAT'}, {'id': '33', 'name': 'JAWA TENGAH', 'nama': 'JAWA TENGAH'},
+            {'id': '34', 'name': 'DI YOGYAKARTA', 'nama': 'DI YOGYAKARTA'}, {'id': '35', 'name': 'JAWA TIMUR', 'nama': 'JAWA TIMUR'},
+            {'id': '36', 'name': 'BANTEN', 'nama': 'BANTEN'}, {'id': '51', 'name': 'BALI', 'nama': 'BALI'},
+            {'id': '52', 'name': 'NUSA TENGGARA BARAT', 'nama': 'NUSA TENGGARA BARAT'}, {'id': '53', 'name': 'NUSA TENGGARA TIMUR', 'nama': 'NUSA TENGGARA TIMUR'},
+            {'id': '61', 'name': 'KALIMANTAN BARAT', 'nama': 'KALIMANTAN BARAT'}, {'id': '62', 'name': 'KALIMANTAN TENGAH', 'nama': 'KALIMANTAN TENGAH'},
+            {'id': '63', 'name': 'KALIMANTAN SELATAN', 'nama': 'KALIMANTAN SELATAN'}, {'id': '64', 'name': 'KALIMANTAN TIMUR', 'nama': 'KALIMANTAN TIMUR'},
+            {'id': '65', 'name': 'KALIMANTAN UTARA', 'nama': 'KALIMANTAN UTARA'}, {'id': '71', 'name': 'SULAWESI UTARA', 'nama': 'SULAWESI UTARA'},
+            {'id': '72', 'name': 'SULAWESI TENGAH', 'nama': 'SULAWESI TENGAH'}, {'id': '73', 'name': 'SULAWESI SELATAN', 'nama': 'SULAWESI SELATAN'},
+            {'id': '74', 'name': 'SULAWESI TENGGARA', 'nama': 'SULAWESI TENGGARA'}, {'id': '75', 'name': 'GORONTALO', 'nama': 'GORONTALO'},
+            {'id': '76', 'name': 'SULAWESI BARAT', 'nama': 'SULAWESI BARAT'}, {'id': '81', 'name': 'MALUKU', 'nama': 'MALUKU'},
+            {'id': '82', 'name': 'MALUKU UTARA', 'nama': 'MALUKU UTARA'}, {'id': '91', 'name': 'PAPUA BARAT', 'nama': 'PAPUA BARAT'},
+            {'id': '94', 'name': 'PAPUA', 'nama': 'PAPUA'}
+        ]
+
+        # Fetch provinces for dropdown using Emsifa API
         provinces = []
-        api_key = get_rajaongkir_api_key()
+        try:
+            url = f"{get_emsifa_api_base_url()}/provinces.json"
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                provinces = response.json()
+            else:
+                provinces = fallback_provinces
+        except Exception:
+            provinces = fallback_provinces
         
-        if api_key:
-            try:
-                response = requests.get(
-                    f"{get_rajaongkir_base_url()}/province",
-                    headers={"key": api_key},
-                    timeout=5
-                )
-                if response.status_code == 200:
-                    data = response.json()
-                    provinces = data.get("rajaongkir", {}).get("results", [])
-            except Exception:
-                # Fallback to empty list if API fails
-                provinces = []
+        # Filter relevant addresses for display
+        user_addresses = request.user.addresses.all()
         
-        return render(request, self.template_name, {"provinces": provinces})
+        # Handle edit mode
+        edit_address = None
+        edit_id = request.GET.get('edit')
+        if edit_id:
+            edit_address = Address.objects.filter(id=edit_id, user=request.user).first()
+        
+        return render(request, self.template_name, {
+            "provinces": provinces,
+            "addresses": user_addresses,
+            "edit_address": edit_address,
+        })
 
     def post(self, request, *args, **kwargs):
         """MEMBERIKAN NILAI RANDOM UNTUK SLUG KALO DUPLIKAT"""
@@ -398,9 +427,7 @@ class FrontendCheckoutAddressView(LoginRequiredMixin, View):
             recipient_phone=request.POST.get("recipient_phone", "").strip(),
             address=full_address,
             city=request.POST.get("city", "").strip(),
-            city_id=request.POST.get("city_id", "").strip(),
             province=request.POST.get("province", "").strip(),
-            province_id=request.POST.get("province_id", "").strip(),
             sub_district=(
                 request.POST.get("sub_district", "").strip()
                 or request.POST.get("district_name", "").strip()
@@ -414,22 +441,15 @@ class FrontendCheckoutAddressView(LoginRequiredMixin, View):
 
 
 class RajaOngkirProvinceView(LoginRequiredMixin, View):
-    """API endpoint untuk mendapatkan list provinsi"""
+    """API endpoint untuk mendapatkan list provinsi (Emsifa API)"""
     def get(self, request, *args, **kwargs):
-        api_key = get_rajaongkir_api_key()
-        
-        if not api_key:
-            return JsonResponse({"success": False, "error": "API key not configured"}, status=500)
-        
         try:
             response = requests.get(
-                f"{get_rajaongkir_base_url()}/province",
-                headers={"key": api_key},
+                f"{get_emsifa_api_base_url()}/provinces.json",
                 timeout=5
             )
             if response.status_code == 200:
-                data = response.json()
-                provinces = data.get("rajaongkir", {}).get("results", [])
+                provinces = response.json()
                 return JsonResponse({"success": True, "data": provinces})
             else:
                 return JsonResponse({"success": False, "error": "Failed to fetch provinces"}, status=500)
@@ -438,25 +458,19 @@ class RajaOngkirProvinceView(LoginRequiredMixin, View):
 
 
 class RajaOngkirCityView(LoginRequiredMixin, View):
-    """API endpoint untuk mendapatkan list kota berdasarkan province_id"""
+    """API endpoint untuk mendapatkan list kota/kabupaten (Emsifa API)"""
     def get(self, request, *args, **kwargs):
         province_id = request.GET.get("province_id")
         if not province_id:
             return JsonResponse({"success": False, "error": "province_id required"}, status=400)
         
-        api_key = get_rajaongkir_api_key()
-        if not api_key:
-            return JsonResponse({"success": False, "error": "API key not configured"}, status=500)
-        
         try:
             response = requests.get(
-                f"{get_rajaongkir_base_url()}/city?province={province_id}",
-                headers={"key": api_key},
+                f"{get_emsifa_api_base_url()}/regencies/{province_id}.json",
                 timeout=5
             )
             if response.status_code == 200:
-                data = response.json()
-                cities = data.get("rajaongkir", {}).get("results", [])
+                cities = response.json()
                 return JsonResponse({"success": True, "data": cities})
             else:
                 return JsonResponse({"success": False, "error": "Failed to fetch cities"}, status=500)
@@ -465,17 +479,15 @@ class RajaOngkirCityView(LoginRequiredMixin, View):
 
 
 class EmsifaDistrictView(LoginRequiredMixin, View):
-    """API endpoint untuk mendapatkan list kecamatan (district) berdasarkan city_id (EMSIFA API)"""
+    """API endpoint untuk mendapatkan list kecamatan (districts) (EMSIFA API)"""
     def get(self, request, *args, **kwargs):
         city_id = request.GET.get("city_id")
         if not city_id:
             return JsonResponse({"success": False, "error": "city_id required"}, status=400)
         
         try:
-            # EMSIFA API uses regency ID (kabupaten/kota) which is the first 4 digits of city_id
-            regency_id = str(city_id)[:4]
             response = requests.get(
-                f"{get_emsifa_api_base_url()}/kecamatan/{regency_id}.json",
+                f"{get_emsifa_api_base_url()}/districts/{city_id}.json",
                 timeout=5
             )
             if response.status_code == 200:
@@ -488,24 +500,67 @@ class EmsifaDistrictView(LoginRequiredMixin, View):
 
 
 class EmsifaVillageView(LoginRequiredMixin, View):
-    """API endpoint untuk mendapatkan list kelurahan (village) berdasarkan district_id (EMSIFA API)"""
+    """API endpoint untuk mendapatkan list kelurahan (villages) dengan kode pos (Emsifa + RajaOngkir)"""
     def get(self, request, *args, **kwargs):
         district_id = request.GET.get("district_id")
+        district_name = request.GET.get("district_name", "")
+        
         if not district_id:
             return JsonResponse({"success": False, "error": "district_id required"}, status=400)
         
         try:
-            # EMSIFA API uses kecamatan ID which is the first 6 digits of district_id
-            kecamantan_code = str(district_id)[:6]
+            # 1. Fetch official villages list from Emsifa
             response = requests.get(
-                f"{get_emsifa_api_base_url()}/kelurahan/{kecamantan_code}.json",
+                f"{get_emsifa_api_base_url()}/villages/{district_id}.json",
                 timeout=5
             )
-            if response.status_code == 200:
-                villages = response.json()
-                return JsonResponse({"success": True, "data": villages})
-            else:
-                return JsonResponse({"success": False, "error": "Failed to fetch villages"}, status=500)
+            if response.status_code != 200:
+                return JsonResponse({"success": False, "error": "Failed to fetch villages from Emsifa"}, status=500)
+            
+            villages = response.json()
+            
+            # 2. Try to get postcodes from RajaOngkir (Komerce) if district_name is provided
+            postcode_map = {}
+            if district_name:
+                from panel_admin.services.rajaongkir_service import RajaOngkirService
+                # Search RajaOngkir Komerce for this district name
+                ro_result = RajaOngkirService.search_destination(district_name, limit=50)
+                if ro_result.get('success'):
+                    ro_data = ro_result.get('data', {}).get('data', [])
+                    for item in ro_data:
+                        # Komerce API uses 'subdistrict_name' for kelurahan and 'zip_code' for kode pos
+                        v_name_ro = (item.get('subdistrict_name') or '').upper().strip()
+                        pc = item.get('zip_code') or ''
+                        if v_name_ro and pc:
+                            if v_name_ro not in postcode_map:
+                                postcode_map[v_name_ro] = []
+                            if pc not in postcode_map[v_name_ro]:
+                                postcode_map[v_name_ro].append(pc)
+
+            # 3. Enrich Emsifa villages with postcodes (with fuzzy name matching)
+            for v in villages:
+                # Emsifa uses 'name', fallback to 'nama' for compatibility
+                v_name_emsifa = (v.get('name') or v.get('nama', '')).upper().strip()
+                
+                # Try direct match
+                postcodes = postcode_map.get(v_name_emsifa, [])
+                
+                # Try match without common prefixes like "DESA " or "KELURAHAN "
+                if not postcodes:
+                    clean_name = v_name_emsifa.replace('DESA ', '').replace('KELURAHAN ', '').strip()
+                    postcodes = postcode_map.get(clean_name, [])
+                
+                # Try substring matching
+                if not postcodes:
+                    for ro_name, ro_pcs in postcode_map.items():
+                        if v_name_emsifa in ro_name or ro_name in v_name_emsifa:
+                            postcodes = ro_pcs
+                            break
+
+                v['postcodes'] = postcodes
+                
+            return JsonResponse({"success": True, "data": villages})
+            
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 

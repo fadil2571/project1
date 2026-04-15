@@ -15,6 +15,14 @@ class OrderCreateView(LoginRequiredMixin, View):
         address_id = request.POST.get('address_id')
         payment_method = request.POST.get('payment_method', 'bank_transfer')
         notes = request.POST.get('notes', '')
+        shipping_cost_raw = request.POST.get('shipping_cost', '0')
+        courier_name = request.POST.get('courier_name', '')
+        courier_service = request.POST.get('courier_service', '')
+
+        try:
+            shipping_cost = int(shipping_cost_raw)
+        except (ValueError, TypeError):
+            shipping_cost = 0
         
         # Get cart
         try:

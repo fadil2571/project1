@@ -4,7 +4,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
+node_modules/
+tests/  
 # Dependencies
 .venv/
 venv/
@@ -31,4 +32,10 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+*.exe
+*.json
+*.pdf
 ```
+
+
+tailwindcss.exe

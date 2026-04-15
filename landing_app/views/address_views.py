@@ -12,11 +12,36 @@ def _optional_location_value(post_data, *keys):
     return None
 
 
+import requests
+from landing_app.views.frontend_views import get_emsifa_api_base_url
+
 class AddressView(LoginRequiredMixin, View):
     template_name = 'storefront/auth/address.html'
     login_url = '/auth/login/'
     
     def get(self, request, *args, **kwargs):
+        # Fallback data if API fails
+        fallback_provinces = [
+            {'id': '11', 'name': 'ACEH', 'nama': 'ACEH'}, {'id': '12', 'name': 'SUMATERA UTARA', 'nama': 'SUMATERA UTARA'},
+            {'id': '13', 'name': 'SUMATERA BARAT', 'nama': 'SUMATERA BARAT'}, {'id': '14', 'name': 'RIAU', 'nama': 'RIAU'},
+            {'id': '15', 'name': 'JAMBI', 'nama': 'JAMBI'}, {'id': '16', 'name': 'SUMATERA SELATAN', 'nama': 'SUMATERA SELATAN'},
+            {'id': '17', 'name': 'BENGKULU', 'nama': 'BENGKULU'}, {'id': '18', 'name': 'LAMPUNG', 'nama': 'LAMPUNG'},
+            {'id': '19', 'name': 'KEPULAUAN BANGKA BELITUNG', 'nama': 'KEPULAUAN BANGKA BELITUNG'},
+            {'id': '21', 'name': 'KEPULAUAN RIAU', 'nama': 'KEPULAUAN RIAU'}, {'id': '31', 'name': 'DKI JAKARTA', 'nama': 'DKI JAKARTA'},
+            {'id': '32', 'name': 'JAWA BARAT', 'nama': 'JAWA BARAT'}, {'id': '33', 'name': 'JAWA TENGAH', 'nama': 'JAWA TENGAH'},
+            {'id': '34', 'name': 'DI YOGYAKARTA', 'nama': 'DI YOGYAKARTA'}, {'id': '35', 'name': 'JAWA TIMUR', 'nama': 'JAWA TIMUR'},
+            {'id': '36', 'name': 'BANTEN', 'nama': 'BANTEN'}, {'id': '51', 'name': 'BALI', 'nama': 'BALI'},
+            {'id': '52', 'name': 'NUSA TENGGARA BARAT', 'nama': 'NUSA TENGGARA BARAT'}, {'id': '53', 'name': 'NUSA TENGGARA TIMUR', 'nama': 'NUSA TENGGARA TIMUR'},
+            {'id': '61', 'name': 'KALIMANTAN BARAT', 'nama': 'KALIMANTAN BARAT'}, {'id': '62', 'name': 'KALIMANTAN TENGAH', 'nama': 'KALIMANTAN TENGAH'},
+            {'id': '63', 'name': 'KALIMANTAN SELATAN', 'nama': 'KALIMANTAN SELATAN'}, {'id': '64', 'name': 'KALIMANTAN TIMUR', 'nama': 'KALIMANTAN TIMUR'},
+            {'id': '65', 'name': 'KALIMANTAN UTARA', 'nama': 'KALIMANTAN UTARA'}, {'id': '71', 'name': 'SULAWESI UTARA', 'nama': 'SULAWESI UTARA'},
+            {'id': '72', 'name': 'SULAWESI TENGAH', 'nama': 'SULAWESI TENGAH'}, {'id': '73', 'name': 'SULAWESI SELATAN', 'nama': 'SULAWESI SELATAN'},
+            {'id': '74', 'name': 'SULAWESI TENGGARA', 'nama': 'SULAWESI TENGGARA'}, {'id': '75', 'name': 'GORONTALO', 'nama': 'GORONTALO'},
+            {'id': '76', 'name': 'SULAWESI BARAT', 'nama': 'SULAWESI BARAT'}, {'id': '81', 'name': 'MALUKU', 'nama': 'MALUKU'},
+            {'id': '82', 'name': 'MALUKU UTARA', 'nama': 'MALUKU UTARA'}, {'id': '91', 'name': 'PAPUA BARAT', 'nama': 'PAPUA BARAT'},
+            {'id': '94', 'name': 'PAPUA', 'nama': 'PAPUA'}
+        ]
+
         addresses = request.user.addresses.all()
         edit_id = request.GET.get('edit')
         edit_address = None
@@ -24,9 +49,22 @@ class AddressView(LoginRequiredMixin, View):
         if edit_id:
             edit_address = get_object_or_404(Address, id=edit_id, user=request.user)
         
+        # Fetch provinces for the dropdown
+        provinces = []
+        try:
+            url = f"{get_emsifa_api_base_url()}/provinces.json"
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                provinces = response.json()
+            else:
+                provinces = fallback_provinces
+        except Exception:
+            provinces = fallback_provinces
+
         context = {
             'addresses': addresses,
             'edit_address': edit_address,
+            'provinces': provinces,
         }
         return render(request, self.template_name, context)
     
