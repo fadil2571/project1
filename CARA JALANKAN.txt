@@ -1,0 +1,56 @@
+# CARA MENJALANKAN PROJECT KOPMASSHOP
+
+Berikut adalah langkah-langkah untuk menjalankan project ini di lingkungan lokal (Windows):
+
+## 1. Persiapan Virtual Environment
+Pastikan Anda berada di direktori project, lalu aktifkan virtual environment yang sudah ada:
+```powershell
+.\.venv\Scripts\activate
+```
+*Jika belum ada venv, buat dengan: `python -m venv .venv`*
+
+## 2. Instalasi Dependencies
+Instal semua library Python yang dibutuhkan:
+```powershell
+pip install -r requirements.txt
+```
+
+## 3. Konfigurasi Environment Variable (.env)
+1. Salin file `.env.example` menjadi `.env`.
+2. Sesuaikan konfigurasi database (DB_NAME, DB_USER, DB_PASSWORD, DB_PORT) di dalam file `.env`.
+3. Pastikan PostgreSQL sudah berjalan di komputer Anda.
+
+## 4. Migrasi Database
+Jalankan migrasi untuk membuat struktur tabel di database:
+```powershell
+python manage.py migrate
+```
+
+## 5. Seed Data (Roles & Admin)
+Jalankan perintah berikut untuk mengisi data awal (roles, superadmin, dan admin):
+```powershell
+# Menambahkan Roles saja
+python manage.py seed_roles
+
+# Menambahkan Roles dan akun Admin/Superadmin (opsional)
+python manage.py seed_roles --with-admin --with-superadmin
+```
+*Detail login admin dapat dilihat di file .env (ADMIN_USERNAME, ADMIN_PASSWORD).*
+
+## 6. Menjalankan Server Django
+Jalankan server pengembangan:
+```powershell
+python manage.py runserver
+```
+Akses website di: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+## 7. Menjalankan Tailwind CSS (Opsional - Untuk Frontend)
+Jika Anda melakukan perubahan pada styling (CSS), jalankan watcher Tailwind:
+```powershell
+npm run dev:css
+```
+
+---
+**Catatan:**
+- Pastikan PostgreSQL sudah terinstal dan database dengan nama yang sesuai sudah dibuat.
+- Gunakan Python versi 3.10 ke atas.

@@ -1,3 +1,4 @@
+from django.db import models
 import random
 import string
 import uuid
@@ -101,7 +102,7 @@ class Role(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "roles"
+        db_table = "kopmas_roles"
         ordering = ["id"]
 
     def __str__(self):
@@ -149,7 +150,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     class Meta:
-        db_table = "users"
+        db_table = "kopmas_users"
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -278,7 +279,7 @@ class Store(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "stores"
+        db_table = "kopmas_stores"
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -354,7 +355,7 @@ class Category(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "categories"
+        db_table = "kopmas_categories"
         verbose_name_plural = "Categories"
         ordering = ["created_at"]
 
@@ -497,7 +498,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "products"
+        db_table = "kopmas_products"
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -628,7 +629,7 @@ class ProductImage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "product_images"
+        db_table = "kopmas_product_images"
         ordering = ["-is_main", "created_at"]  # Gambar utama selalu tampil paling depan
 
     def __str__(self):
@@ -655,7 +656,7 @@ class ProductVariation(models.Model):
     )
 
     class Meta:
-        db_table = "product_variations"
+        db_table = "kopmas_product_variations"
         ordering = ["id"]
         constraints = [
             models.UniqueConstraint(
@@ -685,7 +686,7 @@ class VariantOption(models.Model):
     option_value = models.CharField(max_length=120)
 
     class Meta:
-        db_table = "variant_options"
+        db_table = "kopmas_variant_options"
         ordering = ["id"]
         constraints = [
             models.UniqueConstraint(
@@ -728,7 +729,7 @@ class Address(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "addresses"
+        db_table = "kopmas_addresses"
         ordering = [
             "-is_default",
             "-created_at",
@@ -851,7 +852,7 @@ class Order(models.Model):
     delivered_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        db_table = "orders"
+        db_table = "kopmas_orders"
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -935,7 +936,7 @@ class OrderItem(models.Model):
     total = models.DecimalField(max_digits=12, decimal_places=2)  # Dihitung otomatis
 
     class Meta:
-        db_table = "order_items"
+        db_table = "kopmas_order_items"
 
     def __str__(self):
         return f"{self.product_name} x {self.quantity}"
@@ -989,7 +990,7 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "payments"
+        db_table = "kopmas_payments"
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -1020,7 +1021,7 @@ class SellerPaymentMethodSetting(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "seller_payment_method_settings"
+        db_table = "kopmas_seller_payment_method_settings"
 
     def __str__(self):
         return f"Payment settings for {self.seller.email}"
@@ -1057,7 +1058,7 @@ class SellerBankAccount(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "seller_bank_accounts"
+        db_table = "kopmas_seller_bank_accounts"
         ordering = ["-is_default", "created_at"]  # Rekening default selalu di atas
 
     def __str__(self):
@@ -1127,7 +1128,7 @@ class ProductReview(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "product_review"
+        db_table = "kopmas_product_review"
         ordering = ["-created_at"]
         unique_together = [
             "transaction",
@@ -1195,7 +1196,7 @@ class Cart(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "carts"
+        db_table = "kopmas_carts"
 
     def __str__(self):
         if self.user:
@@ -1227,7 +1228,7 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
 
     class Meta:
-        db_table = "cart_items"
+        db_table = "kopmas_cart_items"
         unique_together = ["cart", "product"]  # Satu produk hanya satu baris per cart
 
     def __str__(self):
@@ -1276,7 +1277,7 @@ class EmailOTP(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "email_otps"
+        db_table = "kopmas_email_otps"
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -1312,7 +1313,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "notifications"
+        db_table = "kopmas_notifications"
         ordering = ["-created_at"]
 
     def __str__(self):
