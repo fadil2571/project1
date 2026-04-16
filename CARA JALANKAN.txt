@@ -1,56 +1,52 @@
-# CARA MENJALANKAN PROJECT KOPMASSHOP
+# PANDUAN MENJALANKAN PROJECT KOPMASSHOP (Versi Update)
 
-Berikut adalah langkah-langkah untuk menjalankan project ini di lingkungan lokal (Windows):
+Project ini telah dioptimasi untuk berjalan menggunakan **Python 3.11** dan **Django 4.2 (LTS)**.
 
 ## 1. Persiapan Virtual Environment
-Pastikan Anda berada di direktori project, lalu aktifkan virtual environment yang sudah ada:
+Jika Anda memulai dari awal, buat dan aktifkan virtual environment:
 ```powershell
+# Jika belum ada venv:
+python -m venv .venv
+
+# Aktifkan venv (Windows):
 .\.venv\Scripts\activate
 ```
-*Jika belum ada venv, buat dengan: `python -m venv .venv`*
 
 ## 2. Instalasi Dependencies
-Instal semua library Python yang dibutuhkan:
+Pastikan library yang terinstal adalah versi terbaru yang kompatibel:
 ```powershell
 pip install -r requirements.txt
 ```
 
 ## 3. Konfigurasi Environment Variable (.env)
-1. Salin file `.env.example` menjadi `.env`.
-2. Sesuaikan konfigurasi database (DB_NAME, DB_USER, DB_PASSWORD, DB_PORT) di dalam file `.env`.
-3. Pastikan PostgreSQL sudah berjalan di komputer Anda.
+1. Buka file `.env`.
+2. Pastikan konfigurasi database sudah benar (port default PostgreSQL adalah 5432, namun project ini dikonfigurasi menggunakan port 5555 sesuai environment Anda).
+3. Update `ADMIN_EMAIL` dan `ADMIN_PASSWORD` sesuai keinginan untuk akun admin utama.
 
 ## 4. Migrasi Database
-Jalankan migrasi untuk membuat struktur tabel di database:
+Jalankan migrasi untuk membuat tabel baru dengan prefix `kopmas_`:
 ```powershell
+python manage.py makemigrations
 python manage.py migrate
 ```
 
-## 5. Seed Data (Roles & Admin)
-Jalankan perintah berikut untuk mengisi data awal (roles, superadmin, dan admin):
+## 5. Seed Data (Roles & Akun Admin)
+Jalankan perintah seeder untuk mengisi role (Admin, Seller, Buyer) dan membuat akun administrator utama yang diambil dari file .env:
 ```powershell
-# Menambahkan Roles saja
-python manage.py seed_roles
-
-# Menambahkan Roles dan akun Admin/Superadmin (opsional)
-python manage.py seed_roles --with-admin --with-superadmin
+python manage.py seed_roles --with-admin
 ```
-*Detail login admin dapat dilihat di file .env (ADMIN_USERNAME, ADMIN_PASSWORD).*
+*Catatan: Akun admin yang dibuat otomatis memiliki status Superuser.*
 
-## 6. Menjalankan Server Django
-Jalankan server pengembangan:
+## 6. Menjalankan Server
+Jalankan server pengembangan Django:
 ```powershell
 python manage.py runserver
 ```
-Akses website di: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+Akses melalui browser di: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-## 7. Menjalankan Tailwind CSS (Opsional - Untuk Frontend)
-Jika Anda melakukan perubahan pada styling (CSS), jalankan watcher Tailwind:
-```powershell
-npm run dev:css
-```
+## 7. Troubleshooting
+- **IntegrityError / Table Missing**: Pastikan Anda sudah menjalankan `migrate` dan `seed_roles` setelah melakukan perubahan pada `models.py`.
+- **Google Login Error**: Jika terjadi error saat login Google, coba restart server (`Ctrl+C` lalu jalankan `runserver` lagi) agar metadata skema tabel yang baru termuat dengan benar.
 
 ---
-**Catatan:**
-- Pastikan PostgreSQL sudah terinstal dan database dengan nama yang sesuai sudah dibuat.
-- Gunakan Python versi 3.10 ke atas.
+**Teknologi Utama:** Django 4.2.x, Python 3.11, PostgreSQL.
