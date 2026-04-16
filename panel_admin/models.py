@@ -75,7 +75,7 @@ class AppUserManager(BaseUserManager):
         - Akan raise ValueError jika is_staff atau is_superuser di-override ke False.
         """
         extra_fields = self._normalize_role_input(
-            extra_fields, default_role="superadmin"
+            extra_fields, default_role="admin"
         )
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
@@ -120,7 +120,6 @@ class User(AbstractUser):
     """
 
     ROLE_CHOICES = [
-        ("superadmin", "Super Administrator"),
         ("admin", "Administrator"),
         ("seller", "Seller"),
         ("buyer", "Buyer"),
@@ -206,13 +205,13 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        """True jika user adalah admin atau superadmin."""
-        return self.role_id in {"admin", "superadmin"} or self.is_superuser
+        """True jika user adalah admin."""
+        return self.role_id == "admin" or self.is_superuser
 
     @property
     def is_super_admin(self):
-        """True jika user adalah superadmin."""
-        return self.role_id == "superadmin" or self.is_superuser
+        """True jika user adalah superuser."""
+        return self.is_superuser
 
     @property
     def is_seller_user(self):

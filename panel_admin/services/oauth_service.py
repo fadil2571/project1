@@ -36,7 +36,7 @@ class RoleBasedAccountAdapter(DefaultAccountAdapter):
             return '/auth/login/'
 
         role = (getattr(user, 'role_id', '') or '').strip().lower()
-        if getattr(user, 'is_superuser', False) or role in {'admin', 'superadmin'}:
+        if getattr(user, 'is_superuser', False) or role == 'admin':
             return '/dashboard/admin/'
         if role == 'seller':
             return '/dashboard/seller/'
@@ -88,7 +88,7 @@ class GoogleSocialAccountAdapter(DefaultSocialAccountAdapter):
         if sociallogin.is_existing:
             user = sociallogin.user
             if user and self._is_admin_user(user):
-                messages.error(request, 'Role admin/superadmin tidak diizinkan login menggunakan Google OAuth.')
+                messages.error(request, 'Role admin tidak diizinkan login menggunakan Google OAuth.')
                 raise ImmediateHttpResponse(HttpResponseRedirect('/auth/login/'))
 
             if user and not user.is_verified:
@@ -106,7 +106,7 @@ class GoogleSocialAccountAdapter(DefaultSocialAccountAdapter):
         try:
             existing_user = User.objects.get(email__iexact=email)
             if self._is_admin_user(existing_user):
-                messages.error(request, 'Role admin/superadmin tidak diizinkan login menggunakan Google OAuth.')
+                messages.error(request, 'Role admin tidak diizinkan login menggunakan Google OAuth.')
                 raise ImmediateHttpResponse(HttpResponseRedirect('/auth/login/'))
 
             sociallogin.connect(request, existing_user)
@@ -165,7 +165,7 @@ class GoogleSocialAccountAdapter(DefaultSocialAccountAdapter):
             return f'/auth/verify-email-otp/?{query}'
 
         role = (getattr(user, 'role_id', '') or '').lower()
-        if getattr(user, 'is_admin', False) or role in {'admin', 'superadmin'}:
+        if getattr(user, 'is_admin', False) or role == 'admin':
             return '/dashboard/admin/'
         if getattr(user, 'is_seller_user', False) or role == 'seller':
             return '/dashboard/seller/'
@@ -198,7 +198,7 @@ class GoogleSocialAccountAdapter(DefaultSocialAccountAdapter):
     @staticmethod
     def _is_admin_user(user):
         role = (getattr(user, 'role_id', '') or '').lower()
-        return bool(getattr(user, 'is_superuser', False) or role in {'admin', 'superadmin'})
+        return bool(getattr(user, 'is_superuser', False) or role == 'admin')
 
 
 # ──────────────────────────────────────────────

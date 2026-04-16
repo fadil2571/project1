@@ -8,13 +8,14 @@ from panel_admin.models import Role
 
 
 ROLE_SEEDS = (
-    ("superadmin", "Super Administrator"),
-    ("admin", "Admin Kopmas"),
+    ("admin", "Administrator"),
+    ("seller", "Seller"),
+    ("buyer", "Buyer"),
 )
 
 
 class Command(BaseCommand):
-    help = "Seed role admin/superadmin and optionally create/update admin/superadmin accounts."
+    help = "Seed roles (admin, seller, buyer) and optionally create/update an admin account."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -22,23 +23,14 @@ class Command(BaseCommand):
             action="store_true",
             help="Create or update admin account using CLI args or environment variables.",
         )
-        parser.add_argument(
-            "--with-superadmin",
-            action="store_true",
-            help="Create or update superadmin account using CLI args or environment variables.",
-        )
         parser.add_argument("--admin-email", type=str, default="", help="Admin email.")
         parser.add_argument("--admin-password", type=str, default="", help="Admin password.")
-        parser.add_argument("--email", type=str, default="", help="Superadmin email.")
-        parser.add_argument("--password", type=str, default="", help="Superadmin password.")
 
     @transaction.atomic
     def handle(self, *args, **options):
         self._seed_roles()
         if options["with_admin"]:
             self._seed_admin(options)
-        if options["with_superadmin"]:
-            self._seed_superadmin(options)
 
         self.stdout.write(self.style.SUCCESS("Seeder selesai dijalankan."))
 
@@ -68,26 +60,25 @@ class Command(BaseCommand):
         user = User.objects.filter(email__iexact=email).first()
 
         if not user:
-            user = User.objects.create_user(
+            # Menggunakan create_superuser tapi dengan role 'admin'
+            user = User.objects.create_superuser(
                 email=email,
                 password=password,
-                role="admin",
-                is_staff=True,
-                is_verified=True,
             )
-            self.stdout.write(self.style.SUCCESS(f"Admin '{user.email}' berhasil dibuat."))
+            user.role_id = "admin"
+            user.is_verified = True
+            user.save(update_fields=["role", "is_verified"])
+            self.stdout.write(self.style.SUCCESS(f"Admin '{user.email}' berhasil dibuat dengan akses superuser."))
             return
 
-        user.email = user.email or email
         user.is_staff = True
-        user.is_superuser = False
+        user.is_superuser = True
         user.is_active = True
         user.is_verified = True
         user.role_id = "admin"
         user.set_password(password)
         user.save(
             update_fields=[
-                "email",
                 "is_staff",
                 "is_superuser",
                 "is_active",
@@ -96,40 +87,4 @@ class Command(BaseCommand):
                 "password",
             ]
         )
-        self.stdout.write(self.style.SUCCESS(f"User '{user.email}' berhasil diupdate menjadi admin."))
-
-    def _seed_superadmin(self, options):
-        email = (options.get("email") or os.getenv("SUPERADMIN_EMAIL", "")).strip().lower()
-        password = (options.get("password") or os.getenv("SUPERADMIN_PASSWORD", "")).strip()
-
-        if not email or not password:
-            self.stdout.write(
-                self.style.WARNING(
-                    "Superadmin dilewati: email/password belum lengkap. "
-                    "Isi lewat argumen CLI atau env SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD."
-                )
-            )
-            return
-
-        User = get_user_model()
-        user = User.objects.filter(email__iexact=email).first()
-
-        if not user:
-            user = User.objects.create_superuser(
-                email=email,
-                password=password,
-            )
-            if user.role_id != "superadmin":
-                user.role_id = "superadmin"
-                user.save(update_fields=["role"])
-            self.stdout.write(self.style.SUCCESS(f"Superadmin '{user.email}' berhasil dibuat."))
-            return
-
-        user.email = user.email or email
-        user.is_staff = True
-        user.is_superuser = True
-        user.is_active = True
-        user.role_id = "superadmin"
-        user.set_password(password)
-        user.save(update_fields=["email", "is_staff", "is_superuser", "is_active", "role", "password"])
-        self.stdout.write(self.style.SUCCESS(f"User '{user.email}' berhasil diupdate menjadi superadmin."))
+        self.stdout.write(self.style.SUCCESS(f"User '{user.email}' berhasil diupdate menjadi Administrator."))
